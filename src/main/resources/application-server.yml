@@ -1,0 +1,18 @@
+spring:
+  security:
+    jwt:
+      secret: ${security.jwt-secret}
+server:
+  id: 211.75.1.201
+  port: 8080
+  delegate-port: 50004
+  servlet:
+    context-path: /
+  file:
+    name: file
+    path: 'C:\ProjectUploadFile\{server.file.name}\camping\'
+logging:
+  level:
+    jdbc:
+      sqltiming: INFO
+      resultsettable: INFO

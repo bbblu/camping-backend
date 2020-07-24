@@ -1,0 +1,2 @@
+rootProject.name = 'camping'
+include 'modules:camping-config', 'modules:camping-database-config'

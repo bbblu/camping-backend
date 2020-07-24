@@ -1,0 +1,155 @@
+Configuration:
+  status: error
+  name: PropertiesConfig
+  Properties:
+    Property:
+      - name: filename
+        value: camping
+      - name: path
+        value: ${env:log.path}${sys:file.separator}${filename}
+  dest: err
+  Appenders:
+    Console:
+      name: STDOUT
+      target: SYSTEM_OUT
+      Filters:
+        ThresholdFilter:
+          - level: info
+      PatternLayout:
+        pattern: '%d{yyyy/MM/dd HH:mm:ss}  %style{%p}{INFO=yellow} --- [%15.15t] %-40.40c{1.} : %m%n'
+    RollingFile:
+      - name: AllRollingFile
+        Append: false
+        fileName: ${path}\${filename}-all.log
+        filePattern: ${path}\all\%d{yyyy-MM-dd}\%d{HH-mm-ss}.log
+        Filters:
+          ThresholdFilter:
+            - level: all
+        PatternLayout:
+          pattern: '%d{yyyy/MM/dd HH:mm:ss}  %style{%p}{INFO=yellow} --- [%15.15t] %-40.40c{1.} : %m%n'
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 128MB
+          TimeBasedTriggeringPolicy:
+            interval: 3600
+            modulate: true
+        DefaultRolloverStrategy:
+          max: 5
+      - name: DebugRollingFile
+        Append: false
+        fileName: ${path}\${filename}-debug.log
+        filePattern: ${path}\debug\%d{yyyy-MM-dd}\%d{HH-mm-ss}.log
+        Filters:
+          ThresholdFilter:
+            - level: debug
+        PatternLayout:
+          pattern: '%d{yyyy/MM/dd HH:mm:ss}  %style{%p}{INFO=yellow} --- [%15.15t] %-40.40c{1.} : %m%n'
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 128MB
+          TimeBasedTriggeringPolicy:
+            interval: 3600
+            modulate: true
+        DefaultRolloverStrategy:
+          max: 5
+      - name: ErrorRollingFile
+        Append: false
+        fileName: ${path}\${filename}-error.log
+        filePattern: ${path}\error\%d{yyyy-MM-dd}\%d{HH-mm-ss}.log
+        Filters:
+          ThresholdFilter:
+            - level: error
+        PatternLayout:
+          pattern: '%d{yyyy/MM/dd HH:mm:ss}  %style{%p}{INFO=yellow} --- [%15.15t] %-40.40c{1.} : %m%n'
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 128MB
+          TimeBasedTriggeringPolicy:
+            interval: 3600
+            modulate: true
+        DefaultRolloverStrategy:
+          max: 5
+      - name: FatalRollingFile
+        Append: false
+        fileName: ${path}\${filename}-fatal.log
+        filePattern: ${path}\fatal\%d{yyyy-MM-dd}\%d{HH-mm-ss}.log
+        Filters:
+          ThresholdFilter:
+            - level: fatal
+        PatternLayout:
+          pattern: '%d{yyyy/MM/dd HH:mm:ss}  %style{%p}{INFO=yellow} --- [%15.15t] %-40.40c{1.} : %m%n'
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 128MB
+          TimeBasedTriggeringPolicy:
+            interval: 3600
+            modulate: true
+        DefaultRolloverStrategy:
+          max: 5
+      - name: InfoRollingFile
+        Append: false
+        fileName: ${path}\${filename}-info.log
+        filePattern: ${path}\info\%d{yyyy-MM-dd}\%d{HH-mm-ss}.log
+        Filters:
+          ThresholdFilter:
+            - level: info
+        PatternLayout:
+          pattern: '%d{yyyy/MM/dd HH:mm:ss}  %style{%p}{INFO=yellow} --- [%15.15t] %-40.40c{1.} : %m%n'
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 128MB
+          TimeBasedTriggeringPolicy:
+            interval: 3600
+            modulate: true
+        DefaultRolloverStrategy:
+          max: 5
+      - name: TraceRollingFile
+        Append: false
+        fileName: ${path}\${filename}-trace.log
+        filePattern: ${path}\trace\%d{yyyy-MM-dd}\%d{HH-mm-ss}.log
+        Filters:
+          ThresholdFilter:
+            - level: trace
+        PatternLayout:
+          pattern: '%d{yyyy/MM/dd HH:mm:ss}  %style{%p}{INFO=yellow} --- [%15.15t] %-40.40c{1.} : %m%n'
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 128MB
+          TimeBasedTriggeringPolicy:
+            interval: 3600
+            modulate: true
+        DefaultRolloverStrategy:
+          max: 5
+      - name: WarnRollingFile
+        Append: false
+        fileName: ${path}\${filename}-warn.log
+        filePattern: ${path}\warn\%d{yyyy-MM-dd}\%d{HH-mm-ss}.log
+        Filters:
+          ThresholdFilter:
+            - level: warn
+        PatternLayout:
+          pattern: '%d{yyyy/MM/dd HH:mm:ss}  %style{%p}{INFO=yellow} --- [%15.15t] %-40.40c{1.} : %m%n'
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 128MB
+          TimeBasedTriggeringPolicy:
+            interval: 3600
+            modulate: true
+        DefaultRolloverStrategy:
+          max: 5
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        - ref: STDOUT
+        - ref: AllRollingFile
+        - ref: DebugRollingFile
+        - ref: ErrorRollingFile
+        - ref: FatalRollingFile
+        - ref: InfoRollingFile
+        - ref: TraceRollingFile
+        - ref: WarnRollingFile
+    Logger:
+      name: log4jdbc.log4j2
+      level: info
+      additivity: false
