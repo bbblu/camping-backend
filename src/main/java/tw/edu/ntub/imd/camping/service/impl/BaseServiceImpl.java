@@ -38,17 +38,6 @@ public abstract class BaseServiceImpl<B, E, ID extends Serializable> extends Bas
     @Transactional
     @Override
     public void delete(ID id) {
-        try {
-            Optional<E> optional = baseDAO.findById(id);
-            if (optional.isPresent()) {
-                E entity = optional.get();
-                baseDAO.delete(entity);
-            } else {
-                throw new Exception("找不到資料, id = " + id);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+        baseDAO.deleteById(id);
     }
 }
