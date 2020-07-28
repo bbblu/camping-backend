@@ -16,7 +16,6 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import tw.edu.ntub.imd.camping.config.properties.FileProperties;
-import tw.edu.ntub.imd.camping.config.properties.ImageProperties;
 
 import java.nio.charset.StandardCharsets;
 
@@ -24,12 +23,10 @@ import java.nio.charset.StandardCharsets;
 public class Config implements WebMvcConfigurer {
     private final Logger logger = LogManager.getLogger(tw.edu.ntub.imd.camping.config.Config.class);
     private final FileProperties fileProperties;
-    private final ImageProperties imageProperties;
 
     @Autowired
-    public Config(FileProperties fileProperties, ImageProperties imageProperties) {
+    public Config(FileProperties fileProperties) {
         this.fileProperties = fileProperties;
-        this.imageProperties = imageProperties;
     }
 
     @Bean
@@ -82,14 +79,10 @@ public class Config implements WebMvcConfigurer {
                 .addResourceLocations(String.format("file:%s", fileProperties.getPath()));
         registry.addResourceHandler("/favicon.ico")
                 .addResourceLocations("classpath:/static/favicon.ico");
-        registry.addResourceHandler(String.format("/%s/**", imageProperties.getName()))
-                .addResourceLocations(String.format("file:%s", imageProperties.getPath()));
 
         logger.info("增加路徑對應：" + String.format("/%s/**", fileProperties.getName()));
         logger.info("對應到的實體路徑為：" + String.format("file:%s", fileProperties.getPath()));
         logger.info("增加路徑對應：/favicon.ico");
         logger.info("對應到的實體路徑為：classpath:/static/favicon.ico");
-        logger.info("增加路徑對應：" + String.format("/%s/**", imageProperties.getName()));
-        logger.info("對應到的實體路徑為：" + String.format("file:%s", imageProperties.getPath()));
     }
 }

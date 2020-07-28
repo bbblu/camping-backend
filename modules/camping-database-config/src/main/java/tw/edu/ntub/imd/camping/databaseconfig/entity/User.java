@@ -235,6 +235,11 @@ public class User {
         return userByLastModifyAccount.getFullName(delimiter);
     }
 
+    /**
+     * 是否啟用(0: 否/ 1: 是)
+     *
+     * @since 1.0.0
+     */
     public Boolean isEnable() {
         return enable;
     }

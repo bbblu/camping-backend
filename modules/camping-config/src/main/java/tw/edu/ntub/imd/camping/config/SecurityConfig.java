@@ -25,7 +25,6 @@ import tw.edu.ntub.imd.camping.config.filter.JwtAuthenticationFilter;
 import tw.edu.ntub.imd.camping.config.handler.CustomAuthenticationSuccessHandler;
 import tw.edu.ntub.imd.camping.config.handler.CustomerAccessDeniedHandler;
 import tw.edu.ntub.imd.camping.config.properties.FileProperties;
-import tw.edu.ntub.imd.camping.config.properties.ImageProperties;
 import tw.edu.ntub.imd.camping.config.provider.CustomAuthenticationProvider;
 
 import java.util.Arrays;
@@ -34,7 +33,6 @@ import java.util.Collections;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private final String imageUrlName;
     private final String fileUrlName;
     private final UserDetailsService userDetailsService;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
@@ -43,13 +41,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     public SecurityConfig(
             FileProperties fileProperties,
-            ImageProperties imageProperties,
             @Qualifier("userDetailsServiceImpl") UserDetailsService userDetailsService,
             CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler,
             JwtAuthenticationFilter jwtAuthenticationFilter
     ) {
         this.fileUrlName = fileProperties.getName();
-        this.imageUrlName = imageProperties.getName();
         this.userDetailsService = userDetailsService;
         this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -86,7 +82,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/favicon.ico",
                         "/static/**",
                         "/excel/test",
-                        String.format("/%s/**", imageUrlName),
                         String.format("/%s/**", fileUrlName)
                 );
     }
