@@ -12,11 +12,11 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class BaseViewServiceImpl<D extends BaseViewDAO<E, ID>, E, ID extends Serializable, B> implements BaseViewService<B, ID> {
-    private final D baseDAO;
-    private final BeanEntityTransformer<E, B> transformer;
+public abstract class BaseViewServiceImpl<B, E, ID extends Serializable> implements BaseViewService<B, ID> {
+    private final BaseViewDAO<E, ID> baseDAO;
+    private final BeanEntityTransformer<B, E> transformer;
 
-    public BaseViewServiceImpl(D d, BeanEntityTransformer<E, B> transformer) {
+    public BaseViewServiceImpl(BaseViewDAO<E, ID> d, BeanEntityTransformer<B, E> transformer) {
         Assert.notNull(d, "baseDAO不能為null");
         Assert.notNull(d, "transformer不能為null");
         this.baseDAO = d;
