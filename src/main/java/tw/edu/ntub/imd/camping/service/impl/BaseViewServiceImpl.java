@@ -25,14 +25,7 @@ public abstract class BaseViewServiceImpl<B, E, ID extends Serializable> impleme
 
     @Override
     public Optional<B> getById(ID id) {
-        Optional<E> optional = baseDAO.findById(id);
-        if (optional.isPresent()) {
-            E entity = optional.get();
-            B bean = transformer.transferToBean(entity);
-            return Optional.of(bean);
-        } else {
-            return Optional.empty();
-        }
+        return baseDAO.findById(id).map(transformer::transferToBean);
     }
 
     @Override
