@@ -4,17 +4,16 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
+import tw.edu.ntub.birc.common.wrapper.date.DateWrapper;
+import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.BooleanTo1And0Converter;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.GenderConverter;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.UserRoleEnumConverter;
+import tw.edu.ntub.imd.camping.databaseconfig.converter.*;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Gender;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.UserRoleEnum;
 
 import javax.persistence.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 /**
  * 使用者
@@ -127,16 +126,18 @@ public class User {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateWrapperConverter.class)
     @Column(name = "birthday", nullable = false)
-    private LocalDate birthday;
+    private DateWrapper birthday;
 
     /**
      * 建立時間
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "create_date", nullable = false)
-    private LocalDateTime createDate = LocalDateTime.now();
+    private DateTimeWrapper createDate = new LocalDateTimeWrapper();
 
     /**
      * 最後修改者帳號
@@ -151,8 +152,9 @@ public class User {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "last_modify_date", nullable = false)
-    private LocalDateTime lastModifyDate = LocalDateTime.now();
+    private DateTimeWrapper lastModifyDate = new LocalDateTimeWrapper();
 
     /**
      * 使用者權限

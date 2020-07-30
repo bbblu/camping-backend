@@ -4,11 +4,13 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
+import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.converter.BooleanTo1And0Converter;
+import tw.edu.ntub.imd.camping.databaseconfig.converter.DateTimeWrapperConverter;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * 聯絡方式紀錄表
@@ -61,16 +63,18 @@ public class ContactInformation {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "create_date", nullable = false)
-    private LocalDateTime createDate = LocalDateTime.now();
+    private DateTimeWrapper createDate = new LocalDateTimeWrapper();
 
     /**
      * 最後修改時間
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "last_modify_date", nullable = false)
-    private LocalDateTime lastModifyDate = LocalDateTime.now();
+    private DateTimeWrapper lastModifyDate = new LocalDateTimeWrapper();
 
     /**
      * 使用者

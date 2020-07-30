@@ -3,11 +3,12 @@ package tw.edu.ntub.imd.camping.databaseconfig.entity.view;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Immutable;
+import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
+import tw.edu.ntub.imd.camping.databaseconfig.converter.DateTimeWrapperConverter;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * 可租借商品列表
@@ -50,16 +51,18 @@ public class CanBorrowProductGroup {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "borrow_start_date", nullable = false)
-    private LocalDateTime borrowStartDate;
+    private DateTimeWrapper borrowStartDate;
 
     /**
      * 可租借的結束時間
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "borrow_end_date", nullable = false)
-    private LocalDateTime borrowEndDate;
+    private DateTimeWrapper borrowEndDate;
 
     /**
      * 使用者名稱，格式為：暱稱(帳號)

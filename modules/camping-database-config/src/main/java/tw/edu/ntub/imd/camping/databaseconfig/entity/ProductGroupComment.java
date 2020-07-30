@@ -2,10 +2,12 @@ package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
+import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
+import tw.edu.ntub.imd.camping.databaseconfig.converter.DateTimeWrapperConverter;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * 商品群組評價
@@ -59,8 +61,9 @@ public class ProductGroupComment {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "comment_date", nullable = false)
-    private LocalDateTime commentDate = LocalDateTime.now();
+    private DateTimeWrapper commentDate = new LocalDateTimeWrapper();
 
     /**
      * 商品群組

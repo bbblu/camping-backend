@@ -4,11 +4,13 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
+import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.converter.BooleanTo1And0Converter;
+import tw.edu.ntub.imd.camping.databaseconfig.converter.DateTimeWrapperConverter;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * 上架商品群組
@@ -73,16 +75,18 @@ public class ProductGroup {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "borrow_start_date", nullable = false)
-    private LocalDateTime borrowStartDate = LocalDateTime.now();
+    private DateTimeWrapper borrowStartDate = new LocalDateTimeWrapper();
 
     /**
      * 可租借的結束時間
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "borrow_end_date", nullable = false)
-    private LocalDateTime borrowEndDate;
+    private DateTimeWrapper borrowEndDate;
 
     /**
      * 聯絡方式編號
@@ -105,8 +109,9 @@ public class ProductGroup {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "create_date", nullable = false)
-    private LocalDateTime createDate = LocalDateTime.now();
+    private DateTimeWrapper createDate = new LocalDateTimeWrapper();
 
     /**
      * 最後修改者的帳號
@@ -121,8 +126,9 @@ public class ProductGroup {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "last_modify_date", nullable = false)
-    private LocalDateTime lastModifyDate = LocalDateTime.now();
+    private DateTimeWrapper lastModifyDate = new LocalDateTimeWrapper();
 
     /**
      * 聯絡方式

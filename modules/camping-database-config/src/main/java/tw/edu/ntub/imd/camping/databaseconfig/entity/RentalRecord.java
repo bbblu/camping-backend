@@ -4,13 +4,15 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
+import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.converter.BooleanTo1And0Converter;
+import tw.edu.ntub.imd.camping.databaseconfig.converter.DateTimeWrapperConverter;
 import tw.edu.ntub.imd.camping.databaseconfig.converter.RentalRecordStatusConverter;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * 租借紀錄
@@ -87,24 +89,27 @@ public class RentalRecord {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "rental_date", nullable = false)
-    private LocalDateTime rentalDate = LocalDateTime.now();
+    private DateTimeWrapper rentalDate = new LocalDateTimeWrapper();
 
     /**
      * 預計租借起始時間
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "borrow_start_date", nullable = false)
-    private LocalDateTime borrowStartDate;
+    private DateTimeWrapper borrowStartDate;
 
     /**
      * 預計租借結束時間
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "borrow_end_date", nullable = false)
-    private LocalDateTime borrowEndDate;
+    private DateTimeWrapper borrowEndDate;
 
     /**
      * 露營區、露營地編號
@@ -119,24 +124,27 @@ public class RentalRecord {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "pick_date")
-    private LocalDateTime pickDate;
+    private DateTimeWrapper pickDate;
 
     /**
      * 歸還時間
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "return_date")
-    private LocalDateTime returnDate;
+    private DateTimeWrapper returnDate;
 
     /**
      * 檢查時間
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "check_date")
-    private LocalDateTime checkDate;
+    private DateTimeWrapper checkDate;
 
     /**
      * 出借者檢查結果
@@ -151,8 +159,9 @@ public class RentalRecord {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "cancel_date")
-    private LocalDateTime cancelDate;
+    private DateTimeWrapper cancelDate;
 
     /**
      * 最後修改人帳號
@@ -167,8 +176,9 @@ public class RentalRecord {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "last_modify_date", nullable = false)
-    private LocalDateTime lastModifyDate = LocalDateTime.now();
+    private DateTimeWrapper lastModifyDate = new LocalDateTimeWrapper();
 
     /**
      * 租借商品群組

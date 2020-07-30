@@ -4,15 +4,17 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
+import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.converter.BooleanTo1And0Converter;
+import tw.edu.ntub.imd.camping.databaseconfig.converter.DateTimeWrapperConverter;
 import tw.edu.ntub.imd.camping.databaseconfig.converter.LogRecordDeviceConverter;
 import tw.edu.ntub.imd.camping.databaseconfig.converter.LogRecordDeviceTypeConverter;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.LogRecordDevice;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.LogRecordDeviceType;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * 使用者操作紀錄
@@ -79,8 +81,9 @@ public class LogRecord {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "execute_date", nullable = false)
-    private LocalDateTime executeDate = LocalDateTime.now();
+    private DateTimeWrapper executeDate = new LocalDateTimeWrapper();
 
     /**
      * 使用設備(-1: Unknown/ 00: Postman/ 01: 瀏覽器/ 02: App瀏覽器/ 03: App)
