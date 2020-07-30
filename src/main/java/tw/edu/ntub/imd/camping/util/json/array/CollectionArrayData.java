@@ -110,4 +110,9 @@ public class CollectionArrayData implements ResponseData {
     public JsonNode getData() {
         return arrayData.getData();
     }
+
+    @Override
+    public String toString() {
+        return arrayData.toString();
+    }
 }

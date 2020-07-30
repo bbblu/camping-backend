@@ -305,4 +305,9 @@ public class ObjectData implements ResponseData {
     public ObjectNode getData() {
         return objectNode;
     }
+
+    @Override
+    public String toString() {
+        return objectNode.toString();
+    }
 }

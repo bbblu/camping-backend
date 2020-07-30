@@ -53,4 +53,9 @@ public class MapObjectData implements ResponseData {
     public JsonNode getData() {
         return objectData.getData();
     }
+
+    @Override
+    public String toString() {
+        return objectData.toString();
+    }
 }
