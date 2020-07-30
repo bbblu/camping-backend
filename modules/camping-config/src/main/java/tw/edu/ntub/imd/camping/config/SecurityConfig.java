@@ -1,7 +1,6 @@
 package tw.edu.ntub.imd.camping.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -26,6 +25,7 @@ import tw.edu.ntub.imd.camping.config.handler.CustomAuthenticationSuccessHandler
 import tw.edu.ntub.imd.camping.config.handler.CustomerAccessDeniedHandler;
 import tw.edu.ntub.imd.camping.config.properties.FileProperties;
 import tw.edu.ntub.imd.camping.config.provider.CustomAuthenticationProvider;
+import tw.edu.ntub.imd.camping.config.util.JwtUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,20 +35,17 @@ import java.util.Collections;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final String fileUrlName;
     private final UserDetailsService userDetailsService;
-    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtUtils jwtUtils;
 
     @Autowired
     public SecurityConfig(
             FileProperties fileProperties,
-            @Qualifier("userDetailsServiceImpl") UserDetailsService userDetailsService,
-            CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler,
-            JwtAuthenticationFilter jwtAuthenticationFilter
+            UserDetailsService userDetailsService,
+            JwtUtils jwtUtils
     ) {
         this.fileUrlName = fileProperties.getName();
         this.userDetailsService = userDetailsService;
-        this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.jwtUtils = jwtUtils;
     }
 
     @Override
@@ -97,8 +94,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .configurationSource(corsConfigurationSource())
                 .and()
                 .userDetailsService(userDetailsService)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new CustomLoginFilter(authenticationManager(), customAuthenticationSuccessHandler), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtils), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new CustomLoginFilter(authenticationManager(), new CustomAuthenticationSuccessHandler(jwtUtils)), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests() // 設定Requests的權限需求
                 .antMatchers(HttpMethod.GET, "/login", "/logout", "/timeout", "/error**").permitAll()
                 .antMatchers(HttpMethod.GET, "/administrator/jsoqgvaofmep1if048vndktirkei/log/**").permitAll()
