@@ -89,6 +89,14 @@ public class User {
     private String firstName;
 
     /**
+     * 暱稱
+     *
+     * @since 1.0.0
+     */
+    @Column(name = "nick_name", length = 50, nullable = false)
+    private String nickName;
+
+    /**
      * 使用者性別(0: 男/ 1: 女/ 2: 未提供)
      *
      * @see Gender
