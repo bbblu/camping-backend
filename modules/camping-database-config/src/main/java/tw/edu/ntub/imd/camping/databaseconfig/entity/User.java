@@ -12,7 +12,6 @@ import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Gender;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.UserRoleEnum;
 
-import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -70,6 +69,7 @@ public class User {
      * @see Experience
      * @since 1.0.0
      */
+    @Column(name = "experience", nullable = false)
     private Experience experience = Experience.ROOKIE;
 
     /**
@@ -177,29 +177,6 @@ public class User {
     }
 
     /**
-     * 取得使用者的姓氏 + 名稱
-     *
-     * @return 使用者全名
-     * @see #getFullName(String)
-     * @since 1.0.0
-     */
-    public String getFullName() {
-        return getFullName(null);
-    }
-
-    /**
-     * 取得使用者的姓氏 + 分隔文字 + 名稱
-     *
-     * @param delimiter 分隔文字，可以是{@code null}
-     * @return 使用者全名
-     * @see #getFullName()
-     * @since 1.0.0
-     */
-    public String getFullName(@Nullable String delimiter) {
-        return (lastName != null ? lastName : "") + (delimiter != null ? delimiter : "") + (firstName != null ? firstName : "");
-    }
-
-    /**
      * 取得使用者性別文字，如：男、女
      *
      * @return 使用者性別文字
@@ -208,31 +185,6 @@ public class User {
      */
     public String getGenderName() {
         return gender.name;
-    }
-
-    /**
-     * 取得最後修改者的姓氏 + 名稱
-     *
-     * @return 最後修改者全名
-     * @see #getLastModifyUserName()
-     * @see #getFullName()
-     * @since 1.0.0
-     */
-    public String getLastModifyUserName() {
-        return getLastModifyUserName(null);
-    }
-
-    /**
-     * 取得最後修改者的姓氏 + 分隔文字 + 名稱
-     *
-     * @param delimiter 分隔文字，可以是{@code null}
-     * @return 最後修改者全名
-     * @see #getLastModifyUserName()
-     * @see #getFullName(String)
-     * @since 1.0.0
-     */
-    public String getLastModifyUserName(@Nullable String delimiter) {
-        return userByLastModifyAccount.getFullName(delimiter);
     }
 
     /**
