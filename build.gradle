@@ -114,6 +114,8 @@ dependencies {
     }
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntime 'com.h2database:h2'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
 test {

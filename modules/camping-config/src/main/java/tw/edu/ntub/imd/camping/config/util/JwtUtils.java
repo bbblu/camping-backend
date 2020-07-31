@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public final class JwtUtils {
+public class JwtUtils {
     @Value("spring.security.jwt.secret")
     private String secret;
 

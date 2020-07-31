@@ -4,18 +4,16 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
+import tw.edu.ntub.birc.common.wrapper.date.DateWrapper;
+import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.BooleanTo1And0Converter;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.GenderConverter;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.UserRoleEnumConverter;
+import tw.edu.ntub.imd.camping.databaseconfig.converter.*;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Gender;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.UserRoleEnum;
 
-import javax.annotation.Nullable;
 import javax.persistence.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 /**
  * 使用者
@@ -70,6 +68,7 @@ public class User {
      * @see Experience
      * @since 1.0.0
      */
+    @Column(name = "experience", nullable = false)
     private Experience experience = Experience.ROOKIE;
 
     /**
@@ -87,6 +86,14 @@ public class User {
      */
     @Column(name = "first_name", length = 50, nullable = false)
     private String firstName;
+
+    /**
+     * 暱稱
+     *
+     * @since 1.0.0
+     */
+    @Column(name = "nick_name", length = 50, nullable = false)
+    private String nickName;
 
     /**
      * 使用者性別(0: 男/ 1: 女/ 2: 未提供)
@@ -119,16 +126,18 @@ public class User {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateWrapperConverter.class)
     @Column(name = "birthday", nullable = false)
-    private LocalDate birthday;
+    private DateWrapper birthday;
 
     /**
      * 建立時間
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "create_date", nullable = false)
-    private LocalDateTime createDate = LocalDateTime.now();
+    private DateTimeWrapper createDate = new LocalDateTimeWrapper();
 
     /**
      * 最後修改者帳號
@@ -143,8 +152,9 @@ public class User {
      *
      * @since 1.0.0
      */
+    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "last_modify_date", nullable = false)
-    private LocalDateTime lastModifyDate = LocalDateTime.now();
+    private DateTimeWrapper lastModifyDate = new LocalDateTimeWrapper();
 
     /**
      * 使用者權限
@@ -177,29 +187,6 @@ public class User {
     }
 
     /**
-     * 取得使用者的姓氏 + 名稱
-     *
-     * @return 使用者全名
-     * @see #getFullName(String)
-     * @since 1.0.0
-     */
-    public String getFullName() {
-        return getFullName(null);
-    }
-
-    /**
-     * 取得使用者的姓氏 + 分隔文字 + 名稱
-     *
-     * @param delimiter 分隔文字，可以是{@code null}
-     * @return 使用者全名
-     * @see #getFullName()
-     * @since 1.0.0
-     */
-    public String getFullName(@Nullable String delimiter) {
-        return (lastName != null ? lastName : "") + (delimiter != null ? delimiter : "") + (firstName != null ? firstName : "");
-    }
-
-    /**
      * 取得使用者性別文字，如：男、女
      *
      * @return 使用者性別文字
@@ -211,30 +198,10 @@ public class User {
     }
 
     /**
-     * 取得最後修改者的姓氏 + 名稱
+     * 是否啟用(0: 否/ 1: 是)
      *
-     * @return 最後修改者全名
-     * @see #getLastModifyUserName()
-     * @see #getFullName()
      * @since 1.0.0
      */
-    public String getLastModifyUserName() {
-        return getLastModifyUserName(null);
-    }
-
-    /**
-     * 取得最後修改者的姓氏 + 分隔文字 + 名稱
-     *
-     * @param delimiter 分隔文字，可以是{@code null}
-     * @return 最後修改者全名
-     * @see #getLastModifyUserName()
-     * @see #getFullName(String)
-     * @since 1.0.0
-     */
-    public String getLastModifyUserName(@Nullable String delimiter) {
-        return userByLastModifyAccount.getFullName(delimiter);
-    }
-
     public Boolean isEnable() {
         return enable;
     }

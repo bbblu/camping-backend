@@ -262,4 +262,9 @@ public class ArrayData implements ResponseData {
     public ArrayNode getData() {
         return arrayNode;
     }
+
+    @Override
+    public String toString() {
+        return arrayNode.toString();
+    }
 }

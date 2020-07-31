@@ -3,7 +3,7 @@ spring:
     jwt:
       secret: ${security.jwt-secret}
 server:
-  id: 211.75.1.201
+  ip: 211.75.1.201
   port: 8080
   delegate-port: 50004
   servlet:

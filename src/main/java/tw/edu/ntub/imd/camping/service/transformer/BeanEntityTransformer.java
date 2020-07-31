@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public interface BeanEntityTransformer<E, B> {
+public interface BeanEntityTransformer<B, E> {
     @Nonnull
     E transferToEntity(@Nonnull B b);
 
