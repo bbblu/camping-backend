@@ -1,5 +1,6 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity.listener;
 
+import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ContactInformation;
 
 import javax.persistence.PrePersist;
@@ -12,6 +13,9 @@ public class ContactInformationListener {
     private void beforeSave(ContactInformation contactInformation) {
         if (contactInformation.isEnable() == null) {
             contactInformation.setEnable(true);
+        }
+        if (contactInformation.getUserAccount() == null) {
+            contactInformation.setUserAccount(SecurityUtils.getLoginUserAccount());
         }
         if (contactInformation.getCreateDate() == null) {
             contactInformation.setCreateDate(LocalDateTime.now());
