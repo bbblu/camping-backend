@@ -14,9 +14,6 @@ public class ProductGroupListener {
         if (productGroup.isEnable() == null) {
             productGroup.setEnable(true);
         }
-        if (productGroup.getBorrowStartDate() == null) {
-            productGroup.setBorrowStartDate(LocalDateTime.now());
-        }
         if (productGroup.getCreateDate() == null) {
             productGroup.setCreateDate(LocalDateTime.now());
         }
