@@ -31,8 +31,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                version = "0.0.1",
-                title = "新北工業會 - API",
+                version = "1.1.0",
+                title = "借借露 - API",
                 description = "此為所有系統API功能列表，如有疑問，請洽負責人員\n" +
                         "\n" +
                         "  以下為標準回傳格式，data請替換成API的RequestBody\n" +
@@ -45,8 +45,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
                         "  }\n" +
                         "  ```",
                 contact = @Contact(
-                        name = "李恩瑋",
-                        email = "10646007@ntub.edu.tw"
+                        name = "李恩瑋 / 黃峻彥",
+                        email = "10646007@ntub.edu.tw / 10646003@ntub.edu.tw"
                 )
         ),
         servers = {
