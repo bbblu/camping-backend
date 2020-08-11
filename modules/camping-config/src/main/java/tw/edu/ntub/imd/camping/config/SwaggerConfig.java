@@ -55,8 +55,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
                 )
         ),
         servers = {
-                @Server(url = "http://140.131.115.156:8080", description = "測試機"),
-                @Server(url = "http://140.131.115.157:8080", description = "正式機")
+                @Server(url = "http://211.75.1.201:50004", description = "測試機"),
+                @Server(url = "http://211.75.1.201:50004", description = "正式機")
         }
 )
 public class SwaggerConfig {
