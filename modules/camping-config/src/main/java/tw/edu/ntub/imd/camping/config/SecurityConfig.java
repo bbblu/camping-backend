@@ -91,8 +91,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .accessDeniedHandler(new CustomerAccessDeniedHandler()) // 偵測權限不足的處理
                 .and()
                 .cors()
-                .configurationSource(corsConfigurationSource())
-                .and()
+                .disable()
                 .userDetailsService(userDetailsService)
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtils), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new CustomLoginFilter(authenticationManager(), new CustomAuthenticationSuccessHandler(jwtUtils)), UsernamePasswordAuthenticationFilter.class)
@@ -126,12 +125,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://211.75.1.204:50001",
-                "http://140.131.115.147:3000",
-                "http://140.131.115.162:3000",
-                "http://140.131.115.163:3000"
-        ));
+        configuration.setAllowedOrigins(Collections.singletonList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Collections.singletonList("*"));
         configuration.setExposedHeaders(Collections.singletonList("X-Auth-Token"));
