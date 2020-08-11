@@ -4,17 +4,13 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
-import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.BooleanTo1And0Converter;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.DateTimeWrapperConverter;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.LogRecordDeviceConverter;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.LogRecordDeviceTypeConverter;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.LogRecordListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.LogRecordDevice;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.LogRecordDeviceType;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * 使用者操作紀錄
@@ -24,6 +20,7 @@ import javax.persistence.*;
 @Data
 @EqualsAndHashCode(exclude = "userByExecutor")
 @Entity
+@EntityListeners(LogRecordListener.class)
 @Table(name = "log_record", schema = Config.DATABASE_NAME)
 public class LogRecord {
     /**
@@ -81,9 +78,8 @@ public class LogRecord {
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "execute_date", nullable = false)
-    private DateTimeWrapper executeDate = new LocalDateTimeWrapper();
+    private LocalDateTime executeDate;
 
     /**
      * 使用設備(-1: Unknown/ 00: Postman/ 01: 瀏覽器/ 02: App瀏覽器/ 03: App)
@@ -91,7 +87,6 @@ public class LogRecord {
      * @since 1.0.0
      */
     @Column(name = "device", length = 2, nullable = false)
-    @Convert(converter = LogRecordDeviceConverter.class)
     private LogRecordDevice device;
 
     /**
@@ -100,7 +95,6 @@ public class LogRecord {
      * @since 1.0.0
      */
     @Column(name = "device_type", length = 2, nullable = false)
-    @Convert(converter = LogRecordDeviceTypeConverter.class)
     private LogRecordDeviceType deviceType;
 
     /**
@@ -117,7 +111,6 @@ public class LogRecord {
      * @since 1.0.0
      */
     @Column(name = "result", nullable = false)
-    @Convert(converter = BooleanTo1And0Converter.class)
     @Getter(AccessLevel.NONE)
     private Boolean success;
 
@@ -153,6 +146,11 @@ public class LogRecord {
         }
     }
 
+    /**
+     * 執行結果
+     *
+     * @since 1.0.0
+     */
     public Boolean isSuccess() {
         return success;
     }

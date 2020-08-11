@@ -91,19 +91,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .accessDeniedHandler(new CustomerAccessDeniedHandler()) // 偵測權限不足的處理
                 .and()
                 .cors()
-                .configurationSource(corsConfigurationSource())
-                .and()
+                .disable()
                 .userDetailsService(userDetailsService)
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtils), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new CustomLoginFilter(authenticationManager(), new CustomAuthenticationSuccessHandler(jwtUtils)), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests() // 設定Requests的權限需求
-                .antMatchers(HttpMethod.GET, "/login", "/logout", "/timeout", "/error**").permitAll()
-                .antMatchers(HttpMethod.GET, "/administrator/jsoqgvaofmep1if048vndktirkei/log/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/member/register").permitAll()
-                .antMatchers(HttpMethod.GET, "/photo/home-photo").permitAll()
-                .antMatchers(HttpMethod.OPTIONS, "**").permitAll()
                 .anyRequest() // 表示除了上述請求，都需要權限
-                .authenticated()
+                .permitAll()
                 .and()
                 .formLogin() // 設定Login，如果是用Form表單登入的話
                 .loginPage("/login") // 設定Login頁面的URL
@@ -131,12 +125,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://211.75.1.204:50001",
-                "http://140.131.115.147:3000",
-                "http://140.131.115.162:3000",
-                "http://140.131.115.163:3000"
-        ));
+        configuration.setAllowedOrigins(Collections.singletonList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Collections.singletonList("*"));
         configuration.setExposedHeaders(Collections.singletonList("X-Auth-Token"));

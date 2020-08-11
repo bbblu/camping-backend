@@ -4,13 +4,11 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
-import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.BooleanTo1And0Converter;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.DateTimeWrapperConverter;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ContactInformationListener;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * 聯絡方式紀錄表
@@ -20,6 +18,7 @@ import javax.persistence.*;
 @Data
 @EqualsAndHashCode(exclude = "userByUserAccount")
 @Entity
+@EntityListeners(ContactInformationListener.class)
 @Table(name = "contact_information", schema = Config.DATABASE_NAME)
 public class ContactInformation {
     /**
@@ -38,9 +37,8 @@ public class ContactInformation {
      * @since 1.0.0
      */
     @Getter(AccessLevel.NONE)
-    @Convert(converter = BooleanTo1And0Converter.class)
     @Column(name = "enable", nullable = false)
-    private Boolean enable = true;
+    private Boolean enable;
 
     /**
      * 該聯絡方式對應的使用者帳號
@@ -63,18 +61,16 @@ public class ContactInformation {
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "create_date", nullable = false)
-    private DateTimeWrapper createDate = new LocalDateTimeWrapper();
+    private LocalDateTime createDate;
 
     /**
      * 最後修改時間
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "last_modify_date", nullable = false)
-    private DateTimeWrapper lastModifyDate = new LocalDateTimeWrapper();
+    private LocalDateTime lastModifyDate;
 
     /**
      * 使用者
@@ -86,6 +82,11 @@ public class ContactInformation {
     @JoinColumn(name = "user_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User userByUserAccount;
 
+    /**
+     * 是否啟用(0: 否/ 1: 是)
+     *
+     * @since 1.0.0
+     */
     public Boolean isEnable() {
         return enable;
     }

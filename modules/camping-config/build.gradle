@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation rootProject.project('modules:camping-database-config')
     implementation 'org.yaml:snakeyaml:1.26'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'

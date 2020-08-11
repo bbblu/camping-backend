@@ -12,13 +12,4 @@ public enum RentalRecordStatus {
     RentalRecordStatus(String status) {
         this.status = status;
     }
-
-    public static RentalRecordStatus getByStatus(String status) {
-        for (RentalRecordStatus value : values()) {
-            if (value.status.equals(status)) {
-                return value;
-            }
-        }
-        throw new IllegalStateException("沒有此狀態：" + status);
-    }
 }

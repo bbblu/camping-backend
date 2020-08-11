@@ -42,13 +42,4 @@ public enum RentalDetailStatus {
     RentalDetailStatus(String status) {
         this.status = status;
     }
-
-    public static RentalDetailStatus getByStatus(String status) {
-        for (RentalDetailStatus value : values()) {
-            if (value.status.equals(status)) {
-                return value;
-            }
-        }
-        throw new IllegalStateException("沒有此狀態：" + status);
-    }
 }

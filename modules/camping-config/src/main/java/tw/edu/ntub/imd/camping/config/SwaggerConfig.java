@@ -31,9 +31,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                version = "0.0.1",
-                title = "新北工業會 - API",
+                version = "1.1.0",
+                title = "借借露 - API",
                 description = "此為所有系統API功能列表，如有疑問，請洽負責人員\n" +
+                        "\n" +
+                        "| 負責人姓名 | 信箱 |\n" +
+                        "|:---------:|:----:|\n" +
+                        "| 李恩瑋 | 10646007@ntub.edu.tw |\n" +
+                        "| 黃峻彥 | 10646003@ntub.edu.tw |\n" +
                         "\n" +
                         "  以下為標準回傳格式，data請替換成API的RequestBody\n" +
                         "  ```json=\n" +
@@ -50,8 +55,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
                 )
         ),
         servers = {
-                @Server(url = "http://140.131.115.156:8080", description = "測試機"),
-                @Server(url = "http://140.131.115.157:8080", description = "正式機")
+                @Server(url = "http://211.75.1.201:50004", description = "測試機"),
+                @Server(url = "http://211.75.1.201:50004", description = "正式機")
         }
 )
 public class SwaggerConfig {

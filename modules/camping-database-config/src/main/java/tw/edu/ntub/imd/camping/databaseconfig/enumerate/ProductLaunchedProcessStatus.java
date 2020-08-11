@@ -36,13 +36,4 @@ public enum ProductLaunchedProcessStatus {
     ProductLaunchedProcessStatus(String status) {
         this.status = status;
     }
-
-    public static ProductLaunchedProcessStatus getByStatus(String status) {
-        for (ProductLaunchedProcessStatus value : values()) {
-            if (value.status.equals(status)) {
-                return value;
-            }
-        }
-        throw new IllegalStateException("沒有此狀態：" + status);
-    }
 }

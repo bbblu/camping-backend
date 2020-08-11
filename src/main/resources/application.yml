@@ -3,7 +3,7 @@ springdoc:
     path: /api/doc
   swagger-ui:
     path: /api
-  packages-to-scan: tw.org.ntcia.controller
+  packages-to-scan: tw.edu.ntub.imd.camping.controller
   default-produces-media-type: application/json;charset=UTF-8
 debug: true
 spring:

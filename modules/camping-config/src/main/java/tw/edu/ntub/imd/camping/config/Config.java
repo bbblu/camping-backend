@@ -17,7 +17,10 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import tw.edu.ntub.imd.camping.config.properties.FileProperties;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Configuration
 public class Config implements WebMvcConfigurer {
@@ -62,12 +65,7 @@ public class Config implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(
-                        "http://211.75.1.204:50001",
-                        "http://140.131.115.147:3000",
-                        "http://140.131.115.162:3000",
-                        "http://140.131.115.163:3000"
-                )
+                .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .exposedHeaders("X-Auth-Token");
@@ -75,13 +73,15 @@ public class Config implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        Path filePath = Paths.get(fileProperties.getPath()).toAbsolutePath().normalize();
+        URI fileUri = filePath.toUri();
         registry.addResourceHandler(String.format("/%s/**", fileProperties.getName()))
-                .addResourceLocations(String.format("file:%s", fileProperties.getPath()));
+                .addResourceLocations(fileUri.toString());
         registry.addResourceHandler("/favicon.ico")
                 .addResourceLocations("classpath:/static/favicon.ico");
 
         logger.info("增加路徑對應：" + String.format("/%s/**", fileProperties.getName()));
-        logger.info("對應到的實體路徑為：" + String.format("file:%s", fileProperties.getPath()));
+        logger.info("對應到的實體路徑為：" + fileUri);
         logger.info("增加路徑對應：/favicon.ico");
         logger.info("對應到的實體路徑為：classpath:/static/favicon.ico");
     }
