@@ -10,7 +10,7 @@ server:
     context-path: /
   file:
     name: file
-    path: 'C:\ProjectUploadFile\{server.file.name}\camping\'
+    path: 'C:\ProjectUploadFile\${server.file.name}\camping\'
 logging:
   level:
     jdbc:
