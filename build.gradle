@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'tw.edu.ntub.imd'
-version = '1.0.0'
+version = '1.1.0'
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
@@ -90,7 +90,7 @@ repositories {
 dependencies {
     implementation project('modules:camping-config')
     implementation project('modules:camping-database-config')
-    implementation 'tw.edu.ntub.birc:common:1.0.0'
+    implementation 'tw.edu.ntub.birc:common:1.0.4'
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'org.yaml:snakeyaml:1.26'
     implementation 'org.apache.commons:commons-text:1.8'
@@ -113,7 +113,7 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testImplementation 'org.springframework.security:spring-security-test'
-    testRuntime 'com.h2database:h2'
+    testRuntimeOnly 'com.h2database:h2'
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 }

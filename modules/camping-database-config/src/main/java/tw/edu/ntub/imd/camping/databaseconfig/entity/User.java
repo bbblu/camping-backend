@@ -1,30 +1,32 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
-import tw.edu.ntub.birc.common.wrapper.date.DateWrapper;
-import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
+import lombok.*;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.*;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.UserListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Gender;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.UserRoleEnum;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * 使用者
  *
  * @since 1.0.0
  */
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Data
 @EqualsAndHashCode(exclude = {"userRoleByRoleId", "userByLastModifyAccount"})
 @Entity
+@EntityListeners(UserListener.class)
 @Table(name = "user", schema = Config.DATABASE_NAME)
-public class User {
+public class User implements Persistable<String> {
+    @Transient
+    private boolean save;
     /**
      * 使用者帳號
      *
@@ -48,9 +50,8 @@ public class User {
      * @see UserRoleEnum
      * @since 1.0.0
      */
-    @Convert(converter = UserRoleEnumConverter.class)
     @Column(name = "role_id", nullable = false, columnDefinition = "UNSIGNED")
-    private UserRoleEnum roleId = UserRoleEnum.USER;
+    private UserRoleEnum roleId;
 
     /**
      * 是否啟用(0: 否/ 1: 是)
@@ -58,9 +59,8 @@ public class User {
      * @since 1.0.0
      */
     @Getter(AccessLevel.NONE)
-    @Convert(converter = BooleanTo1And0Converter.class)
     @Column(name = "enable", nullable = false)
-    private Boolean enable = true;
+    private Boolean enable;
 
     /**
      * 露營經驗(0: 新手/ 1: 有過幾次經驗)
@@ -68,8 +68,9 @@ public class User {
      * @see Experience
      * @since 1.0.0
      */
+    @Enumerated
     @Column(name = "experience", nullable = false)
-    private Experience experience = Experience.ROOKIE;
+    private Experience experience;
 
     /**
      * 使用者姓氏
@@ -101,7 +102,7 @@ public class User {
      * @see Gender
      * @since 1.0.0
      */
-    @Convert(converter = GenderConverter.class)
+    @Enumerated
     @Column(name = "gender", length = 1, nullable = false)
     private Gender gender;
 
@@ -126,18 +127,16 @@ public class User {
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateWrapperConverter.class)
     @Column(name = "birthday", nullable = false)
-    private DateWrapper birthday;
+    private LocalDate birthday;
 
     /**
      * 建立時間
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "create_date", nullable = false)
-    private DateTimeWrapper createDate = new LocalDateTimeWrapper();
+    private LocalDateTime createDate;
 
     /**
      * 最後修改者帳號
@@ -152,9 +151,8 @@ public class User {
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "last_modify_date", nullable = false)
-    private DateTimeWrapper lastModifyDate = new LocalDateTimeWrapper();
+    private LocalDateTime lastModifyDate;
 
     /**
      * 使用者權限
@@ -204,5 +202,15 @@ public class User {
      */
     public Boolean isEnable() {
         return enable;
+    }
+
+    @Override
+    public String getId() {
+        return account;
+    }
+
+    @Override
+    public boolean isNew() {
+        return save;
     }
 }

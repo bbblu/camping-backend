@@ -4,13 +4,11 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
-import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.BooleanTo1And0Converter;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.DateTimeWrapperConverter;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ProductListener;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * 上架商品的詳細內容
@@ -24,6 +22,7 @@ import javax.persistence.*;
         "userByLastModifyAccount"
 })
 @Entity
+@EntityListeners(ProductListener.class)
 @Table(name = "product", schema = Config.DATABASE_NAME)
 public class Product {
     /**
@@ -50,9 +49,8 @@ public class Product {
      * @since 1.0.0
      */
     @Getter(AccessLevel.NONE)
-    @Convert(converter = BooleanTo1And0Converter.class)
     @Column(name = "enable", nullable = false)
-    private Boolean enable = true;
+    private Boolean enable;
 
     /**
      * 商品類型
@@ -123,9 +121,8 @@ public class Product {
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "last_modify_date", nullable = false)
-    private DateTimeWrapper lastModifyDate = new LocalDateTimeWrapper();
+    private LocalDateTime lastModifyDate;
 
     /**
      * 商品群組
@@ -160,7 +157,6 @@ public class Product {
     /**
      * 是否啟用(0: 否/ 1: 是)
      *
-     * @return 是否啟用(0 : 否 / 1 : 是)
      * @since 1.0.0
      */
     public Boolean isEnable() {

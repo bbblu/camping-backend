@@ -97,13 +97,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtils), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new CustomLoginFilter(authenticationManager(), new CustomAuthenticationSuccessHandler(jwtUtils)), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests() // 設定Requests的權限需求
-                .antMatchers(HttpMethod.GET, "/login", "/logout", "/timeout", "/error**").permitAll()
-                .antMatchers(HttpMethod.GET, "/administrator/jsoqgvaofmep1if048vndktirkei/log/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/member/register").permitAll()
-                .antMatchers(HttpMethod.GET, "/photo/home-photo").permitAll()
-                .antMatchers(HttpMethod.OPTIONS, "**").permitAll()
                 .anyRequest() // 表示除了上述請求，都需要權限
-                .authenticated()
+                .permitAll()
                 .and()
                 .formLogin() // 設定Login，如果是用Form表單登入的話
                 .loginPage("/login") // 設定Login頁面的URL

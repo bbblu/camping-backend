@@ -2,14 +2,12 @@ package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
-import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.DateTimeWrapperConverter;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.RentalDetailStatusConverter;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.RentalDetailListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalDetailStatus;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * 租借詳細記錄
@@ -23,6 +21,7 @@ import javax.persistence.*;
         "userByLastModifyAccount"
 })
 @Entity
+@EntityListeners(RentalDetailListener.class)
 @Table(name = "rental_detail", schema = Config.DATABASE_NAME)
 public class RentalDetail {
     /**
@@ -56,7 +55,7 @@ public class RentalDetail {
      *
      * @since 1.0.0
      */
-    @Convert(converter = RentalDetailStatusConverter.class)
+    @Enumerated
     @Column(name = "status", length = 1, nullable = false)
     private RentalDetailStatus status;
 
@@ -81,9 +80,8 @@ public class RentalDetail {
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "last_modify_date", nullable = false)
-    private DateTimeWrapper lastModifyDate = new LocalDateTimeWrapper();
+    private LocalDateTime lastModifyDate;
 
     /**
      * 租借紀錄

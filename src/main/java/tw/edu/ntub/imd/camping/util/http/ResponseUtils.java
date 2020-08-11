@@ -10,10 +10,11 @@ import org.apache.commons.text.StringEscapeUtils;
 import tw.edu.ntub.birc.common.exception.NullParameterException;
 import tw.edu.ntub.birc.common.exception.UnknownException;
 import tw.edu.ntub.birc.common.exception.date.ParseDateException;
+import tw.edu.ntub.birc.common.util.DateTimeUtils;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
-import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
-import tw.edu.ntub.birc.common.wrapper.date.LocalDateWrapper;
-import tw.edu.ntub.birc.common.wrapper.date.LocalTimeWrapper;
+import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
+import tw.edu.ntub.birc.common.wrapper.date.DateWrapper;
+import tw.edu.ntub.birc.common.wrapper.date.TimeWrapper;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -118,11 +119,11 @@ public class ResponseUtils {
                     return LocalDate.parse(p.getValueAsString());
                 }
             });
-            addDeserializer(LocalDateWrapper.class, new JsonDeserializer<>() {
+            addDeserializer(DateWrapper.class, new JsonDeserializer<>() {
                 @Override
-                public LocalDateWrapper deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+                public DateWrapper deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
                     try {
-                        return new LocalDateWrapper(LocalDate.parse(p.getValueAsString()));
+                        return DateTimeUtils.parseDate(p.getValueAsString());
                     } catch (ParseDateException | NullParameterException e) {
                         e.printStackTrace();
                         return null;
@@ -138,11 +139,11 @@ public class ResponseUtils {
                     return LocalTime.parse(p.getValueAsString());
                 }
             });
-            addDeserializer(LocalTimeWrapper.class, new JsonDeserializer<>() {
+            addDeserializer(TimeWrapper.class, new JsonDeserializer<>() {
                 @Override
-                public LocalTimeWrapper deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+                public TimeWrapper deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
                     try {
-                        return new LocalTimeWrapper(LocalTime.parse(p.getValueAsString()));
+                        return DateTimeUtils.parseTime(p.getValueAsString());
                     } catch (ParseDateException | NullParameterException e) {
                         e.printStackTrace();
                         return null;
@@ -158,11 +159,13 @@ public class ResponseUtils {
                     return LocalDateTime.parse(p.getValueAsString());
                 }
             });
-            addDeserializer(LocalDateTimeWrapper.class, new JsonDeserializer<>() {
+            addDeserializer(DateTimeWrapper.class, new JsonDeserializer<>() {
                 @Override
-                public LocalDateTimeWrapper deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+                public DateTimeWrapper deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
                     try {
-                        return new LocalDateTimeWrapper(LocalDateTime.parse(p.getValueAsString()));
+                        String text = p.getText();
+                        String valueAsString = p.getValueAsString();
+                        return DateTimeUtils.parseDateTime(p.getValueAsString());
                     } catch (ParseDateException | NullParameterException e) {
                         e.printStackTrace();
                         return null;

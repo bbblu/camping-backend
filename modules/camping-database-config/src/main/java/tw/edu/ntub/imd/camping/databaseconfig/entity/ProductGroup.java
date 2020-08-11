@@ -4,13 +4,11 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
-import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.BooleanTo1And0Converter;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.DateTimeWrapperConverter;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ProductGroupListener;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * 上架商品群組
@@ -24,6 +22,7 @@ import javax.persistence.*;
         "userByLastModifyAccount"
 })
 @Entity
+@EntityListeners(ProductGroupListener.class)
 @Table(name = "product_group", schema = Config.DATABASE_NAME)
 public class ProductGroup {
     /**
@@ -42,7 +41,6 @@ public class ProductGroup {
      * @since 1.0.0
      */
     @Getter(AccessLevel.NONE)
-    @Convert(converter = BooleanTo1And0Converter.class)
     @Column(name = "enable", nullable = false)
     private Boolean enable;
 
@@ -75,18 +73,16 @@ public class ProductGroup {
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "borrow_start_date", nullable = false)
-    private DateTimeWrapper borrowStartDate = new LocalDateTimeWrapper();
+    private LocalDateTime borrowStartDate;
 
     /**
      * 可租借的結束時間
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "borrow_end_date", nullable = false)
-    private DateTimeWrapper borrowEndDate;
+    private LocalDateTime borrowEndDate;
 
     /**
      * 聯絡方式編號
@@ -109,9 +105,8 @@ public class ProductGroup {
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "create_date", nullable = false)
-    private DateTimeWrapper createDate = new LocalDateTimeWrapper();
+    private LocalDateTime createDate;
 
     /**
      * 最後修改者的帳號
@@ -126,9 +121,8 @@ public class ProductGroup {
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "last_modify_date", nullable = false)
-    private DateTimeWrapper lastModifyDate = new LocalDateTimeWrapper();
+    private LocalDateTime lastModifyDate;
 
     /**
      * 聯絡方式
@@ -163,7 +157,6 @@ public class ProductGroup {
     /**
      * 是否啟用(0: 否/ 1: 是)
      *
-     * @return 是否啟用(0 : 否 / 1 : 是)
      * @since 1.0.0
      */
     public Boolean isEnable() {

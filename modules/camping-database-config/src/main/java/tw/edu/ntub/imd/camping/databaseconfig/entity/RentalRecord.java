@@ -4,15 +4,12 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
-import tw.edu.ntub.birc.common.wrapper.date.LocalDateTimeWrapper;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.BooleanTo1And0Converter;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.DateTimeWrapperConverter;
-import tw.edu.ntub.imd.camping.databaseconfig.converter.RentalRecordStatusConverter;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.RentalRecordListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * 租借紀錄
@@ -28,6 +25,7 @@ import javax.persistence.*;
         "userByLastModifyAccount"
 })
 @Entity
+@EntityListeners(RentalRecordListener.class)
 @Table(name = "rental_record", schema = Config.DATABASE_NAME)
 public class RentalRecord {
     /**
@@ -54,9 +52,8 @@ public class RentalRecord {
      * @since 1.0.0
      */
     @Getter(AccessLevel.NONE)
-    @Convert(converter = BooleanTo1And0Converter.class)
     @Column(name = "enable", nullable = false)
-    private Boolean enable = true;
+    private Boolean enable;
 
     /**
      * 狀態(0:取消/ 1: 未取貨/ 2:未歸還/ 3:已歸還/ 4: 已檢查)
@@ -64,9 +61,9 @@ public class RentalRecord {
      * @see RentalRecordStatus
      * @since 1.0.0
      */
-    @Convert(converter = RentalRecordStatusConverter.class)
+    @Enumerated
     @Column(name = "status", length = 1, nullable = false)
-    private RentalRecordStatus status = RentalRecordStatus.NOT_PICK_UP;
+    private RentalRecordStatus status;
 
     /**
      * 租借者帳號
@@ -89,27 +86,24 @@ public class RentalRecord {
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "rental_date", nullable = false)
-    private DateTimeWrapper rentalDate = new LocalDateTimeWrapper();
+    private LocalDateTime rentalDate;
 
     /**
      * 預計租借起始時間
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "borrow_start_date", nullable = false)
-    private DateTimeWrapper borrowStartDate;
+    private LocalDateTime borrowStartDate;
 
     /**
      * 預計租借結束時間
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "borrow_end_date", nullable = false)
-    private DateTimeWrapper borrowEndDate;
+    private LocalDateTime borrowEndDate;
 
     /**
      * 露營區、露營地編號
@@ -124,27 +118,24 @@ public class RentalRecord {
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "pick_date")
-    private DateTimeWrapper pickDate;
+    private LocalDateTime pickDate;
 
     /**
      * 歸還時間
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "return_date")
-    private DateTimeWrapper returnDate;
+    private LocalDateTime returnDate;
 
     /**
      * 檢查時間
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "check_date")
-    private DateTimeWrapper checkDate;
+    private LocalDateTime checkDate;
 
     /**
      * 出借者檢查結果
@@ -159,9 +150,8 @@ public class RentalRecord {
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "cancel_date")
-    private DateTimeWrapper cancelDate;
+    private LocalDateTime cancelDate;
 
     /**
      * 最後修改人帳號
@@ -176,9 +166,8 @@ public class RentalRecord {
      *
      * @since 1.0.0
      */
-    @Convert(converter = DateTimeWrapperConverter.class)
     @Column(name = "last_modify_date", nullable = false)
-    private DateTimeWrapper lastModifyDate = new LocalDateTimeWrapper();
+    private LocalDateTime lastModifyDate;
 
     /**
      * 租借商品群組
@@ -230,6 +219,11 @@ public class RentalRecord {
     @JoinColumn(name = "last_modify_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User userByLastModifyAccount;
 
+    /**
+     * 是否啟用(0: 否/ 1: 是)
+     *
+     * @since 1.0.0
+     */
     public Boolean isEnable() {
         return enable;
     }

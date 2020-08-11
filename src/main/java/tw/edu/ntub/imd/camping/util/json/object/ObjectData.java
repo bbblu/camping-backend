@@ -3,7 +3,9 @@ package tw.edu.ntub.imd.camping.util.json.object;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
+import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
 import tw.edu.ntub.birc.common.wrapper.date.DateWrapper;
+import tw.edu.ntub.birc.common.wrapper.date.TimeWrapper;
 import tw.edu.ntub.imd.camping.util.http.ResponseUtils;
 import tw.edu.ntub.imd.camping.util.json.ResponseData;
 import tw.edu.ntub.imd.camping.util.json.array.ArrayData;
@@ -145,7 +147,25 @@ public class ObjectData implements ResponseData {
     }
 
     public ObjectData add(String key, DateWrapper dateWrapper, DateTimePattern builder) {
-        objectNode.put(key, dateWrapper.format(builder));
+        objectNode.put(key, dateWrapper != null ? dateWrapper.format(builder) : null);
+        return this;
+    }
+
+    public ObjectData add(String key, TimeWrapper timeWrapper) {
+        return add(key, timeWrapper, DateTimePattern.DEFAULT_TIME);
+    }
+
+    public ObjectData add(String key, TimeWrapper timeWrapper, DateTimePattern builder) {
+        objectNode.put(key, timeWrapper != null ? timeWrapper.format(builder) : null);
+        return this;
+    }
+
+    public ObjectData add(String key, DateTimeWrapper dateTimeWrapper) {
+        return add(key, dateTimeWrapper, DateTimePattern.DEFAULT_DATE_TIME);
+    }
+
+    public ObjectData add(String key, DateTimeWrapper dateTimeWrapper, DateTimePattern builder) {
+        objectNode.put(key, dateTimeWrapper != null ? dateTimeWrapper.format(builder) : null);
         return this;
     }
 
