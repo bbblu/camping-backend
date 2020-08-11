@@ -35,6 +35,11 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
                 title = "借借露 - API",
                 description = "此為所有系統API功能列表，如有疑問，請洽負責人員\n" +
                         "\n" +
+                        "| 負責人姓名 | 信箱 |\n" +
+                        "|:---------:|:----:|\n" +
+                        "| 李恩瑋 | 10646007@ntub.edu.tw |\n" +
+                        "| 黃峻彥 | 10646003@ntub.edu.tw |\n" +
+                        "\n" +
                         "  以下為標準回傳格式，data請替換成API的RequestBody\n" +
                         "  ```json=\n" +
                         "  {\n" +
@@ -45,8 +50,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
                         "  }\n" +
                         "  ```",
                 contact = @Contact(
-                        name = "李恩瑋 / 黃峻彥",
-                        email = "10646007@ntub.edu.tw / 10646003@ntub.edu.tw"
+                        name = "李恩瑋",
+                        email = "10646007@ntub.edu.tw"
                 )
         ),
         servers = {
