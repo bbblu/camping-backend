@@ -17,6 +17,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import tw.edu.ntub.imd.camping.config.properties.FileProperties;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -72,15 +73,15 @@ public class Config implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        System.out.println("fileProperties.getPath() = " + fileProperties.getPath());
-        Path filePath = Paths.get(fileProperties.getPath()).normalize().toAbsolutePath();
+        Path filePath = Paths.get(fileProperties.getPath()).toAbsolutePath().normalize();
+        URI fileUri = filePath.toUri();
         registry.addResourceHandler(String.format("/%s/**", fileProperties.getName()))
-                .addResourceLocations(String.format("file:%s", filePath.toString()));
+                .addResourceLocations(fileUri.toString());
         registry.addResourceHandler("/favicon.ico")
                 .addResourceLocations("classpath:/static/favicon.ico");
 
         logger.info("增加路徑對應：" + String.format("/%s/**", fileProperties.getName()));
-        logger.info("對應到的實體路徑為：" + String.format("file:%s", filePath.toString()));
+        logger.info("對應到的實體路徑為：" + fileUri);
         logger.info("增加路徑對應：/favicon.ico");
         logger.info("對應到的實體路徑為：classpath:/static/favicon.ico");
     }
