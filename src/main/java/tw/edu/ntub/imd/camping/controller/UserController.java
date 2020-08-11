@@ -32,6 +32,19 @@ public class UserController {
         this.contactInformationService = contactInformationService;
     }
 
+    @Operation(
+            tags = "User",
+            method = "POST",
+            summary = "使用者註冊",
+            description = "使用者註冊，預設權限為一般使用者",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "註冊成功",
+                    content = @Content(
+                            mediaType = "application/json"
+                    )
+            )
+    )
     @PostMapping(path = "")
     public ResponseEntity<String> register(@Valid @RequestBody UserBean userBean, BindingResult bindingResult) {
         BindingResultUtils.validate(bindingResult);
