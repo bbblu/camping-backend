@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -65,7 +64,6 @@ public class UserController {
                     )
             )
     )
-    @PreAuthorize("isAuthenticated()")
     @PostMapping(path = "/contact-information")
     public ResponseEntity<String> createContactInformation(
             @Valid @RequestBody ContactInformationBean contactInformationBean,
