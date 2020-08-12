@@ -27,8 +27,8 @@ import tw.edu.ntub.imd.camping.config.properties.FileProperties;
 import tw.edu.ntub.imd.camping.config.provider.CustomAuthenticationProvider;
 import tw.edu.ntub.imd.camping.config.util.JwtUtils;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -85,53 +85,79 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .exceptionHandling() // 出錯時的例外處理
+        configCSRF(http);
+        configExceptionHandle(http);
+        configCORS(http);
+        configFilter(http);
+        configRequestAuthorize(http);
+        configLogin(http);
+        configLogout(http);
+        configSession(http);
+    }
+
+    private void configCSRF(HttpSecurity http) throws Exception {
+        http.csrf().disable();
+    }
+
+    private void configExceptionHandle(HttpSecurity http) throws Exception {
+        http.exceptionHandling() // 出錯時的例外處理
                 .authenticationEntryPoint(new CustomEntryPoint()) // 未登入處理
-                .accessDeniedHandler(new CustomerAccessDeniedHandler()) // 偵測權限不足的處理
-                .and()
-                .cors()
-                .disable()
-                .userDetailsService(userDetailsService)
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtils), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new CustomLoginFilter(authenticationManager(), new CustomAuthenticationSuccessHandler(jwtUtils)), UsernamePasswordAuthenticationFilter.class)
-                .authorizeRequests() // 設定Requests的權限需求
-                .antMatchers(HttpMethod.POST, "/user/contact-information").authenticated()
-                .anyRequest() // 表示除了上述請求，都需要權限
-                .permitAll()
-                .and()
-                .formLogin() // 設定Login，如果是用Form表單登入的話
-                .loginPage("/login") // 設定Login頁面的URL
-                .loginProcessingUrl("/login") // 設定Login動作的URL
-                .failureUrl("/login?error") // 設定Login失敗的URL
-                .permitAll() // Login不需要權限
-                .usernameParameter("account")
-                .passwordParameter("password")
-                .and()
-                .logout() // 設定Logout
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")) // 設定Logout URL
-                .logoutSuccessUrl("/login") // 設定登出成功後的URL
-                .deleteCookies("JSESSIONID")
-                .and()
-                .sessionManagement() // Session管理
-                .sessionFixation() // Session固定ID保護
-                .migrateSession() // 每次登入，都會產生新的，並將舊的屬性複製，預設值
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .invalidSessionUrl("/timeout") // Session過期時的URL導向
-                .maximumSessions(1) // 設定Session數只能一個
-                .expiredUrl("/timeout") // 設定因為再次登入而導致的URL過期的URL導向
-        ;
+                .accessDeniedHandler(new CustomerAccessDeniedHandler()); // 偵測權限不足的處理
+    }
+
+    private void configCORS(HttpSecurity http) throws Exception {
+        http.cors().configurationSource(corsConfigurationSource());
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Collections.singletonList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Collections.singletonList("*"));
         configuration.setExposedHeaders(Collections.singletonList("X-Auth-Token"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    private void configFilter(HttpSecurity http) throws Exception {
+        http.userDetailsService(userDetailsService)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtils), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new CustomLoginFilter(authenticationManager(), new CustomAuthenticationSuccessHandler(jwtUtils)), UsernamePasswordAuthenticationFilter.class);
+    }
+
+    private void configRequestAuthorize(HttpSecurity http) throws Exception {
+        http.authorizeRequests() // 設定Requests的權限需求
+                .antMatchers(HttpMethod.POST, "/user/contact-information").authenticated()
+                .anyRequest() // 表示除了上述請求，都不用登入即可使用
+                .permitAll();
+    }
+
+    private void configLogin(HttpSecurity http) throws Exception {
+        http.formLogin() // 設定Login，如果是用Form表單登入的話
+                .loginPage("/login") // 設定Login頁面的URL
+                .loginProcessingUrl("/login") // 設定Login動作的URL
+                .failureUrl("/login?error") // 設定Login失敗的URL
+                .permitAll() // Login不需要權限
+                .usernameParameter("account")
+                .passwordParameter("password");
+    }
+
+    private void configLogout(HttpSecurity http) throws Exception {
+        http.logout() // 設定Logout
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")) // 設定Logout URL
+                .logoutSuccessUrl("/login") // 設定登出成功後的URL
+                .deleteCookies("JSESSIONID");
+    }
+
+    private void configSession(HttpSecurity http) throws Exception {
+        http.sessionManagement() // Session管理
+                .sessionFixation() // Session固定ID保護
+                .migrateSession() // 每次登入，都會產生新的，並將舊的屬性複製，預設值
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .invalidSessionUrl("/timeout") // Session過期時的URL導向
+                .maximumSessions(1) // 設定Session數只能一個
+                .expiredUrl("/timeout"); // 設定因為再次登入而導致的URL過期的URL導向
     }
 }
