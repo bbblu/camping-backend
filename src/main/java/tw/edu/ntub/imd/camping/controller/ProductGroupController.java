@@ -21,10 +21,10 @@ import javax.validation.constraints.Positive;
 @Tag(name = "Product", description = "商品相關API")
 @RestController
 @RequestMapping(path = "/product")
-public class ProductController {
+public class ProductGroupController {
     private final ProductService productService;
 
-    public ProductController(ProductService productService) {
+    public ProductGroupController(ProductService productService) {
         this.productService = productService;
     }
 
