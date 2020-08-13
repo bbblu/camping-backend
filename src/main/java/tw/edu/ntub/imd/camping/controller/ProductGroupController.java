@@ -1,6 +1,7 @@
 package tw.edu.ntub.imd.camping.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.imd.camping.bean.ProductGroupBean;
+import tw.edu.ntub.imd.camping.bean.ProductTypeBean;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
@@ -53,6 +55,31 @@ public class ProductGroupController {
         BindingResultUtils.validate(bindingResult);
         productGroupService.save(productGroup);
         return ResponseEntityBuilder.success().message("上架成功").build();
+    }
+
+    @Operation(
+            tags = "Product",
+            method = "GET",
+            summary = "查詢商品類型",
+            description = "查詢商品類型",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "查詢成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = ProductTypeBean.class))
+                    )
+            )
+    )
+    @GetMapping(path = "/product/type")
+    public ResponseEntity<String> searchProductType() {
+        return ResponseEntityBuilder.success()
+                .message("查詢成功")
+                .data(productGroupService.searchAllProductType(), (objectData, productType) -> {
+                    objectData.add("id", productType.getId());
+                    objectData.add("name", productType.getName());
+                })
+                .build();
     }
 
     @Operation(

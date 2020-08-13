@@ -5,10 +5,8 @@ import tw.edu.ntub.birc.common.util.CollectionUtils;
 import tw.edu.ntub.imd.camping.bean.ProductBean;
 import tw.edu.ntub.imd.camping.bean.ProductGroupBean;
 import tw.edu.ntub.imd.camping.bean.ProductImageBean;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.ProductDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.ProductGroupDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.ProductImageDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.ProductRelatedLinkDAO;
+import tw.edu.ntub.imd.camping.bean.ProductTypeBean;
+import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductImage;
@@ -19,6 +17,7 @@ import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.service.transformer.ProductGroupTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.ProductImageTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.ProductTransformer;
+import tw.edu.ntub.imd.camping.service.transformer.ProductTypeTransformer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +31,8 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     private final ProductGroupTransformer transformer;
     private final ProductDAO productDAO;
     private final ProductTransformer productTransformer;
+    private final ProductTypeDAO typeDAO;
+    private final ProductTypeTransformer typeTransformer;
     private final ProductImageDAO imageDAO;
     private final ProductImageTransformer imageTransformer;
     private final ProductRelatedLinkDAO relatedLinkDAO;
@@ -42,6 +43,8 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             ProductGroupTransformer transformer,
             ProductDAO productDAO,
             ProductTransformer productTransformer,
+            ProductTypeDAO typeDAO,
+            ProductTypeTransformer typeTransformer,
             ProductImageDAO imageDAO,
             ProductImageTransformer imageTransformer,
             ProductRelatedLinkDAO relatedLinkDAO
@@ -52,6 +55,8 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         this.transformer = transformer;
         this.productDAO = productDAO;
         this.productTransformer = productTransformer;
+        this.typeDAO = typeDAO;
+        this.typeTransformer = typeTransformer;
         this.imageDAO = imageDAO;
         this.imageTransformer = imageTransformer;
         this.relatedLinkDAO = relatedLinkDAO;
@@ -134,6 +139,11 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         relatedLinkDAO.updateEnableByProductIdList(productIdList, false);
         productDAO.updateEnableByGroupId(id, false);
         groupDAO.updateEnableById(id, false);
+    }
+
+    @Override
+    public List<ProductTypeBean> searchAllProductType() {
+        return typeTransformer.transferToBeanList(typeDAO.findByEnableIsTrue());
     }
 
     @Override
