@@ -15,7 +15,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductImage;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductRelatedLink;
 import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
 import tw.edu.ntub.imd.camping.dto.file.uploader.UploadResult;
-import tw.edu.ntub.imd.camping.service.ProductService;
+import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.service.transformer.ProductGroupTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.ProductImageTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.ProductTransformer;
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ProductServiceImpl extends BaseServiceImpl<ProductGroupBean, ProductGroup, Integer> implements ProductService {
+public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, ProductGroup, Integer> implements ProductGroupService {
     private final MultipartFileUploader uploader;
     private final ProductGroupDAO groupDAO;
     private final ProductGroupTransformer transformer;
@@ -36,7 +36,7 @@ public class ProductServiceImpl extends BaseServiceImpl<ProductGroupBean, Produc
     private final ProductImageTransformer imageTransformer;
     private final ProductRelatedLinkDAO relatedLinkDAO;
 
-    public ProductServiceImpl(
+    public ProductGroupServiceImpl(
             MultipartFileUploader uploader,
             ProductGroupDAO groupDAO,
             ProductGroupTransformer transformer,

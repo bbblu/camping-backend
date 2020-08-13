@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.imd.camping.bean.ProductGroupBean;
-import tw.edu.ntub.imd.camping.service.ProductService;
+import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
 
@@ -22,10 +22,10 @@ import javax.validation.constraints.Positive;
 @RestController
 @RequestMapping(path = "/product-group")
 public class ProductGroupController {
-    private final ProductService productService;
+    private final ProductGroupService productGroupService;
 
-    public ProductGroupController(ProductService productService) {
-        this.productService = productService;
+    public ProductGroupController(ProductGroupService productGroupService) {
+        this.productGroupService = productGroupService;
     }
 
     @Operation(
@@ -51,7 +51,7 @@ public class ProductGroupController {
     @PostMapping(path = "")
     public ResponseEntity<String> create(@Valid ProductGroupBean productGroup, BindingResult bindingResult) {
         BindingResultUtils.validate(bindingResult);
-        productService.save(productGroup);
+        productGroupService.save(productGroup);
         return ResponseEntityBuilder.success().message("上架成功").build();
     }
 
@@ -70,13 +70,13 @@ public class ProductGroupController {
     )
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<String> delete(@PathVariable(name = "id") @Positive(message = "編號 - 應為大於0的數字") Integer id) {
-        productService.delete(id);
+        productGroupService.delete(id);
         return ResponseEntityBuilder.success().message("刪除成功").build();
     }
 
     @DeleteMapping(path = "/product/{productId}")
     public ResponseEntity<String> deleteProduct(@PathVariable(name = "productId") @Positive(message = "編號 - 應為大於0的數字") Integer productId) {
-        productService.deleteProduct(productId);
+        productGroupService.deleteProduct(productId);
         return ResponseEntityBuilder.success().message("刪除成功").build();
     }
 }
