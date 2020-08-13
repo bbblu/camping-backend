@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface ProductDAO extends BaseDAO<Product, Integer> {
-    List<Product> findByGroupId(Integer id);
+    List<Product> findByGroupId(Integer groupId);
 }

@@ -8,4 +8,6 @@ import java.util.List;
 @Repository
 public interface ProductImageDAO extends BaseDAO<ProductImage, Integer> {
     List<ProductImage> findByProductId(int productId);
+
+    void deleteByProductIdIn(List<Integer> productIdList);
 }
