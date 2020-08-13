@@ -129,9 +129,9 @@ public class ProductServiceImpl extends BaseServiceImpl<ProductGroupBean, Produc
     public void delete(Integer id) {
         List<Product> productList = productDAO.findByGroupId(id);
         List<Integer> productIdList = productList.stream().map(Product::getId).collect(Collectors.toList());
-        imageDAO.deleteByProductIdIn(productIdList);
-        relatedLinkDAO.deleteByProductIdIn(productIdList);
-        productDAO.deleteAll(productList);
-        super.delete(id);
+        imageDAO.updateEnableByProductIdList(productIdList, false);
+        relatedLinkDAO.updateEnableByProductIdList(productIdList, false);
+        productDAO.updateEnableByGroupId(id, false);
+        groupDAO.updateEnableById(id, false);
     }
 }
