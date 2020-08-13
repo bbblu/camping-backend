@@ -125,7 +125,7 @@ public class SwaggerConfig {
     public GroupedOpenApi productApi(@Qualifier("defaultOpenApiCustomiser") OpenApiCustomiser openApiCustomiser) {
         return GroupedOpenApi.builder()
                 .setGroup("商品 - Product")
-                .pathsToMatch("/product/**")
+                .pathsToMatch("/product-group/**")
                 .addOpenApiCustomiser(openApiCustomiser)
                 .build();
     }

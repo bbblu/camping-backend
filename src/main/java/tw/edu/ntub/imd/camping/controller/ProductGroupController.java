@@ -20,7 +20,7 @@ import javax.validation.constraints.Positive;
 
 @Tag(name = "Product", description = "商品相關API")
 @RestController
-@RequestMapping(path = "/product")
+@RequestMapping(path = "/product-group")
 public class ProductGroupController {
     private final ProductService productService;
 
