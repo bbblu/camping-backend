@@ -74,6 +74,19 @@ public class ProductGroupController {
         return ResponseEntityBuilder.success().message("刪除成功").build();
     }
 
+    @Operation(
+            tags = "Product",
+            method = "DELETE",
+            summary = "刪除商品",
+            description = "刪除商品",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "刪除成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    )
+            )
+    )
     @DeleteMapping(path = "/product/{productId}")
     public ResponseEntity<String> deleteProduct(@PathVariable(name = "productId") @Positive(message = "編號 - 應為大於0的數字") Integer productId) {
         productGroupService.deleteProduct(productId);
