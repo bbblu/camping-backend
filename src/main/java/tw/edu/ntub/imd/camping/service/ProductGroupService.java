@@ -4,4 +4,8 @@ import tw.edu.ntub.imd.camping.bean.ProductGroupBean;
 
 public interface ProductGroupService extends BaseService<ProductGroupBean, Integer> {
     void deleteProduct(Integer productId);
+
+    void deleteProductImage(Integer productImageId);
+
+    void deleteProductRelatedLink(Integer productRelatedLinkId);
 }

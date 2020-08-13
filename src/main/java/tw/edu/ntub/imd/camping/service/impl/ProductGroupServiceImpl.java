@@ -142,4 +142,14 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         imageDAO.updateEnableByProductIdList(Collections.singletonList(productId), false);
         relatedLinkDAO.updateEnableByProductIdList(Collections.singletonList(productId), false);
     }
+
+    @Override
+    public void deleteProductImage(Integer productImageId) {
+        imageDAO.updateEnableById(Collections.singletonList(productImageId), false);
+    }
+
+    @Override
+    public void deleteProductRelatedLink(Integer productRelatedLinkId) {
+        relatedLinkDAO.updateEnableById(Collections.singletonList(productRelatedLinkId), false);
+    }
 }

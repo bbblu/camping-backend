@@ -92,4 +92,42 @@ public class ProductGroupController {
         productGroupService.deleteProduct(productId);
         return ResponseEntityBuilder.success().message("刪除成功").build();
     }
+
+    @Operation(
+            tags = "Product",
+            method = "DELETE",
+            summary = "刪除商品圖片",
+            description = "刪除商品圖片",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "刪除成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    )
+            )
+    )
+    @DeleteMapping(path = "/product/image/{imageId}")
+    public ResponseEntity<String> deleteProductImage(@PathVariable(name = "imageId") @Positive(message = "編號 - 應為大於0的數字") Integer imageId) {
+        productGroupService.deleteProductImage(imageId);
+        return ResponseEntityBuilder.success().message("刪除成功").build();
+    }
+
+    @Operation(
+            tags = "Product",
+            method = "DELETE",
+            summary = "刪除商品相關連結",
+            description = "刪除商品相關連結",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "刪除成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    )
+            )
+    )
+    @DeleteMapping(path = "/product/related-link/{relatedLinkId}")
+    public ResponseEntity<String> deleteProductRelatedLink(@PathVariable(name = "relatedLinkId") @Positive(message = "編號 - 應為大於0的數字") Integer relatedLinkId) {
+        productGroupService.deleteProductRelatedLink(relatedLinkId);
+        return ResponseEntityBuilder.success().message("刪除成功").build();
+    }
 }

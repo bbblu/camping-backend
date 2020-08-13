@@ -17,4 +17,8 @@ public interface ProductRelatedLinkDAO extends BaseDAO<ProductRelatedLink, Integ
     @Modifying
     @Query("UPDATE ProductRelatedLink p SET p.enable = :enable WHERE p.productId in :productIdList")
     void updateEnableByProductIdList(@Param("productIdList") List<Integer> productIdList, @Param("enable") boolean enable);
+
+    @Modifying
+    @Query("UPDATE ProductRelatedLink p SET p.enable = :enable WHERE p.id in :id")
+    void updateEnableById(@Param("id") List<Integer> id, @Param("enable") boolean enable);
 }
