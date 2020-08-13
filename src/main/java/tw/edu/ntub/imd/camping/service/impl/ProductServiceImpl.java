@@ -124,4 +124,14 @@ public class ProductServiceImpl extends BaseServiceImpl<ProductGroupBean, Produc
                         .collect(Collectors.toList())
         );
     }
+
+    @Override
+    public void delete(Integer id) {
+        List<Product> productList = productDAO.findByGroupId(id);
+        List<Integer> productIdList = productList.stream().map(Product::getId).collect(Collectors.toList());
+        imageDAO.deleteByProductIdIn(productIdList);
+        relatedLinkDAO.deleteByProductIdIn(productIdList);
+        productDAO.deleteAll(productList);
+        super.delete(id);
+    }
 }
