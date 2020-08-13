@@ -34,5 +34,5 @@ public class City implements Serializable {
      */
     @Id
     @Column(name = "area_name", length = 20, nullable = false)
-    private String area_name;
+    private String areaName;
 }

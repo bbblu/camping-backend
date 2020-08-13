@@ -5,42 +5,46 @@ import tw.edu.ntub.birc.common.util.CollectionUtils;
 import tw.edu.ntub.imd.camping.bean.ProductBean;
 import tw.edu.ntub.imd.camping.bean.ProductGroupBean;
 import tw.edu.ntub.imd.camping.bean.ProductImageBean;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.ProductDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.ProductGroupDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.ProductImageDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.ProductRelatedLinkDAO;
+import tw.edu.ntub.imd.camping.bean.ProductTypeBean;
+import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductImage;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductRelatedLink;
 import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
 import tw.edu.ntub.imd.camping.dto.file.uploader.UploadResult;
-import tw.edu.ntub.imd.camping.service.ProductService;
+import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.service.transformer.ProductGroupTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.ProductImageTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.ProductTransformer;
+import tw.edu.ntub.imd.camping.service.transformer.ProductTypeTransformer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ProductServiceImpl extends BaseServiceImpl<ProductGroupBean, ProductGroup, Integer> implements ProductService {
+public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, ProductGroup, Integer> implements ProductGroupService {
     private final MultipartFileUploader uploader;
     private final ProductGroupDAO groupDAO;
     private final ProductGroupTransformer transformer;
     private final ProductDAO productDAO;
     private final ProductTransformer productTransformer;
+    private final ProductTypeDAO typeDAO;
+    private final ProductTypeTransformer typeTransformer;
     private final ProductImageDAO imageDAO;
     private final ProductImageTransformer imageTransformer;
     private final ProductRelatedLinkDAO relatedLinkDAO;
 
-    public ProductServiceImpl(
+    public ProductGroupServiceImpl(
             MultipartFileUploader uploader,
             ProductGroupDAO groupDAO,
             ProductGroupTransformer transformer,
             ProductDAO productDAO,
             ProductTransformer productTransformer,
+            ProductTypeDAO typeDAO,
+            ProductTypeTransformer typeTransformer,
             ProductImageDAO imageDAO,
             ProductImageTransformer imageTransformer,
             ProductRelatedLinkDAO relatedLinkDAO
@@ -51,6 +55,8 @@ public class ProductServiceImpl extends BaseServiceImpl<ProductGroupBean, Produc
         this.transformer = transformer;
         this.productDAO = productDAO;
         this.productTransformer = productTransformer;
+        this.typeDAO = typeDAO;
+        this.typeTransformer = typeTransformer;
         this.imageDAO = imageDAO;
         this.imageTransformer = imageTransformer;
         this.relatedLinkDAO = relatedLinkDAO;
@@ -129,9 +135,31 @@ public class ProductServiceImpl extends BaseServiceImpl<ProductGroupBean, Produc
     public void delete(Integer id) {
         List<Product> productList = productDAO.findByGroupId(id);
         List<Integer> productIdList = productList.stream().map(Product::getId).collect(Collectors.toList());
-        imageDAO.deleteByProductIdIn(productIdList);
-        relatedLinkDAO.deleteByProductIdIn(productIdList);
-        productDAO.deleteAll(productList);
-        super.delete(id);
+        imageDAO.updateEnableByProductIdList(productIdList, false);
+        relatedLinkDAO.updateEnableByProductIdList(productIdList, false);
+        productDAO.updateEnableByGroupId(id, false);
+        groupDAO.updateEnableById(id, false);
+    }
+
+    @Override
+    public List<ProductTypeBean> searchAllProductType() {
+        return typeTransformer.transferToBeanList(typeDAO.findByEnableIsTrue());
+    }
+
+    @Override
+    public void deleteProduct(Integer productId) {
+        productDAO.updateEnableById(productId, false);
+        imageDAO.updateEnableByProductIdList(Collections.singletonList(productId), false);
+        relatedLinkDAO.updateEnableByProductIdList(Collections.singletonList(productId), false);
+    }
+
+    @Override
+    public void deleteProductImage(Integer productImageId) {
+        imageDAO.updateEnableById(Collections.singletonList(productImageId), false);
+    }
+
+    @Override
+    public void deleteProductRelatedLink(Integer productRelatedLinkId) {
+        relatedLinkDAO.updateEnableById(Collections.singletonList(productRelatedLinkId), false);
     }
 }

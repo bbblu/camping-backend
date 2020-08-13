@@ -61,6 +61,24 @@ public class ProductGroup {
     private String coverImage;
 
     /**
+     * 城市名稱，如臺北市、宜蘭縣
+     *
+     * @see City#name
+     * @since 1.3.2
+     */
+    @Column(name = "city_name", length = 20, nullable = false)
+    private String cityName;
+
+    /**
+     * 區名稱，如中正區、宜蘭市
+     *
+     * @see City#areaName
+     * @since 1.3.2
+     */
+    @Column(name = "city_area_name", length = 20, nullable = false)
+    private String cityAreaName;
+
+    /**
      * 租借價格
      *
      * @since 1.0.0
@@ -123,6 +141,19 @@ public class ProductGroup {
      */
     @Column(name = "last_modify_date", nullable = false)
     private LocalDateTime lastModifyDate;
+
+    /**
+     * 可租借城市
+     *
+     * @see City
+     * @since 1.3.2
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "city_name", referencedColumnName = "name", nullable = false, insertable = false, updatable = false),
+            @JoinColumn(name = "city_area_name", referencedColumnName = "area_name", nullable = false, insertable = false, updatable = false)
+    })
+    private City city;
 
     /**
      * 聯絡方式
