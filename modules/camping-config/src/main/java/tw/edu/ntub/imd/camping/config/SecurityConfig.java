@@ -130,6 +130,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private void configRequestAuthorize(HttpSecurity http) throws Exception {
         http.authorizeRequests() // 設定Requests的權限需求
                 .antMatchers(HttpMethod.POST, "/user/contact-information").authenticated()
+                .antMatchers(HttpMethod.POST, "/product").authenticated()
                 .anyRequest() // 表示除了上述請求，都不用登入即可使用
                 .permitAll();
     }

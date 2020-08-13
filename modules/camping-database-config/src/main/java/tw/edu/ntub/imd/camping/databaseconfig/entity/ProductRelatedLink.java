@@ -1,9 +1,6 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ProductRelatedLinkListener;
 
@@ -15,6 +12,7 @@ import java.time.LocalDateTime;
  *
  * @since 1.0.0
  */
+@NoArgsConstructor
 @Data
 @EqualsAndHashCode(exclude = "productByProductId")
 @Entity
@@ -81,6 +79,10 @@ public class ProductRelatedLink {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
     private Product productByProductId;
+
+    public ProductRelatedLink(String url) {
+        this.url = url;
+    }
 
     /**
      * 是否啟用(0: 否/ 1: 是)

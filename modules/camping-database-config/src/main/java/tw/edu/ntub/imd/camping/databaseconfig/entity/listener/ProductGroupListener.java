@@ -14,8 +14,14 @@ public class ProductGroupListener {
         if (productGroup.isEnable() == null) {
             productGroup.setEnable(true);
         }
+        if (productGroup.getCreateAccount() == null) {
+            productGroup.setCreateAccount(SecurityUtils.getLoginUserAccount());
+        }
         if (productGroup.getCreateDate() == null) {
             productGroup.setCreateDate(LocalDateTime.now());
+        }
+        if (productGroup.getLastModifyAccount() == null) {
+            productGroup.setLastModifyAccount(SecurityUtils.getLoginUserAccount());
         }
         if (productGroup.getLastModifyDate() == null) {
             productGroup.setLastModifyDate(LocalDateTime.now());

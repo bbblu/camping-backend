@@ -14,6 +14,9 @@ public class ProductListener {
         if (product.isEnable() == null) {
             product.setEnable(true);
         }
+        if (product.getLastModifyAccount() == null) {
+            product.setLastModifyAccount(SecurityUtils.getLoginUserAccount());
+        }
         if (product.getLastModifyDate() == null) {
             product.setLastModifyDate(LocalDateTime.now());
         }

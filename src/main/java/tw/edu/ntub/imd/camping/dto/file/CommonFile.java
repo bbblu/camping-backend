@@ -1,5 +1,6 @@
 package tw.edu.ntub.imd.camping.dto.file;
 
+import tw.edu.ntub.imd.camping.exception.file.FileExtensionNotFoundException;
 import tw.edu.ntub.imd.camping.util.file.FileUtils;
 
 import javax.annotation.Nonnull;
@@ -20,7 +21,13 @@ public class CommonFile implements File {
     public CommonFile(@Nonnull Path path) {
         Path fileNamePath = path.getFileName();
         this.name = fileNamePath.toString();
-        this.extension = FileUtils.getFileExtension(name);
+        String tempExtension;
+        try {
+            tempExtension = FileUtils.getFileExtension(name);
+        } catch (FileExtensionNotFoundException e) {
+            tempExtension = "";
+        }
+        this.extension = tempExtension;
         this.path = path;
     }
 
