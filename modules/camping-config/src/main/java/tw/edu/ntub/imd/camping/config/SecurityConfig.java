@@ -97,6 +97,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(new CustomLoginFilter(authenticationManager(), new CustomAuthenticationSuccessHandler(jwtUtils)), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests() // 設定Requests的權限需求
                 .antMatchers(HttpMethod.POST, "/user/contact-information").authenticated()
+                .antMatchers(HttpMethod.POST, "/product").authenticated()
                 .anyRequest() // 表示除了上述請求，都需要權限
                 .permitAll()
                 .and()

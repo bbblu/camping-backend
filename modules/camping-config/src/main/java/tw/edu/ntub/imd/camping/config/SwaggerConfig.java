@@ -120,4 +120,13 @@ public class SwaggerConfig {
             openApiCustomiser.customise(openApi);
         };
     }
+
+    @Bean
+    public GroupedOpenApi productApi(@Qualifier("defaultOpenApiCustomiser") OpenApiCustomiser openApiCustomiser) {
+        return GroupedOpenApi.builder()
+                .setGroup("商品 - Product")
+                .pathsToMatch("/product/**")
+                .addOpenApiCustomiser(openApiCustomiser)
+                .build();
+    }
 }

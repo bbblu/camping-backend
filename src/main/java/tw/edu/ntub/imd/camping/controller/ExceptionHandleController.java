@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.InvalidPropertyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,6 +17,7 @@ import tw.edu.ntub.birc.common.exception.ProjectException;
 import tw.edu.ntub.birc.common.exception.UnknownException;
 import tw.edu.ntub.birc.common.exception.date.ParseDateException;
 import tw.edu.ntub.birc.common.util.ClassUtils;
+import tw.edu.ntub.imd.camping.exception.ConvertPropertyException;
 import tw.edu.ntub.imd.camping.exception.MethodNotSupportedException;
 import tw.edu.ntub.imd.camping.exception.NullRequestBodyException;
 import tw.edu.ntub.imd.camping.exception.file.FileNotExistException;
@@ -108,6 +110,11 @@ public class ExceptionHandleController {
                 request.getMethod(),
                 e
         )).build();
+    }
+
+    @ExceptionHandler(InvalidPropertyException.class)
+    public ResponseEntity<String> handleInvalidPropertyException(InvalidPropertyException e) {
+        return ResponseEntityBuilder.error(new ConvertPropertyException(e)).build();
     }
 
     @ExceptionHandler(Exception.class)
