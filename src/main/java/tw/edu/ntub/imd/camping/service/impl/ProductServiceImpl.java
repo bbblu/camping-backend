@@ -21,6 +21,7 @@ import tw.edu.ntub.imd.camping.service.transformer.ProductImageTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.ProductTransformer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -133,5 +134,12 @@ public class ProductServiceImpl extends BaseServiceImpl<ProductGroupBean, Produc
         relatedLinkDAO.updateEnableByProductIdList(productIdList, false);
         productDAO.updateEnableByGroupId(id, false);
         groupDAO.updateEnableById(id, false);
+    }
+
+    @Override
+    public void deleteProduct(Integer productId) {
+        productDAO.updateEnableById(productId, false);
+        imageDAO.updateEnableByProductIdList(Collections.singletonList(productId), false);
+        relatedLinkDAO.updateEnableByProductIdList(Collections.singletonList(productId), false);
     }
 }

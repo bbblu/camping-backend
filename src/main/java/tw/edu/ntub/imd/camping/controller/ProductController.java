@@ -73,4 +73,10 @@ public class ProductController {
         productService.delete(id);
         return ResponseEntityBuilder.success().message("刪除成功").build();
     }
+
+    @DeleteMapping(path = "/product/{productId}")
+    public ResponseEntity<String> deleteProduct(@PathVariable(name = "productId") @Positive(message = "編號 - 應為大於0的數字") Integer productId) {
+        productService.deleteProduct(productId);
+        return ResponseEntityBuilder.success().message("刪除成功").build();
+    }
 }
