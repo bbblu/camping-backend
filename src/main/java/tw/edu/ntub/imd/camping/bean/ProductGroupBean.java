@@ -36,6 +36,16 @@ public class ProductGroupBean {
     @URL(message = "封面圖連結 - 請輸入網址連結")
     private String coverImageUrl;
 
+    @Schema(description = "城市名稱，如臺北市、宜蘭縣", example = "臺北市")
+    @NotBlank(message = "城市名稱 - 未填寫")
+    @Size(max = 20, message = "城市名稱 - 輸入字數大於{max}個字")
+    private String cityName;
+
+    @Schema(description = "區名稱，如中正區、宜蘭市", example = "中正區")
+    @NotBlank(message = "區名稱 - 未填寫")
+    @Size(max = 20, message = "區名稱 - 輸入字數大於{max}個字")
+    private String cityAreaName;
+
     @Schema(description = "價格", example = "3990")
     @NotNull(message = "價格 - 未填寫")
     @PositiveOrZero(message = "價格 - 應為大於等於0的數字")
