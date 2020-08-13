@@ -151,7 +151,7 @@ public class ProductGroup {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
             @JoinColumn(name = "city_name", referencedColumnName = "name", nullable = false, insertable = false, updatable = false),
-            @JoinColumn(name = "city_area_name", referencedColumnName = "city_area_name", nullable = false, insertable = false, updatable = false)
+            @JoinColumn(name = "city_area_name", referencedColumnName = "area_name", nullable = false, insertable = false, updatable = false)
     })
     private City city;
 
