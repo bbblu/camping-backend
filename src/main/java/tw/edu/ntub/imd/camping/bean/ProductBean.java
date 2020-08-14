@@ -18,7 +18,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class ProductBean {
     @Hidden
-    private Integer Id;
+    private Integer id;
 
     @Hidden
     private Integer groupId;
