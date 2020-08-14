@@ -1,5 +1,6 @@
 package tw.edu.ntub.imd.camping.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -9,15 +10,13 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
-import tw.edu.ntub.imd.camping.bean.CanBorrowProductGroupBean;
-import tw.edu.ntub.imd.camping.bean.ProductGroupBean;
-import tw.edu.ntub.imd.camping.bean.ProductGroupFilterDataBean;
-import tw.edu.ntub.imd.camping.bean.ProductTypeBean;
+import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.service.CityService;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
@@ -29,8 +28,11 @@ import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.text.DecimalFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Tag(name = "Product", description = "商品相關API")
 @RestController
@@ -179,6 +181,79 @@ public class ProductGroupController {
 
     @Operation(
             tags = "Product",
+            method = "GET",
+            summary = "查詢商品群組",
+            description = "查詢商品群組",
+            parameters = @Parameter(name = "id", description = "商品群組編號", example = "1"),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "查詢成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ProductGroupContentSchema.class)
+                    )
+            )
+    )
+    @GetMapping(path = "/{id}")
+    public ResponseEntity<String> getGroupContent(
+            @PathVariable(name = "id")
+            @Positive(message = "群組編號不能為負數")
+                    int id
+    ) {
+        Optional<ProductGroupBean> optionalGroup = productGroupService.getById(id);
+        if (optionalGroup.isPresent()) {
+            ProductGroupBean productGroupBean = optionalGroup.get();
+            ObjectData data = new ObjectData();
+            data.add("name", productGroupBean.getName());
+            data.add("city", String.format("%s %s", productGroupBean.getCityName(), productGroupBean.getCityAreaName()));
+            data.add("price", priceFormat.format(productGroupBean.getPrice()));
+            data.add("borrowDateRange", String.format(
+                    "%s ~ %s",
+                    productGroupBean.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
+                    productGroupBean.getBorrowEndDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm"))
+            ));
+            ContactInformationBean contactInformation = productGroupBean.getContactInformation();
+            data.add("contactInformation", contactInformation.getContent());
+
+            CollectionObjectData collectionData = data.createCollectionData();
+            collectionData.add("productArray", productGroupBean.getProductArray(), (productData, productBean) -> {
+                productData.add("id", productBean.getId());
+                productData.add("type", productBean.getTypeName());
+                productData.add("count", productBean.getCount());
+                productData.add("brand", productBean.getBrand());
+                productData.add("useInformation", productBean.getUseInformation());
+                productData.add("brokenCompensation", productBean.getBrokenCompensation());
+                productData.add("memo", productBean.getMemo());
+                if (CollectionUtils.isNotEmpty(productBean.getImageArray())) {
+                    productData.addStringArray("imageArray", productBean.getImageArray()
+                            .stream()
+                            .map(ProductImageBean::getUrl)
+                            .collect(Collectors.toList())
+                    );
+                } else {
+                    productData.addStringArray("imageArray", new String[0]);
+                }
+                if (CollectionUtils.isNotEmpty(productBean.getRelatedLinkList())) {
+                    productData.addStringArray("relatedLinkArray", productBean.getRelatedLinkList()
+                            .stream()
+                            .map(ProductRelatedLinkBean::getUrl)
+                            .collect(Collectors.toList())
+                    );
+                } else {
+                    productData.addStringArray("relatedLinkArray", new String[0]);
+                }
+            });
+            return ResponseEntityBuilder.success()
+                    .message("查詢成功")
+                    .data(data)
+                    .build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @Operation(
+            tags = "Product",
             method = "DELETE",
             summary = "刪除商品群組",
             description = "刪除商品群組",
@@ -260,5 +335,45 @@ public class ProductGroupController {
         private ProductTypeBean[] type;
         @Schema(description = "地點")
         private CityController.SearchCitySchema city;
+    }
+
+    @Schema(name = "商品群組內容", description = "商品群組內容")
+    @Data
+    private static class ProductGroupContentSchema {
+        @Schema(description = "商品群組名稱", example = "便宜帳篷、桌椅三件套，限時特價$3990")
+        private String name;
+        @Schema(description = "城市", example = "台北市 中正區")
+        private String city;
+        @Schema(description = "租借價格", minimum = "0", example = "$ 3,990")
+        private String price;
+        @Schema(description = "可租借時間範圍", example = "2020/08/14 15:00 ~ 2020/08/20 00:00")
+        private String borrowDateRange;
+        @Schema(description = "聯絡方式", example = "Email: 10646007@ntub.edu.tw")
+        private String contactInformation;
+        @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(description = "商品陣列"))
+        private ProductContentSchema productArray;
+
+        @Hidden
+        @Data
+        private static class ProductContentSchema {
+            @Schema(description = "商品編號", minimum = "1", example = "6")
+            private Integer id;
+            @Schema(description = "商品類型", example = "睡帳")
+            private String type;
+            @Schema(description = "商品數量", example = "2")
+            private Integer count;
+            @Schema(description = "商品品牌", example = "OO")
+            private String brand;
+            @Schema(description = "使用說明", example = "內附搭帳棚說明書")
+            private String useInformation;
+            @Schema(description = "損壞賠償", example = "缺少零件：1/$200、布劃破：$1000")
+            private String brokenCompensation;
+            @Schema(description = "備註", nullable = true, example = "附有教學影片，若在搭設過程有疑問，都可以聯絡我")
+            private String memo;
+            @ArraySchema(minItems = 0, schema = @Schema(description = "商品圖片陣列", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png"))
+            private String[] imageArray;
+            @ArraySchema(minItems = 0, schema = @Schema(description = "商品相關連結陣列", example = "https://www.fooish.com/jquery/"))
+            private String[] relatedLinkArray;
+        }
     }
 }
