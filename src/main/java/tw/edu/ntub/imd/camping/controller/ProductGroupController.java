@@ -257,6 +257,7 @@ public class ProductGroupController {
             method = "DELETE",
             summary = "刪除商品群組",
             description = "刪除商品群組",
+            parameters = @Parameter(name = "id", description = "商品群組編號", example = "1"),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "刪除成功",
@@ -276,6 +277,7 @@ public class ProductGroupController {
             method = "DELETE",
             summary = "刪除商品",
             description = "刪除商品",
+            parameters = @Parameter(name = "productId", description = "商品編號", example = "1"),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "刪除成功",
@@ -295,6 +297,7 @@ public class ProductGroupController {
             method = "DELETE",
             summary = "刪除商品圖片",
             description = "刪除商品圖片",
+            parameters = @Parameter(name = "imageId", description = "商品圖片編號", example = "1"),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "刪除成功",
@@ -314,6 +317,7 @@ public class ProductGroupController {
             method = "DELETE",
             summary = "刪除商品相關連結",
             description = "刪除商品相關連結",
+            parameters = @Parameter(name = "relatedLinkId", description = "商品相關連結編號", example = "1"),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "刪除成功",
