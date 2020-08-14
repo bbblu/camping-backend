@@ -62,12 +62,43 @@ public class CanBorrowProductGroup {
     private LocalDateTime borrowEndDate;
 
     /**
+     * 城市名稱 + ' ' + 區域名稱
+     *
+     * @see tw.edu.ntub.imd.camping.databaseconfig.entity.City#name
+     * @see tw.edu.ntub.imd.camping.databaseconfig.entity.City#areaName
+     * @since 1.3.3
+     */
+    @Column(name = "city", length = 41, nullable = false)
+    private String city;
+
+    /**
+     * 城市名稱，如臺北市、宜蘭縣
+     *
+     * @see tw.edu.ntub.imd.camping.databaseconfig.entity.City#name
+     * @since 1.3.3
+     */
+    @Column(name = "city_name", length = 20, nullable = false)
+    private String cityName;
+
+    /**
+     * 區名稱，如中正區、宜蘭市
+     *
+     * @see tw.edu.ntub.imd.camping.databaseconfig.entity.City#areaName
+     * @since 1.3.3
+     */
+    @Column(name = "city_area_name", length = 20, nullable = false)
+    private String cityAreaName;
+
+    /**
      * 使用者名稱，格式為：暱稱(帳號)
      *
      * @since 1.0.0
      */
     @Column(name = "user_name", length = 152, nullable = false)
     private String userName;
+
+    @Column(name = "product_type")
+    private String productTypeArray;
 
     /**
      * 商品群組

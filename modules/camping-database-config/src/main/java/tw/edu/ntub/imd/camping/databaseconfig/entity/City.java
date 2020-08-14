@@ -1,11 +1,12 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
 /**
  * 可租借城市
@@ -16,8 +17,8 @@ import java.io.Serializable;
 @EqualsAndHashCode
 @Entity
 @Table(name = "city", schema = Config.DATABASE_NAME)
-@IdClass(City.class)
-public class City implements Serializable {
+@IdClass(CityId.class)
+public class City {
     /**
      * 城市名稱，如臺北市、宜蘭縣
      *
@@ -35,4 +36,22 @@ public class City implements Serializable {
     @Id
     @Column(name = "area_name", length = 20, nullable = false)
     private String areaName;
+
+    /**
+     * 是否啟用(0: 不啟用/ 1: 啟用)
+     *
+     * @since 1.3.3
+     */
+    @Getter(AccessLevel.NONE)
+    @Column(name = "enable", nullable = false)
+    private Boolean enable;
+
+    /**
+     * 是否啟用(0: 不啟用/ 1: 啟用)
+     *
+     * @since 1.3.3
+     */
+    public Boolean isEnable() {
+        return enable;
+    }
 }

@@ -2,26 +2,22 @@ package tw.edu.ntub.imd.camping.service.impl;
 
 import org.springframework.stereotype.Service;
 import tw.edu.ntub.birc.common.util.CollectionUtils;
-import tw.edu.ntub.imd.camping.bean.ProductBean;
-import tw.edu.ntub.imd.camping.bean.ProductGroupBean;
-import tw.edu.ntub.imd.camping.bean.ProductImageBean;
-import tw.edu.ntub.imd.camping.bean.ProductTypeBean;
+import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductImage;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductRelatedLink;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.view.CanBorrowProductGroup;
 import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
 import tw.edu.ntub.imd.camping.dto.file.uploader.UploadResult;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
-import tw.edu.ntub.imd.camping.service.transformer.ProductGroupTransformer;
-import tw.edu.ntub.imd.camping.service.transformer.ProductImageTransformer;
-import tw.edu.ntub.imd.camping.service.transformer.ProductTransformer;
-import tw.edu.ntub.imd.camping.service.transformer.ProductTypeTransformer;
+import tw.edu.ntub.imd.camping.service.transformer.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +32,8 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     private final ProductImageDAO imageDAO;
     private final ProductImageTransformer imageTransformer;
     private final ProductRelatedLinkDAO relatedLinkDAO;
+    private final CanBorrowProductGroupDAO canBorrowProductGroupDAO;
+    private final CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer;
 
     public ProductGroupServiceImpl(
             MultipartFileUploader uploader,
@@ -47,7 +45,9 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             ProductTypeTransformer typeTransformer,
             ProductImageDAO imageDAO,
             ProductImageTransformer imageTransformer,
-            ProductRelatedLinkDAO relatedLinkDAO
+            ProductRelatedLinkDAO relatedLinkDAO,
+            CanBorrowProductGroupDAO canBorrowProductGroupDAO,
+            CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer
     ) {
         super(groupDAO, transformer);
         this.uploader = uploader;
@@ -60,6 +60,8 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         this.imageDAO = imageDAO;
         this.imageTransformer = imageTransformer;
         this.relatedLinkDAO = relatedLinkDAO;
+        this.canBorrowProductGroupDAO = canBorrowProductGroupDAO;
+        this.canBorrowProductGroupBeanTransformer = canBorrowProductGroupBeanTransformer;
     }
 
     @Override
@@ -144,6 +146,25 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     @Override
     public List<ProductTypeBean> searchAllProductType() {
         return typeTransformer.transferToBeanList(typeDAO.findByEnableIsTrue());
+    }
+
+    @Override
+    public List<CanBorrowProductGroupBean> searchCanBorrowProductGroup(ProductGroupFilterDataBean filterData) {
+        return canBorrowProductGroupBeanTransformer.transferToBeanList(
+                canBorrowProductGroupDAO.findAll()
+                        .stream()
+                        .filter(filterCanBorrowProductGroup(filterData))
+                        .collect(Collectors.toList())
+        );
+    }
+
+    private Predicate<CanBorrowProductGroup> filterCanBorrowProductGroup(ProductGroupFilterDataBean filterData) {
+        return canBorrowProductGroup ->
+                filterData.isBorrowStartDateNullOrBefore(canBorrowProductGroup.getBorrowStartDate().toLocalDate()) &&
+                        filterData.isBorrowEndDateNullOrAfter(canBorrowProductGroup.getBorrowEndDate().toLocalDate()) &&
+                        filterData.isCityAreaNameNullOrEquals(canBorrowProductGroup.getCityAreaName()) &&
+                        filterData.isTypeArrayNullOrAllMatchContains(canBorrowProductGroup.getProductTypeArray()) &&
+                        filterData.isPriceNullOrBetween(canBorrowProductGroup.getPrice());
     }
 
     @Override

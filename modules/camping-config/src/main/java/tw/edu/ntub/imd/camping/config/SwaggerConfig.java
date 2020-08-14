@@ -129,4 +129,13 @@ public class SwaggerConfig {
                 .addOpenApiCustomiser(openApiCustomiser)
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi cityApi(@Qualifier("defaultOpenApiCustomiser") OpenApiCustomiser openApiCustomiser) {
+        return GroupedOpenApi.builder()
+                .setGroup("城市 - City")
+                .pathsToMatch("/city/**")
+                .addOpenApiCustomiser(openApiCustomiser)
+                .build();
+    }
 }

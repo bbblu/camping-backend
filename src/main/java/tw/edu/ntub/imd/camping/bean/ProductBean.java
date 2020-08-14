@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.URL;
+import tw.edu.ntub.birc.common.annotation.AliasName;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -18,7 +19,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class ProductBean {
     @Hidden
-    private Integer Id;
+    private Integer id;
 
     @Hidden
     private Integer groupId;
@@ -27,6 +28,10 @@ public class ProductBean {
     @NotNull(message = "商品類型 - 未填寫")
     @Positive(message = "商品類型 - 應為大於0的正數")
     private Integer type;
+
+    @Hidden
+    @AliasName("productTypeByType.name")
+    private String typeName;
 
     @Schema(description = "商品名稱", example = "OO牌帳篷")
     @NotBlank(message = "商品名稱 - 未填寫")
