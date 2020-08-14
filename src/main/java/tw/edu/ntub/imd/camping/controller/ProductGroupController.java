@@ -32,7 +32,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Tag(name = "Product", description = "商品相關API")
 @RestController
@@ -224,21 +223,20 @@ public class ProductGroupController {
                 productData.add("useInformation", productBean.getUseInformation());
                 productData.add("brokenCompensation", productBean.getBrokenCompensation());
                 productData.add("memo", productBean.getMemo());
+                CollectionObjectData productCollectionData = productData.createCollectionData();
                 if (CollectionUtils.isNotEmpty(productBean.getImageArray())) {
-                    productData.addStringArray("imageArray", productBean.getImageArray()
-                            .stream()
-                            .map(ProductImageBean::getUrl)
-                            .collect(Collectors.toList())
-                    );
+                    productCollectionData.add("imageArray", productBean.getImageArray(), (productImageData, productImage) -> {
+                        productImageData.add("id", productImage.getId());
+                        productImageData.add("url", productImage.getUrl());
+                    });
                 } else {
                     productData.addStringArray("imageArray", new String[0]);
                 }
                 if (CollectionUtils.isNotEmpty(productBean.getRelatedLinkList())) {
-                    productData.addStringArray("relatedLinkArray", productBean.getRelatedLinkList()
-                            .stream()
-                            .map(ProductRelatedLinkBean::getUrl)
-                            .collect(Collectors.toList())
-                    );
+                    productCollectionData.add("relatedLinkArray", productBean.getRelatedLinkList(), (productRelatedLinkData, productRelatedLink) -> {
+                        productRelatedLinkData.add("id", productRelatedLink.getId());
+                        productRelatedLinkData.add("url", productRelatedLink.getUrl());
+                    });
                 } else {
                     productData.addStringArray("relatedLinkArray", new String[0]);
                 }
@@ -374,10 +372,28 @@ public class ProductGroupController {
             private String brokenCompensation;
             @Schema(description = "備註", nullable = true, example = "附有教學影片，若在搭設過程有疑問，都可以聯絡我")
             private String memo;
-            @ArraySchema(minItems = 0, schema = @Schema(description = "商品圖片陣列", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png"))
-            private String[] imageArray;
-            @ArraySchema(minItems = 0, schema = @Schema(description = "商品相關連結陣列", example = "https://www.fooish.com/jquery/"))
-            private String[] relatedLinkArray;
+            @ArraySchema(minItems = 0, schema = @Schema(description = "商品圖片陣列", implementation = ProductImageContentSchema.class))
+            private ProductImageContentSchema[] imageArray;
+            @ArraySchema(minItems = 0, schema = @Schema(description = "商品相關連結陣列", implementation = ProductRelatedLinkContentSchema.class))
+            private ProductRelatedLinkContentSchema[] relatedLinkArray;
+
+            @Hidden
+            @Data
+            private static class ProductImageContentSchema {
+                @Schema(description = "商品圖片編號", example = "1")
+                private Integer id;
+                @Schema(description = "商品圖片網址", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
+                private String url;
+            }
+
+            @Hidden
+            @Data
+            private static class ProductRelatedLinkContentSchema {
+                @Schema(description = "商品相關連結編號", example = "1")
+                private Integer id;
+                @Schema(description = "商品相關連結網址", example = "https://www.fooish.com/jquery/")
+                private String url;
+            }
         }
     }
 }
