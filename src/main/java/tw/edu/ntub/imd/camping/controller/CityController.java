@@ -58,7 +58,7 @@ public class CityController {
 
     @Schema(name = "城市及區域", description = "城市代表台北市、新北市，區域代表中正區、板橋區")
     @Data
-    private static class SearchCitySchema {
+    public static class SearchCitySchema {
         @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(description = "城市名稱陣列", example = "新北市"))
         private String[] nameArray;
         @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(description = "區域名稱陣列", type = "array", example = "三峽區(這是二維陣列)"))

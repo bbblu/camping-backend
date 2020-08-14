@@ -7,27 +7,36 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.Data;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.imd.camping.bean.ProductGroupBean;
 import tw.edu.ntub.imd.camping.bean.ProductTypeBean;
+import tw.edu.ntub.imd.camping.service.CityService;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
+import tw.edu.ntub.imd.camping.util.json.array.ArrayData;
+import tw.edu.ntub.imd.camping.util.json.object.CollectionObjectData;
+import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Product", description = "商品相關API")
 @RestController
 @RequestMapping(path = "/product-group")
 public class ProductGroupController {
     private final ProductGroupService productGroupService;
+    private final CityService cityService;
 
-    public ProductGroupController(ProductGroupService productGroupService) {
+    public ProductGroupController(ProductGroupService productGroupService, CityService cityService) {
         this.productGroupService = productGroupService;
+        this.cityService = cityService;
     }
 
     @Operation(
@@ -75,11 +84,50 @@ public class ProductGroupController {
     public ResponseEntity<String> searchProductType() {
         return ResponseEntityBuilder.success()
                 .message("查詢成功")
-                .data(productGroupService.searchAllProductType(), (objectData, productType) -> {
-                    objectData.add("id", productType.getId());
-                    objectData.add("name", productType.getName());
-                })
+                .data(productGroupService.searchAllProductType(), this::addProductTypeToObjectData)
                 .build();
+    }
+
+    private void addProductTypeToObjectData(ObjectData data, ProductTypeBean type) {
+        data.add("id", type.getId());
+        data.add("name", type.getName());
+    }
+
+    @Operation(
+            tags = "Product",
+            method = "GET",
+            summary = "查詢商品群組列表過濾器資料",
+            description = "查詢過濾器所需的地點、商品種類",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "查詢成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ProductGroupListFilterSchema.class)
+                    )
+            )
+    )
+    @GetMapping(path = "/filter")
+    public ResponseEntity<String> searchProductGroupFilter() {
+        List<ProductTypeBean> typeList = productGroupService.searchAllProductType();
+        ObjectData data = new ObjectData();
+        CollectionObjectData collectionData = data.createCollectionData();
+        collectionData.add("type", typeList, this::addProductTypeToObjectData);
+        addCityToObjectData(cityService.searchAllEnableCity(), data);
+        return ResponseEntityBuilder.success()
+                .message("查詢成功")
+                .data(data)
+                .build();
+    }
+
+    private void addCityToObjectData(Map<String, List<String>> cityMap, ObjectData data) {
+        ObjectData cityData = data.addObject("city");
+        ArrayData cityNameArray = cityData.addArray("nameArray");
+        ArrayData cityAreaNameArray = cityData.addArray("areaNameArray");
+        cityMap.forEach((name, areaNameList) -> {
+            cityNameArray.add(name);
+            cityAreaNameArray.addStringArray(areaNameList);
+        });
     }
 
     @Operation(
@@ -156,5 +204,14 @@ public class ProductGroupController {
     public ResponseEntity<String> deleteProductRelatedLink(@PathVariable(name = "relatedLinkId") @Positive(message = "編號 - 應為大於0的數字") Integer relatedLinkId) {
         productGroupService.deleteProductRelatedLink(relatedLinkId);
         return ResponseEntityBuilder.success().message("刪除成功").build();
+    }
+
+    @Schema(name = "商品群組列表過濾器資料", description = "商品群組列表過濾器資料")
+    @Data
+    private static class ProductGroupListFilterSchema {
+        @ArraySchema(minItems = 1, maxItems = 10, uniqueItems = true, schema = @Schema(description = "商品類型"))
+        private ProductTypeBean[] type;
+        @Schema(description = "地點")
+        private CityController.SearchCitySchema city;
     }
 }
