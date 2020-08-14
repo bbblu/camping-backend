@@ -17,7 +17,7 @@ public class CanBorrowProductGroupBean {
     @Schema(description = "封面圖網址", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
     private String coverImage;
 
-    @Schema(description = "價格", minimum = "0", example = "6999")
+    @Schema(description = "價格", minimum = "0", example = "$ 6,999")
     private Integer price;
 
     @Schema(description = "可租借起始日期", type = "string", example = "2020/08/14 00:00")

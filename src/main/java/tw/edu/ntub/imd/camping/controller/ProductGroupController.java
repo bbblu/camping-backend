@@ -36,7 +36,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(path = "/product-group")
 public class ProductGroupController {
-    private final DecimalFormat priceFormat = new DecimalFormat("$#,#");
+    private final DecimalFormat priceFormat = new DecimalFormat("$ #,###");
     private final ProductGroupService productGroupService;
     private final CityService cityService;
 
