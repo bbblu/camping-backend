@@ -1,6 +1,7 @@
 package tw.edu.ntub.imd.camping.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,7 +13,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
+import tw.edu.ntub.imd.camping.bean.CanBorrowProductGroupBean;
 import tw.edu.ntub.imd.camping.bean.ProductGroupBean;
+import tw.edu.ntub.imd.camping.bean.ProductGroupFilterDataBean;
 import tw.edu.ntub.imd.camping.bean.ProductTypeBean;
 import tw.edu.ntub.imd.camping.service.CityService;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
@@ -24,6 +28,7 @@ import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +36,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(path = "/product-group")
 public class ProductGroupController {
+    private final DecimalFormat priceFormat = new DecimalFormat("$#,#");
     private final ProductGroupService productGroupService;
     private final CityService cityService;
 
@@ -130,17 +136,43 @@ public class ProductGroupController {
         });
     }
 
+    @Operation(
+            tags = "Product",
+            method = "GET",
+            summary = "查詢商品群組列表",
+            description = "查詢商品群組列表",
+            parameters = {
+                    @Parameter(name = "borrowStartDate", description = "可租借起始時間", example = "2020/08/14"),
+                    @Parameter(name = "borrowEndDate", description = "可租借結束時間", example = "2020/08/20"),
+                    @Parameter(name = "cityAreaName", description = "城市區域名稱", example = "中正區"),
+                    @Parameter(
+                            name = "typeArray",
+                            description = "商品類型陣列",
+                            example = "[1, 2, 3]"
+                    ),
+                    @Parameter(name = "priceRange", description = "價格範圍(0: 0 ~ 2,000/ 1: 2,001 ~ 4,000)", example = "0")
+            },
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "查詢成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CanBorrowProductGroupBean.class)
+                    )
+            )
+    )
     @GetMapping(path = "")
-    public ResponseEntity<String> searchCanBorrowProductGroup() {
+    public ResponseEntity<String> searchCanBorrowProductGroup(ProductGroupFilterDataBean filterData) {
         return ResponseEntityBuilder.success()
                 .message("查詢成功")
-                .data(productGroupService.searchCanBorrowProductGroup(), (data, canBorrowProductGroupBean) -> {
-                    data.add("id", canBorrowProductGroupBean.getId());
-                    data.add("coverImage", canBorrowProductGroupBean.getCoverImage());
-                    data.add("price", canBorrowProductGroupBean.getPrice());
-                    data.add("borrowStartDate", canBorrowProductGroupBean.getBorrowStartDate());
-                    data.add("borrowEndDate", canBorrowProductGroupBean.getBorrowEndDate());
-                    data.add("userName", canBorrowProductGroupBean.getUserName());
+                .data(productGroupService.searchCanBorrowProductGroup(filterData), (data, canBorrowProductGroup) -> {
+                    data.add("id", canBorrowProductGroup.getId());
+                    data.add("coverImage", canBorrowProductGroup.getCoverImage());
+                    data.add("price", priceFormat.format(canBorrowProductGroup.getPrice()));
+                    data.add("borrowStartDate", canBorrowProductGroup.getBorrowStartDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
+                    data.add("borrowEndDate", canBorrowProductGroup.getBorrowEndDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
+                    data.add("city", canBorrowProductGroup.getCity());
+                    data.add("userName", canBorrowProductGroup.getUserName());
                 })
                 .build();
     }

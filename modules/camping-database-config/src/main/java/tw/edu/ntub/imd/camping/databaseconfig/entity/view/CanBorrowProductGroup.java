@@ -97,6 +97,9 @@ public class CanBorrowProductGroup {
     @Column(name = "user_name", length = 152, nullable = false)
     private String userName;
 
+    @Column(name = "product_type")
+    private String productTypeArray;
+
     /**
      * 商品群組
      *

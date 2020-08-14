@@ -8,6 +8,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductImage;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductRelatedLink;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.view.CanBorrowProductGroup;
 import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
 import tw.edu.ntub.imd.camping.dto.file.uploader.UploadResult;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
@@ -16,6 +17,7 @@ import tw.edu.ntub.imd.camping.service.transformer.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -147,10 +149,22 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     }
 
     @Override
-    public List<CanBorrowProductGroupBean> searchCanBorrowProductGroup() {
+    public List<CanBorrowProductGroupBean> searchCanBorrowProductGroup(ProductGroupFilterDataBean filterData) {
         return canBorrowProductGroupBeanTransformer.transferToBeanList(
                 canBorrowProductGroupDAO.findAll()
+                        .stream()
+                        .filter(filterCanBorrowProductGroup(filterData))
+                        .collect(Collectors.toList())
         );
+    }
+
+    private Predicate<CanBorrowProductGroup> filterCanBorrowProductGroup(ProductGroupFilterDataBean filterData) {
+        return canBorrowProductGroup ->
+                filterData.isBorrowStartDateNullOrBefore(canBorrowProductGroup.getBorrowStartDate().toLocalDate()) &&
+                        filterData.isBorrowEndDateNullOrAfter(canBorrowProductGroup.getBorrowEndDate().toLocalDate()) &&
+                        filterData.isCityAreaNameNullOrEquals(canBorrowProductGroup.getCityAreaName()) &&
+                        filterData.isTypeArrayNullOrAllMatchContains(canBorrowProductGroup.getProductTypeArray()) &&
+                        filterData.isPriceNullOrBetween(canBorrowProductGroup.getPrice());
     }
 
     @Override
