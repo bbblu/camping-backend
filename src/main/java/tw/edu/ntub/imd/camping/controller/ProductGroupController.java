@@ -130,6 +130,21 @@ public class ProductGroupController {
         });
     }
 
+    @GetMapping(path = "")
+    public ResponseEntity<String> searchCanBorrowProductGroup() {
+        return ResponseEntityBuilder.success()
+                .message("查詢成功")
+                .data(productGroupService.searchCanBorrowProductGroup(), (data, canBorrowProductGroupBean) -> {
+                    data.add("id", canBorrowProductGroupBean.getId());
+                    data.add("coverImage", canBorrowProductGroupBean.getCoverImage());
+                    data.add("price", canBorrowProductGroupBean.getPrice());
+                    data.add("borrowStartDate", canBorrowProductGroupBean.getBorrowStartDate());
+                    data.add("borrowEndDate", canBorrowProductGroupBean.getBorrowEndDate());
+                    data.add("userName", canBorrowProductGroupBean.getUserName());
+                })
+                .build();
+    }
+
     @Operation(
             tags = "Product",
             method = "DELETE",
