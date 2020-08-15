@@ -1,7 +1,9 @@
 package tw.edu.ntub.imd.camping.service.impl;
 
 import org.springframework.stereotype.Service;
+import tw.edu.ntub.birc.common.util.BooleanUtils;
 import tw.edu.ntub.birc.common.util.CollectionUtils;
+import tw.edu.ntub.birc.common.util.JavaBeanUtils;
 import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
@@ -12,6 +14,8 @@ import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
 import tw.edu.ntub.imd.camping.dto.file.uploader.UploadResult;
 import tw.edu.ntub.imd.camping.exception.NotContactInformationOwnerException;
 import tw.edu.ntub.imd.camping.exception.NotFoundException;
+import tw.edu.ntub.imd.camping.exception.NotProductGroupOwner;
+import tw.edu.ntub.imd.camping.exception.NotProductOwner;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.service.transformer.*;
 
@@ -51,7 +55,8 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             ProductRelatedLinkDAO relatedLinkDAO,
             CanBorrowProductGroupDAO canBorrowProductGroupDAO,
             CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer,
-            ContactInformationDAO contactInformationDAO) {
+            ContactInformationDAO contactInformationDAO
+    ) {
         super(groupDAO, transformer);
         this.uploader = uploader;
         this.groupDAO = groupDAO;
@@ -96,32 +101,36 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     }
 
     private void saveProduct(int groupId, List<ProductBean> productBeanList) {
-        List<Product> saveResult = productDAO.saveAll(productTransformer.transferToEntityList(
-                productBeanList.stream()
-                        .peek(productBean -> productBean.setGroupId(groupId))
-                        .collect(Collectors.toList())
-        ));
+        List<ProductBean> saveResultList = saveProduct(productBeanList.parallelStream()
+                .peek(productBean -> productBean.setGroupId(groupId))
+                .collect(Collectors.toList())
+        );
         for (int i = 0; i < productBeanList.size(); i++) {
-            saveProduct(saveResult.get(i), productBeanList.get(i));
+            ProductBean saveResult = saveResultList.get(i);
+            ProductBean productBean = productBeanList.get(i);
+            if (CollectionUtils.isNotEmpty(productBean.getImageArray())) {
+                saveImage(saveResult.getGroupId(), saveResult.getId(), productBean.getImageArray());
+            }
+            if (CollectionUtils.isNotEmpty(productBean.getRelatedLinkArray())) {
+                saveRelatedLinkUrl(saveResult.getId(), productBean.getRelatedLinkArray());
+            }
         }
     }
 
-    private void saveProduct(Product product, ProductBean productBean) {
-        if (CollectionUtils.isNotEmpty(productBean.getImageArray())) {
-            saveImage(product, productBean.getImageArray());
-        }
-        if (CollectionUtils.isNotEmpty(productBean.getRelatedLinkArray())) {
-            saveRelatedLink(product.getId(), productBean.getRelatedLinkArray());
-        }
+    private List<ProductBean> saveProduct(List<ProductBean> productBeanList) {
+        List<Product> saveResult = productDAO.saveAll(
+                productTransformer.transferToEntityList(productBeanList)
+        );
+        return productTransformer.transferToBeanList(saveResult);
     }
 
-    private void saveImage(Product product, List<ProductImageBean> productImageBeanList) {
-        String productGroupIdString = String.valueOf(product.getGroupId());
-        String productIdString = String.valueOf(product.getId());
+    private void saveImage(int groupId, int productId, List<ProductImageBean> productImageBeanList) {
+        String productGroupIdString = String.valueOf(groupId);
+        String productIdString = String.valueOf(productId);
         List<ProductImage> productImageList = new ArrayList<>();
         for (ProductImageBean productImageBean : productImageBeanList) {
             ProductImage productImage = imageTransformer.transferToEntity(productImageBean);
-            productImage.setProductId(product.getId());
+            productImage.setProductId(productId);
             String imageUrl;
             if (productImageBean.getImageFile() != null) {
                 UploadResult uploadResult =
@@ -139,13 +148,47 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         imageDAO.saveAll(productImageList);
     }
 
-    private void saveRelatedLink(int productId, List<String> urlList) {
-        relatedLinkDAO.saveAll(
+    private void saveRelatedLinkUrl(int productId, List<String> urlList) {
+        saveRelatedLink(
+                productId,
                 urlList.stream()
                         .map(ProductRelatedLink::new)
+                        .collect(Collectors.toList())
+        );
+    }
+
+    private void saveRelatedLink(int productId, List<ProductRelatedLink> relatedLinkList) {
+        relatedLinkDAO.saveAll(
+                relatedLinkList.stream()
                         .peek(productRelatedLink -> productRelatedLink.setProductId(productId))
                         .collect(Collectors.toList())
         );
+    }
+
+    @Override
+    public void update(Integer id, ProductGroupBean productGroupBean) {
+        if (BooleanUtils.isFalse(groupDAO.existsByIdAndCreateAccount(id, SecurityUtils.getLoginUserAccount()))) {
+            throw new NotProductGroupOwner(id, SecurityUtils.getLoginUserAccount());
+        }
+        super.update(id, productGroupBean);
+        updateProduct(productGroupBean.getProductArray());
+    }
+
+    @Override
+    public void updateProduct(List<ProductBean> productBeanList) {
+        if (CollectionUtils.isNotEmpty(productBeanList)) {
+            List<Integer> idList = productBeanList.stream()
+                    .map(ProductBean::getId)
+                    .collect(Collectors.toList());
+            if (BooleanUtils.isFalse(
+                    productDAO.existsByIdInAndProductGroupByGroupId_CreateAccount(idList, SecurityUtils.getLoginUserAccount())
+            )) {
+                throw new NotProductOwner(SecurityUtils.getLoginUserAccount());
+            }
+            List<Product> productList = productDAO.findAllById(idList);
+            List<Product> newProductList = JavaBeanUtils.copy(productBeanList, productList);
+            productDAO.saveAll(newProductList);
+        }
     }
 
     @Override

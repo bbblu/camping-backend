@@ -19,4 +19,6 @@ public interface ProductDAO extends BaseDAO<Product, Integer> {
     @Modifying
     @Query("UPDATE Product p SET p.enable = :enable WHERE p.id = :id")
     void updateEnableById(@Param("id") Integer id, @Param("enable") boolean enable);
+
+    boolean existsByIdInAndProductGroupByGroupId_CreateAccount(List<Integer> idList, String groupCreateAccount);
 }
