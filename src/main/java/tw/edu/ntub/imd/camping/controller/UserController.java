@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.imd.camping.bean.ContactInformationBean;
@@ -68,6 +69,7 @@ public class UserController {
                     )
             )
     )
+    @PreAuthorize("hasAnyAuthority('Administrator', 'User')")
     @GetMapping(path = "/{username}")
     public ResponseEntity<String> getUserInfo(
             @PathVariable(name = "username")
