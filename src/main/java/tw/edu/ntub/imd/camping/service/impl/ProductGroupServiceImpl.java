@@ -2,21 +2,23 @@ package tw.edu.ntub.imd.camping.service.impl;
 
 import org.springframework.stereotype.Service;
 import tw.edu.ntub.birc.common.util.CollectionUtils;
+import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.*;
+import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductImage;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductRelatedLink;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.view.CanBorrowProductGroup;
 import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
 import tw.edu.ntub.imd.camping.dto.file.uploader.UploadResult;
+import tw.edu.ntub.imd.camping.exception.NotContactInformationOwnerException;
+import tw.edu.ntub.imd.camping.exception.NotFoundException;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.service.transformer.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,7 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     private final ProductRelatedLinkDAO relatedLinkDAO;
     private final CanBorrowProductGroupDAO canBorrowProductGroupDAO;
     private final CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer;
+    private final ContactInformationDAO contactInformationDAO;
 
     public ProductGroupServiceImpl(
             MultipartFileUploader uploader,
@@ -47,8 +50,8 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             ProductImageTransformer imageTransformer,
             ProductRelatedLinkDAO relatedLinkDAO,
             CanBorrowProductGroupDAO canBorrowProductGroupDAO,
-            CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer
-    ) {
+            CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer,
+            ContactInformationDAO contactInformationDAO) {
         super(groupDAO, transformer);
         this.uploader = uploader;
         this.groupDAO = groupDAO;
@@ -62,10 +65,12 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         this.relatedLinkDAO = relatedLinkDAO;
         this.canBorrowProductGroupDAO = canBorrowProductGroupDAO;
         this.canBorrowProductGroupBeanTransformer = canBorrowProductGroupBeanTransformer;
+        this.contactInformationDAO = contactInformationDAO;
     }
 
     @Override
     public ProductGroupBean save(ProductGroupBean productGroupBean) {
+        checkContactInformationOwner(productGroupBean.getContactInformationId());
         ProductGroup productGroup = transformer.transferToEntity(productGroupBean);
         ProductGroup saveResult = groupDAO.saveAndFlush(productGroup);
         if (productGroupBean.getCoverImageFile() != null) {
@@ -78,6 +83,16 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             saveProduct(saveResult.getId(), productGroupBean.getProductArray());
         }
         return transformer.transferToBean(saveResult);
+    }
+
+    private void checkContactInformationOwner(int contactInformationId) {
+        Optional<ContactInformation> optionalContactInformation =
+                contactInformationDAO.findById(contactInformationId);
+        ContactInformation contactInformation =
+                optionalContactInformation.orElseThrow(() -> new NotFoundException("找不到對應的聯絡方式：" + contactInformationId));
+        if (StringUtils.isNotEquals(SecurityUtils.getLoginUserAccount(), contactInformation.getUserAccount())) {
+            throw new NotContactInformationOwnerException(contactInformation.getId(), SecurityUtils.getLoginUserAccount());
+        }
     }
 
     private void saveProduct(int groupId, List<ProductBean> productBeanList) {
