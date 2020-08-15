@@ -83,7 +83,7 @@ public class UserController {
             data.add("lastName", userBean.getLastName());
             data.add("gender", userBean.getGenderName());
             data.add("birthday", userBean.getBirthday());
-            data.add("experience", userBean.getExperience().name());
+            data.add("experience", userBean.getExperience().toString());
             data.add("email", userBean.getEmail());
             data.add("address", userBean.getAddress());
             return ResponseEntityBuilder.success()
