@@ -90,7 +90,7 @@ repositories {
 dependencies {
     implementation project('modules:camping-config')
     implementation project('modules:camping-database-config')
-    implementation 'tw.edu.ntub.birc:common:1.0.4'
+    implementation 'tw.edu.ntub.birc:common:1.0.5'
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'org.yaml:snakeyaml:1.26'
     implementation 'org.apache.commons:commons-text:1.8'
