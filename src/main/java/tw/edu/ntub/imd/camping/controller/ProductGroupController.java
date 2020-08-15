@@ -215,32 +215,7 @@ public class ProductGroupController {
             data.add("contactInformation", contactInformation.getContent());
 
             CollectionObjectData collectionData = data.createCollectionData();
-            collectionData.add("productArray", productGroupBean.getProductArray(), (productData, productBean) -> {
-                productData.add("id", productBean.getId());
-                productData.add("type", productBean.getTypeName());
-                productData.add("count", productBean.getCount());
-                productData.add("brand", productBean.getBrand());
-                productData.add("useInformation", productBean.getUseInformation());
-                productData.add("brokenCompensation", productBean.getBrokenCompensation());
-                productData.add("memo", productBean.getMemo());
-                CollectionObjectData productCollectionData = productData.createCollectionData();
-                if (CollectionUtils.isNotEmpty(productBean.getImageArray())) {
-                    productCollectionData.add("imageArray", productBean.getImageArray(), (productImageData, productImage) -> {
-                        productImageData.add("id", productImage.getId());
-                        productImageData.add("url", productImage.getUrl());
-                    });
-                } else {
-                    productData.addStringArray("imageArray", new String[0]);
-                }
-                if (CollectionUtils.isNotEmpty(productBean.getRelatedLinkList())) {
-                    productCollectionData.add("relatedLinkArray", productBean.getRelatedLinkList(), (productRelatedLinkData, productRelatedLink) -> {
-                        productRelatedLinkData.add("id", productRelatedLink.getId());
-                        productRelatedLinkData.add("url", productRelatedLink.getUrl());
-                    });
-                } else {
-                    productData.addStringArray("relatedLinkArray", new String[0]);
-                }
-            });
+            collectionData.add("productArray", productGroupBean.getProductArray(), this::addProductData);
             return ResponseEntityBuilder.success()
                     .message("查詢成功")
                     .data(data)
@@ -248,6 +223,37 @@ public class ProductGroupController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    private void addProductData(ObjectData productData, ProductBean product) {
+        productData.add("id", product.getId());
+        productData.add("type", product.getTypeName());
+        productData.add("count", product.getCount());
+        productData.add("brand", product.getBrand());
+        productData.add("useInformation", product.getUseInformation());
+        productData.add("brokenCompensation", product.getBrokenCompensation());
+        productData.add("memo", product.getMemo());
+        CollectionObjectData productCollectionData = productData.createCollectionData();
+        if (CollectionUtils.isNotEmpty(product.getImageArray())) {
+            productCollectionData.add("imageArray", product.getImageArray(), this::addProductImageData);
+        } else {
+            productData.addStringArray("imageArray", new String[0]);
+        }
+        if (CollectionUtils.isNotEmpty(product.getRelatedLinkList())) {
+            productCollectionData.add("relatedLinkArray", product.getRelatedLinkList(), this::addProductRelatedLinkData);
+        } else {
+            productData.addStringArray("relatedLinkArray", new String[0]);
+        }
+    }
+
+    private void addProductImageData(ObjectData productImageData, ProductImageBean productImage) {
+        productImageData.add("id", productImage.getId());
+        productImageData.add("url", productImage.getUrl());
+    }
+
+    private void addProductRelatedLinkData(ObjectData productRelatedLinkData, ProductRelatedLinkBean productRelatedLink) {
+        productRelatedLinkData.add("id", productRelatedLink.getId());
+        productRelatedLinkData.add("url", productRelatedLink.getUrl());
     }
 
     @Operation(
