@@ -542,7 +542,7 @@ public class ProductGroupController {
         private LocalDateTime borrowEndDate;
         @Schema(description = "聯絡方式編號", example = "1")
         private Integer contactInformationId;
-        @Schema(description = "商品")
+        @ArraySchema(minItems = 0, schema = @Schema(description = "商品", implementation = UpdateProductSchema.class))
         private List<UpdateProductSchema> productArray;
     }
 
