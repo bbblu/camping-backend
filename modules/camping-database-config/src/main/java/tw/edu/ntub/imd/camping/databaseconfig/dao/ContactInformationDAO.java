@@ -5,5 +5,5 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.ContactInformation;
 
 @Repository
 public interface ContactInformationDAO extends BaseDAO<ContactInformation, Integer> {
-
+    boolean existsByIdAndUserAccount(Integer id, String userAccount);
 }

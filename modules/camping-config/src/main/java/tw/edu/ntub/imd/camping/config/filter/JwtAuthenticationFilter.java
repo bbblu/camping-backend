@@ -43,14 +43,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     MalformedJwtException |
                     SignatureException |
                     IllegalArgumentException e) {
-                e.printStackTrace();
+                log.error("JWT解析錯誤", e);
             }
         }
         try {
             chain.doFilter(request, response);
         } catch (InsufficientAuthenticationException e) {
-            log.error("請求方法：" + request.getMethod().toUpperCase() + "請求URL：" + request.getRequestURL());
-            log.error(e);
+            log.error("請求方法：" + request.getMethod().toUpperCase() + "請求URL：" + request.getRequestURL(), e);
         }
     }
 

@@ -1,8 +1,11 @@
 package tw.edu.ntub.imd.camping.service.impl;
 
 import org.springframework.stereotype.Service;
+import tw.edu.ntub.birc.common.util.BooleanUtils;
 import tw.edu.ntub.birc.common.util.CollectionUtils;
+import tw.edu.ntub.birc.common.util.JavaBeanUtils;
 import tw.edu.ntub.imd.camping.bean.*;
+import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
@@ -11,6 +14,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductRelatedLink;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.view.CanBorrowProductGroup;
 import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
 import tw.edu.ntub.imd.camping.dto.file.uploader.UploadResult;
+import tw.edu.ntub.imd.camping.exception.NotFoundException;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.service.transformer.*;
 
@@ -34,6 +38,7 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     private final ProductRelatedLinkDAO relatedLinkDAO;
     private final CanBorrowProductGroupDAO canBorrowProductGroupDAO;
     private final CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer;
+    private final ContactInformationDAO contactInformationDAO;
 
     public ProductGroupServiceImpl(
             MultipartFileUploader uploader,
@@ -47,7 +52,8 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             ProductImageTransformer imageTransformer,
             ProductRelatedLinkDAO relatedLinkDAO,
             CanBorrowProductGroupDAO canBorrowProductGroupDAO,
-            CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer
+            CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer,
+            ContactInformationDAO contactInformationDAO
     ) {
         super(groupDAO, transformer);
         this.uploader = uploader;
@@ -62,10 +68,12 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         this.relatedLinkDAO = relatedLinkDAO;
         this.canBorrowProductGroupDAO = canBorrowProductGroupDAO;
         this.canBorrowProductGroupBeanTransformer = canBorrowProductGroupBeanTransformer;
+        this.contactInformationDAO = contactInformationDAO;
     }
 
     @Override
     public ProductGroupBean save(ProductGroupBean productGroupBean) {
+        checkContactInformationOwner(productGroupBean.getContactInformationId());
         ProductGroup productGroup = transformer.transferToEntity(productGroupBean);
         ProductGroup saveResult = groupDAO.saveAndFlush(productGroup);
         if (productGroupBean.getCoverImageFile() != null) {
@@ -80,33 +88,48 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         return transformer.transferToBean(saveResult);
     }
 
+    private void checkContactInformationOwner(int contactInformationId) {
+        if (BooleanUtils.isFalse(
+                contactInformationDAO.existsByIdAndUserAccount(
+                        contactInformationId,
+                        SecurityUtils.getLoginUserAccount()
+                )
+        )) {
+            throw new NotFoundException("找不到對應的聯絡方式");
+        }
+    }
+
     private void saveProduct(int groupId, List<ProductBean> productBeanList) {
-        List<Product> saveResult = productDAO.saveAll(productTransformer.transferToEntityList(
-                productBeanList.stream()
-                        .peek(productBean -> productBean.setGroupId(groupId))
-                        .collect(Collectors.toList())
-        ));
+        List<ProductBean> saveResultList = saveProduct(productBeanList.parallelStream()
+                .peek(productBean -> productBean.setGroupId(groupId))
+                .collect(Collectors.toList())
+        );
         for (int i = 0; i < productBeanList.size(); i++) {
-            saveProduct(saveResult.get(i), productBeanList.get(i));
+            ProductBean saveResult = saveResultList.get(i);
+            ProductBean productBean = productBeanList.get(i);
+            if (CollectionUtils.isNotEmpty(productBean.getImageArray())) {
+                saveImage(saveResult.getGroupId(), saveResult.getId(), productBean.getImageArray());
+            }
+            if (CollectionUtils.isNotEmpty(productBean.getRelatedLinkArray())) {
+                saveRelatedLinkUrl(saveResult.getId(), productBean.getRelatedLinkArray());
+            }
         }
     }
 
-    private void saveProduct(Product product, ProductBean productBean) {
-        if (CollectionUtils.isNotEmpty(productBean.getImageArray())) {
-            saveImage(product, productBean.getImageArray());
-        }
-        if (CollectionUtils.isNotEmpty(productBean.getRelatedLinkArray())) {
-            saveRelatedLink(product.getId(), productBean.getRelatedLinkArray());
-        }
+    private List<ProductBean> saveProduct(List<ProductBean> productBeanList) {
+        List<Product> saveResult = productDAO.saveAll(
+                productTransformer.transferToEntityList(productBeanList)
+        );
+        return productTransformer.transferToBeanList(saveResult);
     }
 
-    private void saveImage(Product product, List<ProductImageBean> productImageBeanList) {
-        String productGroupIdString = String.valueOf(product.getGroupId());
-        String productIdString = String.valueOf(product.getId());
+    private void saveImage(int groupId, int productId, List<ProductImageBean> productImageBeanList) {
+        String productGroupIdString = String.valueOf(groupId);
+        String productIdString = String.valueOf(productId);
         List<ProductImage> productImageList = new ArrayList<>();
         for (ProductImageBean productImageBean : productImageBeanList) {
             ProductImage productImage = imageTransformer.transferToEntity(productImageBean);
-            productImage.setProductId(product.getId());
+            productImage.setProductId(productId);
             String imageUrl;
             if (productImageBean.getImageFile() != null) {
                 UploadResult uploadResult =
@@ -124,17 +147,60 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         imageDAO.saveAll(productImageList);
     }
 
-    private void saveRelatedLink(int productId, List<String> urlList) {
-        relatedLinkDAO.saveAll(
+    private void saveRelatedLinkUrl(int productId, List<String> urlList) {
+        saveRelatedLink(
+                productId,
                 urlList.stream()
                         .map(ProductRelatedLink::new)
+                        .collect(Collectors.toList())
+        );
+    }
+
+    private void saveRelatedLink(int productId, List<ProductRelatedLink> relatedLinkList) {
+        relatedLinkDAO.saveAll(
+                relatedLinkList.stream()
                         .peek(productRelatedLink -> productRelatedLink.setProductId(productId))
                         .collect(Collectors.toList())
         );
     }
 
     @Override
+    public void update(Integer id, ProductGroupBean productGroupBean) {
+        checkIsProductGroupOwner(id);
+        super.update(id, productGroupBean);
+        updateProduct(productGroupBean.getProductArray());
+    }
+
+    private void checkIsProductGroupOwner(Integer id) {
+        if (BooleanUtils.isFalse(groupDAO.existsByIdAndCreateAccount(id, SecurityUtils.getLoginUserAccount()))) {
+            throw new NotFoundException("找不到對應的商品群組");
+        }
+    }
+
+    @Override
+    public void updateProduct(List<ProductBean> productBeanList) {
+        if (CollectionUtils.isNotEmpty(productBeanList)) {
+            List<Integer> idList = productBeanList.stream()
+                    .map(ProductBean::getId)
+                    .collect(Collectors.toList());
+            checkIsAllProductOwner(idList);
+            List<Product> productList = productDAO.findAllById(idList);
+            List<Product> newProductList = JavaBeanUtils.copy(productBeanList, productList);
+            productDAO.saveAll(newProductList);
+        }
+    }
+
+    private void checkIsAllProductOwner(List<Integer> productIdList) {
+        if (BooleanUtils.isFalse(
+                productDAO.existsByIdInAndProductGroupByGroupId_CreateAccount(productIdList, SecurityUtils.getLoginUserAccount())
+        )) {
+            throw new NotFoundException("找不到部份商品");
+        }
+    }
+
+    @Override
     public void delete(Integer id) {
+        checkIsProductGroupOwner(id);
         List<Product> productList = productDAO.findByGroupId(id);
         List<Integer> productIdList = productList.stream().map(Product::getId).collect(Collectors.toList());
         imageDAO.updateEnableByProductIdList(productIdList, false);
@@ -169,6 +235,7 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
 
     @Override
     public void deleteProduct(Integer productId) {
+        checkIsAllProductOwner(Collections.singletonList(productId));
         productDAO.updateEnableById(productId, false);
         imageDAO.updateEnableByProductIdList(Collections.singletonList(productId), false);
         relatedLinkDAO.updateEnableByProductIdList(Collections.singletonList(productId), false);
@@ -176,11 +243,35 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
 
     @Override
     public void deleteProductImage(Integer productImageId) {
+        checkIsProductImageOwner(productImageId);
         imageDAO.updateEnableById(Collections.singletonList(productImageId), false);
+    }
+
+    private void checkIsProductImageOwner(Integer productImageId) {
+        if (BooleanUtils.isFalse(
+                imageDAO.existsByIdAndProductByProductId_ProductGroupByGroupId_CreateAccount(
+                        productImageId,
+                        SecurityUtils.getLoginUserAccount()
+                )
+        )) {
+            throw new NotFoundException("找不到對應的商品圖");
+        }
     }
 
     @Override
     public void deleteProductRelatedLink(Integer productRelatedLinkId) {
+        checkIsProductRelatedLinkOwner(productRelatedLinkId);
         relatedLinkDAO.updateEnableById(Collections.singletonList(productRelatedLinkId), false);
+    }
+
+    private void checkIsProductRelatedLinkOwner(Integer productRelatedLinkId) {
+        if (BooleanUtils.isFalse(
+                relatedLinkDAO.existsByIdAndProductByProductId_ProductGroupByGroupId_CreateAccount(
+                        productRelatedLinkId,
+                        SecurityUtils.getLoginUserAccount()
+                )
+        )) {
+            throw new NotFoundException("找不到對應的商品相關連結");
+        }
     }
 }
