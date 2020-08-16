@@ -5,16 +5,13 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import tw.edu.ntub.birc.common.exception.NullParameterException;
 import tw.edu.ntub.birc.common.exception.UnknownException;
 import tw.edu.ntub.birc.common.exception.date.ParseDateException;
 import tw.edu.ntub.birc.common.util.DateTimeUtils;
-import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
-import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
-import tw.edu.ntub.birc.common.wrapper.date.DateWrapper;
-import tw.edu.ntub.birc.common.wrapper.date.TimeWrapper;
+import tw.edu.ntub.birc.common.util.StringUtils;
+import tw.edu.ntub.birc.common.wrapper.date.*;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -116,7 +113,8 @@ public class ResponseUtils {
                     if (StringUtils.isBlank(p.getValueAsString())) {
                         return null;
                     }
-                    return LocalDate.parse(p.getValueAsString());
+                    DateDetail dateDetail = DateTimeUtils.parseDate(p.getValueAsString());
+                    return LocalDate.of(dateDetail.getYear(), dateDetail.getMonthNo(), dateDetail.getDay());
                 }
             });
             addDeserializer(DateWrapper.class, new JsonDeserializer<>() {
@@ -136,7 +134,13 @@ public class ResponseUtils {
                     if (StringUtils.isBlank(p.getValueAsString())) {
                         return null;
                     }
-                    return LocalTime.parse(p.getValueAsString());
+                    TimeDetail timeDetail = DateTimeUtils.parseTime(p.getValueAsString());
+                    return LocalTime.of(
+                            timeDetail.getHour(),
+                            timeDetail.getMinute(),
+                            timeDetail.getSecond(),
+                            timeDetail.getMillisecondOfNanosecond()
+                    );
                 }
             });
             addDeserializer(TimeWrapper.class, new JsonDeserializer<>() {
@@ -156,15 +160,22 @@ public class ResponseUtils {
                     if (StringUtils.isBlank(p.getValueAsString())) {
                         return null;
                     }
-                    return LocalDateTime.parse(p.getValueAsString());
+                    DateTimeDetail dateTimeDetail = DateTimeUtils.parseDateTime(p.getValueAsString());
+                    return LocalDateTime.of(
+                            LocalDate.of(dateTimeDetail.getYear(), dateTimeDetail.getMonthNo(), dateTimeDetail.getDay()),
+                            LocalTime.of(
+                                    dateTimeDetail.getHour(),
+                                    dateTimeDetail.getMinute(),
+                                    dateTimeDetail.getSecond(),
+                                    dateTimeDetail.getMillisecondOfNanosecond()
+                            )
+                    );
                 }
             });
             addDeserializer(DateTimeWrapper.class, new JsonDeserializer<>() {
                 @Override
                 public DateTimeWrapper deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
                     try {
-                        String text = p.getText();
-                        String valueAsString = p.getValueAsString();
                         return DateTimeUtils.parseDateTime(p.getValueAsString());
                     } catch (ParseDateException | NullParameterException e) {
                         e.printStackTrace();

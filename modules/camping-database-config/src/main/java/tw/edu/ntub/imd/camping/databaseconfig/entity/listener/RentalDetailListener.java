@@ -15,6 +15,9 @@ public class RentalDetailListener {
         if (rentalDetail.getStatus() == null) {
             rentalDetail.setStatus(RentalDetailStatus.NOT_RETURN);
         }
+        if (rentalDetail.getLastModifyAccount() == null) {
+            rentalDetail.setLastModifyAccount(SecurityUtils.getLoginUserAccount());
+        }
         if (rentalDetail.getLastModifyDate() == null) {
             rentalDetail.setLastModifyDate(LocalDateTime.now());
         }

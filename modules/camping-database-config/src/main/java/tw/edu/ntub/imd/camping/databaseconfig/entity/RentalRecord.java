@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @EqualsAndHashCode(exclude = {
-        "productGroupByGroupId",
+        "productGroupByProductGroupId",
         "userByRenterAccount",
         "contactInformationByRenterContactInformationId",
         "campByCampId",
@@ -43,8 +43,8 @@ public class RentalRecord {
      *
      * @since 1.0.0
      */
-    @Column(name = "group_id", nullable = false, columnDefinition = "UNSIGNED")
-    private Integer groupId;
+    @Column(name = "product_group_id", nullable = false, columnDefinition = "UNSIGNED")
+    private Integer productGroupId;
 
     /**
      * 是否啟用(0: 否/ 1: 是)
@@ -176,8 +176,8 @@ public class RentalRecord {
      * @since 1.0.0
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
-    private ProductGroup productGroupByGroupId;
+    @JoinColumn(name = "product_group_id", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
+    private ProductGroup productGroupByProductGroupId;
 
     /**
      * 租借者
