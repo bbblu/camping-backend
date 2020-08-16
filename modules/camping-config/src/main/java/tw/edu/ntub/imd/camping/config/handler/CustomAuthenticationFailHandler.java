@@ -19,7 +19,7 @@ public class CustomAuthenticationFailHandler implements AuthenticationFailureHan
                 response,
                 401,
                 false,
-                "User - LoginFail",
+                ResponseUtils.LOGIN_FAIL_ERROR_CODE,
                 exception.getMessage(),
                 mapper.createObjectNode()
         );

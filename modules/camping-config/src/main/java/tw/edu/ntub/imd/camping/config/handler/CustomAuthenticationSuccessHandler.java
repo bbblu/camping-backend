@@ -38,8 +38,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                 response,
                 200,
                 true,
-                "",
-                "登入成功",
+                ResponseUtils.LOGIN_SUCCESS_ERROR_CODE,
+                ResponseUtils.LOGIN_SUCCESS_MESSAGE,
                 mapper.createObjectNode().put("identity", authorityName)
         );
     }

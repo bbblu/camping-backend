@@ -9,6 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public final class ResponseUtils {
+    public static final String LOGIN_SUCCESS_ERROR_CODE = "";
+    public static final String LOGIN_SUCCESS_MESSAGE = "登入成功";
+    public static final String LOGIN_FAIL_ERROR_CODE = "User - LoginFail";
+
     private ResponseUtils() {
 
     }
