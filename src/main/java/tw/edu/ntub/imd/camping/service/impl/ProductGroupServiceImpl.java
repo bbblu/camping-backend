@@ -4,25 +4,23 @@ import org.springframework.stereotype.Service;
 import tw.edu.ntub.birc.common.util.BooleanUtils;
 import tw.edu.ntub.birc.common.util.CollectionUtils;
 import tw.edu.ntub.birc.common.util.JavaBeanUtils;
-import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.*;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductImage;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductRelatedLink;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.view.CanBorrowProductGroup;
 import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
 import tw.edu.ntub.imd.camping.dto.file.uploader.UploadResult;
-import tw.edu.ntub.imd.camping.exception.NotContactInformationOwnerException;
 import tw.edu.ntub.imd.camping.exception.NotFoundException;
-import tw.edu.ntub.imd.camping.exception.NotProductGroupOwner;
-import tw.edu.ntub.imd.camping.exception.NotProductOwner;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.service.transformer.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -91,12 +89,13 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     }
 
     private void checkContactInformationOwner(int contactInformationId) {
-        Optional<ContactInformation> optionalContactInformation =
-                contactInformationDAO.findById(contactInformationId);
-        ContactInformation contactInformation =
-                optionalContactInformation.orElseThrow(() -> new NotFoundException("找不到對應的聯絡方式：" + contactInformationId));
-        if (StringUtils.isNotEquals(SecurityUtils.getLoginUserAccount(), contactInformation.getUserAccount())) {
-            throw new NotContactInformationOwnerException(contactInformation.getId(), SecurityUtils.getLoginUserAccount());
+        if (BooleanUtils.isFalse(
+                contactInformationDAO.existsByIdAndUserAccount(
+                        contactInformationId,
+                        SecurityUtils.getLoginUserAccount()
+                )
+        )) {
+            throw new NotFoundException("找不到對應的聯絡方式");
         }
     }
 
@@ -167,11 +166,15 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
 
     @Override
     public void update(Integer id, ProductGroupBean productGroupBean) {
-        if (BooleanUtils.isFalse(groupDAO.existsByIdAndCreateAccount(id, SecurityUtils.getLoginUserAccount()))) {
-            throw new NotProductGroupOwner(id, SecurityUtils.getLoginUserAccount());
-        }
+        checkIsProductGroupOwner(id);
         super.update(id, productGroupBean);
         updateProduct(productGroupBean.getProductArray());
+    }
+
+    private void checkIsProductGroupOwner(Integer id) {
+        if (BooleanUtils.isFalse(groupDAO.existsByIdAndCreateAccount(id, SecurityUtils.getLoginUserAccount()))) {
+            throw new NotFoundException("找不到對應的商品群組");
+        }
     }
 
     @Override
@@ -180,19 +183,24 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             List<Integer> idList = productBeanList.stream()
                     .map(ProductBean::getId)
                     .collect(Collectors.toList());
-            if (BooleanUtils.isFalse(
-                    productDAO.existsByIdInAndProductGroupByGroupId_CreateAccount(idList, SecurityUtils.getLoginUserAccount())
-            )) {
-                throw new NotProductOwner(SecurityUtils.getLoginUserAccount());
-            }
+            checkIsAllProductOwner(idList);
             List<Product> productList = productDAO.findAllById(idList);
             List<Product> newProductList = JavaBeanUtils.copy(productBeanList, productList);
             productDAO.saveAll(newProductList);
         }
     }
 
+    private void checkIsAllProductOwner(List<Integer> productIdList) {
+        if (BooleanUtils.isFalse(
+                productDAO.existsByIdInAndProductGroupByGroupId_CreateAccount(productIdList, SecurityUtils.getLoginUserAccount())
+        )) {
+            throw new NotFoundException("找不到部份商品");
+        }
+    }
+
     @Override
     public void delete(Integer id) {
+        checkIsProductGroupOwner(id);
         List<Product> productList = productDAO.findByGroupId(id);
         List<Integer> productIdList = productList.stream().map(Product::getId).collect(Collectors.toList());
         imageDAO.updateEnableByProductIdList(productIdList, false);
@@ -227,6 +235,7 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
 
     @Override
     public void deleteProduct(Integer productId) {
+        checkIsAllProductOwner(Collections.singletonList(productId));
         productDAO.updateEnableById(productId, false);
         imageDAO.updateEnableByProductIdList(Collections.singletonList(productId), false);
         relatedLinkDAO.updateEnableByProductIdList(Collections.singletonList(productId), false);
@@ -234,11 +243,35 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
 
     @Override
     public void deleteProductImage(Integer productImageId) {
+        checkIsProductImageOwner(productImageId);
         imageDAO.updateEnableById(Collections.singletonList(productImageId), false);
+    }
+
+    private void checkIsProductImageOwner(Integer productImageId) {
+        if (BooleanUtils.isFalse(
+                imageDAO.existsByIdAndProductByProductId_ProductGroupByGroupId_CreateAccount(
+                        productImageId,
+                        SecurityUtils.getLoginUserAccount()
+                )
+        )) {
+            throw new NotFoundException("找不到對應的商品圖");
+        }
     }
 
     @Override
     public void deleteProductRelatedLink(Integer productRelatedLinkId) {
+        checkIsProductRelatedLinkOwner(productRelatedLinkId);
         relatedLinkDAO.updateEnableById(Collections.singletonList(productRelatedLinkId), false);
+    }
+
+    private void checkIsProductRelatedLinkOwner(Integer productRelatedLinkId) {
+        if (BooleanUtils.isFalse(
+                relatedLinkDAO.existsByIdAndProductByProductId_ProductGroupByGroupId_CreateAccount(
+                        productRelatedLinkId,
+                        SecurityUtils.getLoginUserAccount()
+                )
+        )) {
+            throw new NotFoundException("找不到對應的商品相關連結");
+        }
     }
 }
