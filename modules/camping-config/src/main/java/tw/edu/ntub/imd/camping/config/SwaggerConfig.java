@@ -138,4 +138,13 @@ public class SwaggerConfig {
                 .addOpenApiCustomiser(openApiCustomiser)
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi rentalApi(@Qualifier("defaultOpenApiCustomiser") OpenApiCustomiser openApiCustomiser) {
+        return GroupedOpenApi.builder()
+                .setGroup("商品租借 - Rental")
+                .pathsToMatch("/rental/**")
+                .addOpenApiCustomiser(openApiCustomiser)
+                .build();
+    }
 }
