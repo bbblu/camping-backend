@@ -18,8 +18,14 @@ public class RentalRecordListener {
         if (rentalRecord.getStatus() == null) {
             rentalRecord.setStatus(RentalRecordStatus.NOT_PICK_UP);
         }
+        if (rentalRecord.getRenterAccount() == null) {
+            rentalRecord.setRenterAccount(SecurityUtils.getLoginUserAccount());
+        }
         if (rentalRecord.getRentalDate() == null) {
             rentalRecord.setRentalDate(LocalDateTime.now());
+        }
+        if (rentalRecord.getLastModifyAccount() == null) {
+            rentalRecord.setLastModifyAccount(SecurityUtils.getLoginUserAccount());
         }
         if (rentalRecord.getLastModifyDate() == null) {
             rentalRecord.setLastModifyDate(LocalDateTime.now());
