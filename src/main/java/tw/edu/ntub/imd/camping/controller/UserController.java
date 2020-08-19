@@ -1,7 +1,7 @@
 package tw.edu.ntub.imd.camping.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -60,23 +60,29 @@ public class UserController {
             method = "GET",
             summary = "查詢使用者資訊",
             description = "查詢使用者資訊",
+            parameters = @Parameter(
+                    name = "account",
+                    content = @Content(schema = @Schema(type = "string")),
+                    description = "帳號",
+                    example = "test"
+            ),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "查詢成功",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = UserBean.class))
+                            schema = @Schema(implementation = UserBean.class)
                     )
             )
     )
     @PreAuthorize("hasAnyAuthority('Administrator', 'User')")
-    @GetMapping(path = "/{username}")
+    @GetMapping(path = "/{account}")
     public ResponseEntity<String> getUserInfo(
-            @PathVariable(name = "username")
+            @PathVariable(name = "account")
             @NotBlank(message = "使用者帳號不能為空")
-                    String username
+                    String account
     ) {
-        Optional<UserBean> optionalUser = userService.getById(username);
+        Optional<UserBean> optionalUser = userService.getById(account);
         if (optionalUser.isPresent()) {
             UserBean userBean = optionalUser.get();
             ObjectData data = new ObjectData();
