@@ -21,7 +21,7 @@ import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
-public class ResponseUtils {
+public class JacksonJsonUtils {
     // JSON的Content-Type字串
     public static final String JSON_MIME_TYPE = "application/json; charset=UTF-8";
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -51,7 +51,7 @@ public class ResponseUtils {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    private ResponseUtils() {
+    private JacksonJsonUtils() {
 
     }
 

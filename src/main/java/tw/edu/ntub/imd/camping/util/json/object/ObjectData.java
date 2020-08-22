@@ -6,8 +6,8 @@ import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
 import tw.edu.ntub.birc.common.wrapper.date.DateWrapper;
 import tw.edu.ntub.birc.common.wrapper.date.TimeWrapper;
+import tw.edu.ntub.imd.camping.util.json.JacksonJsonUtils;
 import tw.edu.ntub.imd.camping.util.json.ResponseData;
-import tw.edu.ntub.imd.camping.util.json.ResponseUtils;
 import tw.edu.ntub.imd.camping.util.json.array.ArrayData;
 
 import javax.annotation.Nullable;
@@ -29,11 +29,11 @@ public class ObjectData implements ResponseData {
     private final ObjectNode objectNode;
 
     public ObjectData() {
-        this(ResponseUtils.createMapper().createObjectNode());
+        this(JacksonJsonUtils.createMapper().createObjectNode());
     }
 
     public ObjectData(String jsonString) {
-        this((ObjectNode) ResponseUtils.createJsonNode(jsonString));
+        this((ObjectNode) JacksonJsonUtils.createJsonNode(jsonString));
     }
 
     public ObjectData(ObjectNode objectNode) {
