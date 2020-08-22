@@ -14,10 +14,7 @@ import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.birc.common.wrapper.date.*;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Year;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
@@ -189,8 +186,17 @@ public class JacksonJsonUtils {
                     if (StringUtils.isBlank(p.getValueAsString())) {
                         return null;
                     }
-                    int year = Integer.parseInt(p.getValueAsString());
+                    int year = p.getValueAsInt();
                     return Year.of(year);
+                }
+            });
+            addDeserializer(YearMonth.class, new JsonDeserializer<>() {
+                @Override
+                public YearMonth deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+                    if (StringUtils.isBlank(p.getValueAsString())) {
+                        return null;
+                    }
+                    return YearMonth.parse("MM/yy");
                 }
             });
         }
