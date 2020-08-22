@@ -196,7 +196,7 @@ public class JacksonJsonUtils {
                     if (StringUtils.isBlank(p.getValueAsString())) {
                         return null;
                     }
-                    return YearMonth.parse("MM/yy");
+                    return YearMonth.parse(p.getValueAsString(), DateTimeFormatter.ofPattern("MM/yy"));
                 }
             });
         }
