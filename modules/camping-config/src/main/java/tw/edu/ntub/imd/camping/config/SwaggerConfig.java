@@ -147,4 +147,13 @@ public class SwaggerConfig {
                 .addOpenApiCustomiser(openApiCustomiser)
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi bankApi(@Qualifier("defaultOpenApiCustomiser") OpenApiCustomiser openApiCustomiser) {
+        return GroupedOpenApi.builder()
+                .setGroup("金融機構 - Bank")
+                .pathsToMatch("/bank/**")
+                .addOpenApiCustomiser(openApiCustomiser)
+                .build();
+    }
 }
