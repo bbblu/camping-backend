@@ -1,4 +1,4 @@
-package tw.edu.ntub.imd.camping.util.http;
+package tw.edu.ntub.imd.camping.util.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;

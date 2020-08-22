@@ -6,8 +6,8 @@ import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimeWrapper;
 import tw.edu.ntub.birc.common.wrapper.date.DateWrapper;
 import tw.edu.ntub.birc.common.wrapper.date.TimeWrapper;
-import tw.edu.ntub.imd.camping.util.http.ResponseUtils;
 import tw.edu.ntub.imd.camping.util.json.ResponseData;
+import tw.edu.ntub.imd.camping.util.json.ResponseUtils;
 import tw.edu.ntub.imd.camping.util.json.array.ArrayData;
 
 import javax.annotation.Nullable;

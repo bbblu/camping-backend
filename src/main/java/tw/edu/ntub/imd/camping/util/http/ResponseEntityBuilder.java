@@ -1,7 +1,5 @@
 package tw.edu.ntub.imd.camping.util.http;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import tw.edu.ntub.birc.common.exception.ProjectException;
@@ -117,26 +115,17 @@ public class ResponseEntityBuilder {
     }
 
     public String buildJSONString() {
-        try {
-            ObjectData result = new ObjectData()
-                    .add("result", success)
-                    .add("errorCode", ProjectException != null ? ProjectException.getErrorCode() : "")
-                    .add("message", message)
-                    .replace("data",
-                            responseData != null ?
-                                    responseData.getData() :
-                                    new ObjectData().getData()
-                    );
-            String body = ResponseUtils.createMapper().writeValueAsString(result.getData());
-            System.out.println("Response JSON = " + body);
-            return body;
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return "{\"result\": false, \"errorCode\": \"Server - JsonProcessError\", \"message\": \"" +
-                    e.getMessage() +
-                    "\", \"data\": " +
-                    (responseData.getData() instanceof ArrayNode ? "[]" : "{}") +
-                    "}";
-        }
+        ObjectData result = new ObjectData()
+                .add("result", success)
+                .add("errorCode", ProjectException != null ? ProjectException.getErrorCode() : "")
+                .add("message", message)
+                .replace("data",
+                        responseData != null ?
+                                responseData.getData() :
+                                new ObjectData().getData()
+                );
+        String body = result.toString();
+        System.out.println("Response JSON = " + body);
+        return body;
     }
 }

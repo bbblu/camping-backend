@@ -22,7 +22,7 @@ import tw.edu.ntub.imd.camping.dto.file.directory.Directory;
 import tw.edu.ntub.imd.camping.dto.file.directory.DirectoryImpl;
 import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
 import tw.edu.ntub.imd.camping.service.BaseViewService;
-import tw.edu.ntub.imd.camping.util.http.ResponseUtils;
+import tw.edu.ntub.imd.camping.util.json.ResponseUtils;
 
 import java.io.IOException;
 import java.nio.file.Paths;

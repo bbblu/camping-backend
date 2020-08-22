@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import tw.edu.ntub.imd.camping.config.properties.FileProperties;
-import tw.edu.ntub.imd.camping.util.http.ResponseUtils;
+import tw.edu.ntub.imd.camping.util.json.ResponseUtils;
 
 @Import({FileProperties.class})
 @SpringBootApplication
