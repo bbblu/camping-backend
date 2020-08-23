@@ -524,6 +524,8 @@ public class ProductGroupController {
     @Schema(name = "更新商品群組", description = "更新商品群組")
     @Data
     private static class UpdateProductGroupSchema {
+        @Schema(description = "匯款帳戶", minLength = 10, maxLength = 16, example = "12345671234567")
+        private String bankAccount;
         @Schema(description = "商品群組名稱", example = "便宜帳篷、桌椅三件套，限時特價$3990")
         private String name;
         @Schema(description = "封面圖連結，與封面圖檔擇一上傳", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
