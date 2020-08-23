@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import tw.edu.ntub.birc.common.util.MathUtils;
+import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.dto.Bank;
 import tw.edu.ntub.imd.camping.dto.BankAccount;
 import tw.edu.ntub.imd.camping.dto.CreditCard;
@@ -67,14 +68,22 @@ public class TransactionUtils {
     }
 
     public void createBankAccount(@Valid BankAccount bankAccount) {
-        ObjectData body = new ObjectData();
-        body.add("account", bankAccount.getAccount());
-        body.add("bankId", bankAccount.getBankId());
-        body.add("bankType", bankAccount.getBankType().ordinal());
-        body.add("bankName", bankAccount.getBankName());
-        body.add("money", bankAccount.getMoney());
-        sendPostRequest(createBankAccountUrl, body, new TypeReference<>() {
-        });
+        try {
+            ObjectData body = new ObjectData();
+            body.add("account", bankAccount.getAccount());
+            body.add("bankId", bankAccount.getBankId());
+            if (bankAccount.getBankType() != null) {
+                body.add("bankType", bankAccount.getBankType().ordinal());
+            }
+            body.add("bankName", bankAccount.getBankName());
+            body.add("money", bankAccount.getMoney() != null ? bankAccount.getMoney() : 10_000);
+            sendPostRequest(createBankAccountUrl, body, new TypeReference<>() {
+            });
+        } catch (CreditCardTransactionException e) {
+            if (StringUtils.isNotEquals(e.getResponseErrorCode(), "Create - Duplicate")) {
+                throw e;
+            }
+        }
     }
 
     private <T> T sendPostRequest(String url, ObjectData body, TypeReference<ResponseBody<T>> typeReference) {

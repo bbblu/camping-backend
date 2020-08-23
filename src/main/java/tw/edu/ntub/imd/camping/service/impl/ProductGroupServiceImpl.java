@@ -10,11 +10,13 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductImage;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductRelatedLink;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.view.CanBorrowProductGroup;
+import tw.edu.ntub.imd.camping.dto.BankAccount;
 import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
 import tw.edu.ntub.imd.camping.dto.file.uploader.UploadResult;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.service.transformer.*;
 import tw.edu.ntub.imd.camping.util.OwnerChecker;
+import tw.edu.ntub.imd.camping.util.TransactionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +39,7 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     private final CanBorrowProductGroupDAO canBorrowProductGroupDAO;
     private final CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer;
     private final ContactInformationDAO contactInformationDAO;
+    private final TransactionUtils transactionUtils;
 
     public ProductGroupServiceImpl(
             MultipartFileUploader uploader,
@@ -51,8 +54,8 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             ProductRelatedLinkDAO relatedLinkDAO,
             CanBorrowProductGroupDAO canBorrowProductGroupDAO,
             CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer,
-            ContactInformationDAO contactInformationDAO
-    ) {
+            ContactInformationDAO contactInformationDAO,
+            TransactionUtils transactionUtils) {
         super(groupDAO, transformer);
         this.uploader = uploader;
         this.groupDAO = groupDAO;
@@ -67,12 +70,15 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         this.canBorrowProductGroupDAO = canBorrowProductGroupDAO;
         this.canBorrowProductGroupBeanTransformer = canBorrowProductGroupBeanTransformer;
         this.contactInformationDAO = contactInformationDAO;
+        this.transactionUtils = transactionUtils;
     }
 
     @Override
     public ProductGroupBean save(ProductGroupBean productGroupBean) {
         OwnerChecker.checkContactInformationOwner(contactInformationDAO, productGroupBean.getContactInformationId());
+
         ProductGroup productGroup = transformer.transferToEntity(productGroupBean);
+        transactionUtils.createBankAccount(new BankAccount(productGroup.getBankAccount()));
         ProductGroup saveResult = groupDAO.saveAndFlush(productGroup);
         if (productGroupBean.getCoverImageFile() != null) {
             UploadResult uploadResult =

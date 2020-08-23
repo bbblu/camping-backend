@@ -2,6 +2,7 @@ package tw.edu.ntub.imd.camping.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tw.edu.ntub.imd.camping.enumerate.BankType;
 
 import javax.validation.constraints.NotBlank;
@@ -10,6 +11,7 @@ import javax.validation.constraints.Size;
 
 @Schema(name = "金融機構帳號", description = "金融機構帳號")
 @Data
+@NoArgsConstructor
 public class BankAccount {
     @Schema(description = "帳號", example = "1234567891234567")
     @NotBlank(message = "帳號 - 未填寫")
@@ -26,4 +28,8 @@ public class BankAccount {
     @Schema(description = "餘額", minimum = "0", example = "5000")
     @PositiveOrZero(message = "餘額 - 應大於等於0")
     private Integer money;
+
+    public BankAccount(String account) {
+        this.account = account;
+    }
 }
