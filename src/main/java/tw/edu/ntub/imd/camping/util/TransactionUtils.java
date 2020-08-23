@@ -7,9 +7,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 import tw.edu.ntub.birc.common.util.MathUtils;
 import tw.edu.ntub.imd.camping.dto.Bank;
+import tw.edu.ntub.imd.camping.dto.BankAccount;
 import tw.edu.ntub.imd.camping.dto.CreditCard;
 import tw.edu.ntub.imd.camping.exception.CreditCardTransactionException;
 import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
@@ -21,8 +24,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+@Validated
 @Component
 public class TransactionUtils {
     private final static HttpClient CLIENT = HttpClient.newBuilder()
@@ -32,7 +39,6 @@ public class TransactionUtils {
             .build();
     private final String searchBankUrl;
     private final String createBankAccountUrl;
-    private final String createCreditCardUrl;
     private final String createTransactionUrl;
     private final String transactionDebitUrl;
     private final ObjectMapper mapper;
@@ -42,8 +48,6 @@ public class TransactionUtils {
                     String searchBankUrl,
             @Value("${camping.credit-card-api.base-url}/bank-account")
                     String createBankAccountUrl,
-            @Value("${camping.credit-card-api.base-url}/credit-card")
-                    String createCreditCardUrl,
             @Value("${camping.credit-card-api.base-url}/transaction")
                     String createTransactionUrl,
             @Value("${camping.credit-card-api.base-url}/transaction/{id}/debit")
@@ -52,7 +56,6 @@ public class TransactionUtils {
     ) {
         this.searchBankUrl = searchBankUrl;
         this.createBankAccountUrl = createBankAccountUrl;
-        this.createCreditCardUrl = createCreditCardUrl;
         this.createTransactionUrl = createTransactionUrl;
         this.transactionDebitUrl = transactionDebitUrl;
         this.mapper = mapper;
@@ -63,33 +66,40 @@ public class TransactionUtils {
         });
     }
 
-    public void createCreditCard(@Valid CreditCard creditCard) {
+    public void createBankAccount(@Valid BankAccount bankAccount) {
         ObjectData body = new ObjectData();
-        body.add("cardId", creditCard.getCardId());
-        body.add("safeCode", creditCard.getSafeCode());
-        body.add("expireDate", creditCard.getExpireDate());
-        body.add("balance", 30_000);
-        sendPostRequest(createCreditCardUrl, body, new TypeReference<>() {
+        body.add("account", bankAccount.getAccount());
+        body.add("bankId", bankAccount.getBankId());
+        body.add("bankType", bankAccount.getBankType().ordinal());
+        body.add("bankName", bankAccount.getBankName());
+        body.add("money", bankAccount.getMoney());
+        sendPostRequest(createBankAccountUrl, body, new TypeReference<>() {
         });
     }
 
     private <T> T sendPostRequest(String url, ObjectData body, TypeReference<ResponseBody<T>> typeReference) {
-        return sendRequest(url, "POST", HttpRequest.BodyPublishers.ofString(body.toString()), typeReference);
+        return sendRequest(
+                url, "POST",
+                HttpRequest.BodyPublishers.ofString(body.toString()),
+                Collections.singletonMap("Content-Type", MediaType.APPLICATION_JSON_VALUE),
+                typeReference
+        );
     }
 
-    private <T> T sendRequest(String url, String method, HttpRequest.BodyPublisher body, TypeReference<ResponseBody<T>> typeReference) {
+    private <T> T sendRequest(String url, String method, HttpRequest.BodyPublisher body, Map<String, String> headerMap, TypeReference<ResponseBody<T>> typeReference) {
         try {
-            HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(URI.create(url))
                     .method(method, body)
-                    .version(HttpClient.Version.HTTP_1_1)
-                    .build();
+                    .version(HttpClient.Version.HTTP_1_1);
+            headerMap.forEach(requestBuilder::header);
+            HttpRequest request = requestBuilder.build();
             HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             if (MathUtils.isInRange(response.statusCode(), 200, 299)) {
                 ResponseBody<T> responseBody = mapper.readValue(response.body(), typeReference);
                 if (responseBody.isSuccess()) {
                     return responseBody.data;
                 } else {
-                    throw new CreditCardTransactionException("金流交易失敗：" + responseBody.getMessage());
+                    throw new CreditCardTransactionException("金流交易失敗：" + responseBody.getMessage(), responseBody.getErrorCode());
                 }
             } else {
                 throw new CreditCardTransactionException("金流交易失敗，Http狀態為：" + response.statusCode());
@@ -100,12 +110,14 @@ public class TransactionUtils {
     }
 
     private <T> T sendGetRequest(String url, TypeReference<ResponseBody<T>> typeReference) {
-        return sendRequest(url, "GET", HttpRequest.BodyPublishers.noBody(), typeReference);
+        return sendRequest(url, "GET", HttpRequest.BodyPublishers.noBody(), Collections.emptyMap(), typeReference);
     }
 
-    public int createTransaction(CreditCard creditCard, int money) {
+    public int createTransaction(@Valid CreditCard creditCard, String payeeBankAccount, int money) {
         try {
             ObjectData body = new ObjectData(mapper.writeValueAsString(creditCard));
+            body.add("expireDate", creditCard.getExpireDate().format(DateTimeFormatter.ofPattern("MM/yy")));
+            body.add("payeeBankAccount", payeeBankAccount);
             body.add("money", money);
             TransactionId id = sendPostRequest(createTransactionUrl, body, new TypeReference<>() {
             });
