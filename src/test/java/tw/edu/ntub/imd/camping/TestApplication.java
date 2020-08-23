@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import tw.edu.ntub.imd.camping.config.properties.FileProperties;
-import tw.edu.ntub.imd.camping.util.http.ResponseUtils;
+import tw.edu.ntub.imd.camping.util.json.JacksonJsonUtils;
 
 @Import({FileProperties.class})
 @SpringBootApplication
@@ -17,6 +17,6 @@ public class TestApplication {
 
     @Bean
     public ObjectMapper objectMapper() {
-        return ResponseUtils.createMapper();
+        return JacksonJsonUtils.createMapper();
     }
 }

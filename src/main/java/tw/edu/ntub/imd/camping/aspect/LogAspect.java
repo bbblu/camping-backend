@@ -43,7 +43,7 @@ public class LogAspect {
                     "execution(" +
                     "public " +
                     "org.springframework.http.ResponseEntity<String> " +
-                    "tw.edu.ntub.imd.courtesyumbrella.controller.*.*(..)" +
+                    "*.*(..)" +
                     ")"
     )
     public void controllerPointcut() {

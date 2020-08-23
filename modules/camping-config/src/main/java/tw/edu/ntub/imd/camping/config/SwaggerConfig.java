@@ -31,7 +31,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                version = "1.1.0",
+                version = "1.3.5",
                 title = "借借露 - API",
                 description = "此為所有系統API功能列表，如有疑問，請洽負責人員\n" +
                         "\n" +
@@ -144,6 +144,15 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .setGroup("商品租借 - Rental")
                 .pathsToMatch("/rental/**")
+                .addOpenApiCustomiser(openApiCustomiser)
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi bankApi(@Qualifier("defaultOpenApiCustomiser") OpenApiCustomiser openApiCustomiser) {
+        return GroupedOpenApi.builder()
+                .setGroup("金融機構 - Bank")
+                .pathsToMatch("/bank/**")
                 .addOpenApiCustomiser(openApiCustomiser)
                 .build();
     }

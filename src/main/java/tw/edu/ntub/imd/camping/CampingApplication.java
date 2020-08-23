@@ -22,7 +22,7 @@ import tw.edu.ntub.imd.camping.dto.file.directory.Directory;
 import tw.edu.ntub.imd.camping.dto.file.directory.DirectoryImpl;
 import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
 import tw.edu.ntub.imd.camping.service.BaseViewService;
-import tw.edu.ntub.imd.camping.util.http.ResponseUtils;
+import tw.edu.ntub.imd.camping.util.json.JacksonJsonUtils;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -36,7 +36,7 @@ public class CampingApplication {
 
     @Bean
     public ObjectMapper objectMapper() {
-        ObjectMapper mapper = ResponseUtils.createMapper();
+        ObjectMapper mapper = JacksonJsonUtils.createMapper();
         SimpleModule projectModule = new SimpleModule("projectModule",
                 new Version(1, 0, 0, "", "tw.edu.ntub.imd", "camping")
         );

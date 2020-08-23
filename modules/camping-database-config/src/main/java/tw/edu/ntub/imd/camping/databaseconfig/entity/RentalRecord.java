@@ -66,12 +66,28 @@ public class RentalRecord {
     private RentalRecordStatus status;
 
     /**
+     * 信用卡交易編號
+     *
+     * @since 1.4.0
+     */
+    @Column(name = "transaction_id", nullable = false)
+    private Integer transactionId;
+
+    /**
      * 租借者帳號
      *
      * @since 1.0.0
      */
     @Column(name = "renter_account", length = 100, nullable = false)
     private String renterAccount;
+
+    /**
+     * 租借人的信用卡號(只顯示末四碼)
+     *
+     * @since 1.4.0
+     */
+    @Column(name = "renter_credit_card_id", length = 16, nullable = false)
+    private String renterCreditCardId;
 
     /**
      * 租借人的聯絡方式編號

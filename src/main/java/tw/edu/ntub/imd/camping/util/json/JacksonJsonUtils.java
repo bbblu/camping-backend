@@ -1,4 +1,4 @@
-package tw.edu.ntub.imd.camping.util.http;
+package tw.edu.ntub.imd.camping.util.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -14,14 +14,11 @@ import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.birc.common.wrapper.date.*;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Year;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
-public class ResponseUtils {
+public class JacksonJsonUtils {
     // JSON的Content-Type字串
     public static final String JSON_MIME_TYPE = "application/json; charset=UTF-8";
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -51,7 +48,7 @@ public class ResponseUtils {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    private ResponseUtils() {
+    private JacksonJsonUtils() {
 
     }
 
@@ -189,8 +186,17 @@ public class ResponseUtils {
                     if (StringUtils.isBlank(p.getValueAsString())) {
                         return null;
                     }
-                    int year = Integer.parseInt(p.getValueAsString());
+                    int year = p.getValueAsInt();
                     return Year.of(year);
+                }
+            });
+            addDeserializer(YearMonth.class, new JsonDeserializer<>() {
+                @Override
+                public YearMonth deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+                    if (StringUtils.isBlank(p.getValueAsString())) {
+                        return null;
+                    }
+                    return YearMonth.parse(p.getValueAsString(), DateTimeFormatter.ofPattern("MM/yy"));
                 }
             });
         }

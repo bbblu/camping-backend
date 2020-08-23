@@ -5,6 +5,7 @@ import tw.edu.ntub.birc.common.util.JavaBeanUtils;
 import tw.edu.ntub.imd.camping.bean.RentalRecordBean;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.RentalDetailDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
+import tw.edu.ntub.imd.camping.dto.CreditCard;
 import tw.edu.ntub.imd.camping.service.transformer.RentalDetailTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.RentalRecordTransformer;
 
@@ -23,7 +24,12 @@ public class RentalRecordTransformerImpl implements RentalRecordTransformer {
     @Nonnull
     @Override
     public RentalRecord transferToEntity(@Nonnull RentalRecordBean rentalRecordBean) {
-        return JavaBeanUtils.copy(rentalRecordBean, new RentalRecord());
+        RentalRecord result = JavaBeanUtils.copy(rentalRecordBean, new RentalRecord());
+        if (rentalRecordBean.getRenterCreditCard() != null) {
+            CreditCard renterCreditCard = rentalRecordBean.getRenterCreditCard();
+            result.setRenterCreditCardId(renterCreditCard.getCardId());
+        }
+        return result;
     }
 
     @Nonnull
@@ -33,6 +39,9 @@ public class RentalRecordTransformerImpl implements RentalRecordTransformer {
         result.setDetailBeanList(detailTransformer.transferToBeanList(
                 detailDAO.findByRecordId(rentalRecord.getId())
         ));
+        CreditCard creditCard = new CreditCard();
+        creditCard.setCardId(rentalRecord.getRenterCreditCardId());
+        result.setRenterCreditCard(creditCard);
         return result;
     }
 }
