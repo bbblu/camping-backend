@@ -501,6 +501,7 @@ public class ProductGroupController {
             @ArraySchema(minItems = 0, schema = @Schema(description = "商品相關連結陣列", implementation = ProductRelatedLinkContentSchema.class))
             private ProductRelatedLinkContentSchema[] relatedLinkArray;
 
+            @Schema(name = "商品圖片", description = "商品圖片")
             @Hidden
             @Data
             private static class ProductImageContentSchema {
@@ -510,6 +511,7 @@ public class ProductGroupController {
                 private String url;
             }
 
+            @Schema(name = "商品相關連結", description = "商品相關連結")
             @Hidden
             @Data
             private static class ProductRelatedLinkContentSchema {
