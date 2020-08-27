@@ -1,18 +1,17 @@
 package tw.edu.ntub.imd.camping.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.imd.camping.bean.ContactInformationBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
+import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.service.ContactInformationService;
 import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
@@ -20,7 +19,6 @@ import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
 import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import java.util.Optional;
 
 @Tag(name = "User", description = "使用者API")
@@ -60,12 +58,6 @@ public class UserController {
             method = "GET",
             summary = "查詢使用者資訊",
             description = "查詢使用者資訊",
-            parameters = @Parameter(
-                    name = "account",
-                    content = @Content(schema = @Schema(type = "string")),
-                    description = "帳號",
-                    example = "test"
-            ),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "查詢成功",
@@ -75,13 +67,10 @@ public class UserController {
                     )
             )
     )
-    @PreAuthorize("hasAnyAuthority('Administrator', 'User')")
-    @GetMapping(path = "/{account}")
-    public ResponseEntity<String> getUserInfo(
-            @PathVariable(name = "account")
-            @NotBlank(message = "使用者帳號不能為空")
-                    String account
-    ) {
+    @GetMapping(path = "")
+    public ResponseEntity<String> getUserInfo() {
+        String account = SecurityUtils.getLoginUserAccount();
+
         Optional<UserBean> optionalUser = userService.getById(account);
         if (optionalUser.isPresent()) {
             UserBean userBean = optionalUser.get();
