@@ -82,6 +82,7 @@ public class UserController {
             data.add("account", userBean.getAccount());
             data.add("firstName", userBean.getFirstName());
             data.add("lastName", userBean.getLastName());
+            data.add("nickName", userBean.getNickName());
             data.add("gender", userBean.getGenderName());
             data.add("birthday", userBean.getBirthday());
             data.add("experience", userBean.getExperience().toString());
