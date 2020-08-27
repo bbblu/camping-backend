@@ -42,10 +42,10 @@ public enum Experience {
 
     @Override
     public String toString() {
-        switch (this.id) {
-            case "0":
+        switch (this) {
+            case ROOKIE:
                 return "0~5次 新手";
-            case "1":
+            case VETERAN:
                 return "5次以上 老手";
             default:
                 return "不提供";
