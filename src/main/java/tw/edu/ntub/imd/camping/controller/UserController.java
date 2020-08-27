@@ -10,6 +10,7 @@ import lombok.Data;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.imd.camping.bean.ContactInformationBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
@@ -20,6 +21,7 @@ import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
 import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
+import tw.edu.ntub.imd.camping.validation.CreateUser;
 
 import javax.validation.Valid;
 import java.util.Arrays;
@@ -51,7 +53,7 @@ public class UserController {
             )
     )
     @PostMapping(path = "")
-    public ResponseEntity<String> register(@Valid @RequestBody UserBean userBean, BindingResult bindingResult) {
+    public ResponseEntity<String> register(@Validated(CreateUser.class) @RequestBody UserBean userBean, BindingResult bindingResult) {
         BindingResultUtils.validate(bindingResult);
         userService.save(userBean);
         return ResponseEntityBuilder.success().message("註冊成功").build();
@@ -95,6 +97,38 @@ public class UserController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @Operation(
+            tags = "User",
+            method = "PATCH",
+            summary = "更新使用者資訊",
+            description = "更新使用者資訊",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UpdateUserInfoSchema.class)
+                    )
+            ),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "更新成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    )
+            )
+    )
+    @PatchMapping(path = "")
+    public ResponseEntity<String> updateUserInfo(
+            @Valid @RequestBody UserBean user,
+            BindingResult bindingResult
+    ) {
+        String account = SecurityUtils.getLoginUserAccount();
+
+        BindingResultUtils.validate(bindingResult);
+        userService.update(account, user);
+        return ResponseEntityBuilder.success().message("更新成功").build();
     }
 
     @Operation(
@@ -150,6 +184,22 @@ public class UserController {
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
     // |----------------------------------------------------------以下為Swagger所需使用的Schema---------------------------------------------------------|
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
+
+    @Schema(name = "更新使用者資訊", description = "更新使用者資訊")
+    @Data
+    private static class UpdateUserInfoSchema {
+        @Schema(description = "露營經驗(0: 新手/ 1: 有過幾次經驗)", type = "int", example = "0")
+        private Experience experience;
+
+        @Schema(description = "暱稱", example = "煞氣a小明")
+        private String nickName;
+
+        @Schema(description = "信箱", example = "10646000@ntub.edu.tw")
+        private String email;
+
+        @Schema(description = "地址", example = "台北市中正區濟南路321號")
+        private String address;
+    }
 
     @Schema(name = "露營經驗", description = "露營經驗")
     @Data
