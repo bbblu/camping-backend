@@ -16,6 +16,7 @@ import tw.edu.ntub.imd.camping.bean.ContactInformationBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
+import tw.edu.ntub.imd.camping.exception.InvalidOldPasswordException;
 import tw.edu.ntub.imd.camping.service.ContactInformationService;
 import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
@@ -134,6 +135,51 @@ public class UserController {
     @Operation(
             tags = "User",
             method = "POST",
+            summary = "修改密碼",
+            description = "修改密碼",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ChangePasswordSchema.class)
+                    )
+            ),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "修改成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    )
+            )
+    )
+    @PostMapping(path = "/change-password")
+    public ResponseEntity<String> changePassword(
+            @RequestBody String password,
+            @RequestBody String newPassword
+    ) {
+        System.out.println(password);
+        System.out.println(newPassword);
+        String account = SecurityUtils.getLoginUserAccount();
+
+        Optional<UserBean> optionalUser = userService.getById(account);
+        if (optionalUser.isPresent()) {
+            UserBean userBean = optionalUser.get();
+            if (!userService.isOldPasswordValid(userBean, password)) {
+                throw new InvalidOldPasswordException();
+            }
+
+            userService.changePassword(userBean, newPassword);
+
+            return ResponseEntityBuilder.success().message("更新成功").build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+    @Operation(
+            tags = "User",
+            method = "POST",
             summary = "新增聯絡方式",
             description = "新增登入者的聯絡方式",
             responses = @ApiResponse(
@@ -199,6 +245,16 @@ public class UserController {
 
         @Schema(description = "地址", example = "台北市中正區濟南路321號")
         private String address;
+    }
+
+    @Schema(name = "修改密碼", description = "修改密碼")
+    @Data
+    private static class ChangePasswordSchema {
+        @Schema(description = "舊密碼", example = "hello")
+        private String password;
+
+        @Schema(description = "新密碼", example = "goodbye")
+        private String newPassword;
     }
 
     @Schema(name = "露營經驗", description = "露營經驗")

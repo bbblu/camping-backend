@@ -37,4 +37,15 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
             throw new DuplicateCreateException(userBean.getAccount() + "帳號已有人註冊");
         }
     }
+
+    @Override
+    public boolean isOldPasswordValid(UserBean userBean, String oldPassword) {
+        String checkPassword = userBean.getPassword();
+        return checkPassword.equals(oldPassword);
+    }
+
+    @Override
+    public void changePassword(UserBean userBean, String newPassword) {
+        userBean.setPassword(passwordEncoder.encode(userBean.getPassword()));
+    }
 }
