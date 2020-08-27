@@ -40,13 +40,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
                         "| 李恩瑋 | 10646007@ntub.edu.tw |\n" +
                         "| 黃峻彥 | 10646003@ntub.edu.tw |\n" +
                         "\n" +
-                        "  以下為標準回傳格式，data請替換成API的RequestBody\n" +
+                        "  以下為標準回傳格式，data請替換成API的Responses\n" +
                         "  ```json=\n" +
                         "  {\n" +
                         "      \"result\": boolean,\n" +
                         "      \"errorCode\": string,\n" +
                         "      \"message\": string,\n" +
-                        "      \"data\": (參考RequestBody)\n" +
+                        "      \"data\": (參考Responses)\n" +
                         "  }\n" +
                         "  ```",
                 contact = @Contact(
