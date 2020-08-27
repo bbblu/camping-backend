@@ -1,10 +1,12 @@
 package tw.edu.ntub.imd.camping.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.Data;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.imd.camping.bean.ContactInformationBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
+import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
 import tw.edu.ntub.imd.camping.service.ContactInformationService;
 import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
@@ -19,6 +22,7 @@ import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
 import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.Optional;
 
 @Tag(name = "User", description = "使用者API")
@@ -113,5 +117,46 @@ public class UserController {
         BindingResultUtils.validate(bindingResult);
         contactInformationService.save(contactInformationBean);
         return ResponseEntityBuilder.success().message("新增成功").build();
+    }
+
+    @Operation(
+            tags = "User",
+            method = "GET",
+            summary = "查詢露營經驗列表",
+            description = "查詢露營經驗列表",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "查詢成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = ExperienceSchema.class))
+                    )
+            )
+    )
+    @GetMapping(path = "/experience")
+    public ResponseEntity<String> getExperienceList() {
+        return ResponseEntityBuilder.success()
+                .message("查詢成功")
+                .data(Arrays.asList(Experience.values()), this::addExperienceToObjectData)
+                .build();
+    }
+
+    private void addExperienceToObjectData(ObjectData data, Experience experience) {
+        data.add("id", experience.id);
+        data.add("display", experience.toString());
+    }
+
+    // |---------------------------------------------------------------------------------------------------------------------------------------------|
+    // |----------------------------------------------------------以下為Swagger所需使用的Schema---------------------------------------------------------|
+    // |---------------------------------------------------------------------------------------------------------------------------------------------|
+
+    @Schema(name = "露營經驗", description = "露營經驗")
+    @Data
+    private static class ExperienceSchema {
+        @Schema(description = "編號", example = "0")
+        private String id;
+
+        @Schema(description = "顯示文字", example = "0~5次 新手")
+        private String display;
     }
 }
