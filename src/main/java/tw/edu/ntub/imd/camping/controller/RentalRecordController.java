@@ -80,47 +80,77 @@ public class RentalRecordController {
     public ResponseEntity<String> searchAll() {
         return ResponseEntityBuilder.success()
                 .message("查詢成功")
-                .data(rentalRecordService.searchByRenterAccount(SecurityUtils.getLoginUserAccount()), (rentalRecordData, rentalRecord) -> {
-                    ProductGroupBean productGroup = rentalRecord.getProductGroup();
-                    ContactInformationBean contactInformation = productGroup.getContactInformation();
-                    rentalRecordData.add("id", rentalRecord.getId());
-                    rentalRecordData.add("status", rentalRecord.getStatus().ordinal());
-                    rentalRecordData.add("borrowRange", String.format(
-                            "%s-%s",
-                            rentalRecord.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")),
-                            rentalRecord.getBorrowEndDate().format(DateTimeFormatter.ofPattern("MM/dd"))
-                    ));
-                    rentalRecordData.add("name", productGroup.getName());
-                    rentalRecordData.add("coverImage", productGroup.getCoverImage());
-                    rentalRecordData.add("areaName", productGroup.getCityAreaName());
-                    rentalRecordData.add("price", PRICE_FORMATTER.format(productGroup.getPrice()));
-                    UserBean createUser = productGroup.getCreateUser();
-                    ObjectData sellerData = rentalRecordData.addObject("seller");
-                    sellerData.add("nickName", createUser.getNickName());
-                    sellerData.add("email", createUser.getEmail());
-                    rentalRecordData.add("contactInformation", contactInformation.getContent());
-                    rentalRecordData.add("rentalDate", rentalRecord.getRentalDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
+                .data(
+                        rentalRecordService.searchByRenterAccount(SecurityUtils.getLoginUserAccount()),
+                        this::addRentalRecordToData
+                )
+                .build();
+    }
 
-                    CollectionObjectData collectionObjectData = rentalRecordData.createCollectionData();
-                    collectionObjectData.add("detailArray", rentalRecord.getDetailBeanList(), (detailData, detail) -> {
-                        ProductBean product = detail.getProduct();
-                        detailData.add("status", detail.getStatus().ordinal());
-                        detailData.add("type", product.getTypeName());
-                        detailData.add("name", product.getName());
-                        detailData.add("count", product.getCount());
-                        detailData.add("brand", product.getBrand());
-                        detailData.add("useInformation", product.getUseInformation());
-                        detailData.add("brokenCompensation", product.getBrokenCompensation());
-                        detailData.addStringArray("imageArray", product.getImageArray() != null ?
-                                product.getImageArray().parallelStream().map(ProductImageBean::getUrl).collect(Collectors.toList()) :
-                                Collections.emptyList()
-                        );
-                        detailData.addStringArray("relatedLinkArray", product.getRelatedLinkList() != null ?
-                                product.getRelatedLinkList().parallelStream().map(ProductRelatedLinkBean::getUrl).collect(Collectors.toList()) :
-                                Collections.emptyList()
-                        );
-                    });
-                })
+    private void addRentalRecordToData(ObjectData rentalRecordData, RentalRecordBean rentalRecord) {
+        ProductGroupBean productGroup = rentalRecord.getProductGroup();
+        ContactInformationBean contactInformation = productGroup.getContactInformation();
+        rentalRecordData.add("id", rentalRecord.getId());
+        rentalRecordData.add("status", rentalRecord.getStatus().ordinal());
+        rentalRecordData.add("borrowRange", String.format(
+                "%s-%s",
+                rentalRecord.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")),
+                rentalRecord.getBorrowEndDate().format(DateTimeFormatter.ofPattern("MM/dd"))
+        ));
+        rentalRecordData.add("name", productGroup.getName());
+        rentalRecordData.add("coverImage", productGroup.getCoverImage());
+        rentalRecordData.add("areaName", productGroup.getCityAreaName());
+        rentalRecordData.add("price", PRICE_FORMATTER.format(productGroup.getPrice()));
+        UserBean createUser = productGroup.getCreateUser();
+        ObjectData sellerData = rentalRecordData.addObject("seller");
+        sellerData.add("nickName", createUser.getNickName());
+        sellerData.add("email", createUser.getEmail());
+        rentalRecordData.add("contactInformation", contactInformation.getContent());
+        rentalRecordData.add("rentalDate", rentalRecord.getRentalDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
+
+        CollectionObjectData collectionObjectData = rentalRecordData.createCollectionData();
+        collectionObjectData.add("detailArray", rentalRecord.getDetailBeanList(), (detailData, detail) -> {
+            ProductBean product = detail.getProduct();
+            detailData.add("status", detail.getStatus().ordinal());
+            detailData.add("type", product.getTypeName());
+            detailData.add("name", product.getName());
+            detailData.add("count", product.getCount());
+            detailData.add("brand", product.getBrand());
+            detailData.add("useInformation", product.getUseInformation());
+            detailData.add("brokenCompensation", product.getBrokenCompensation());
+            detailData.addStringArray("imageArray", product.getImageArray() != null ?
+                    product.getImageArray().parallelStream().map(ProductImageBean::getUrl).collect(Collectors.toList()) :
+                    Collections.emptyList()
+            );
+            detailData.addStringArray("relatedLinkArray", product.getRelatedLinkList() != null ?
+                    product.getRelatedLinkList().parallelStream().map(ProductRelatedLinkBean::getUrl).collect(Collectors.toList()) :
+                    Collections.emptyList()
+            );
+        });
+    }
+
+    @Operation(
+            tags = "Rental",
+            method = "GET",
+            summary = "查詢出借紀錄",
+            description = "查詢登入者的所有出借紀錄",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "查詢成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = SearchRentalRecordResult.class)
+                    )
+            )
+    )
+    @GetMapping(path = "/borrow")
+    public ResponseEntity<String> searchAllBorrowRecord() {
+        return ResponseEntityBuilder.success()
+                .message("查詢成功")
+                .data(
+                        rentalRecordService.searchByProductGroupCreateAccount(SecurityUtils.getLoginUserAccount()),
+                        this::addRentalRecordToData
+                )
                 .build();
     }
 

@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface RentalRecordService extends BaseService<RentalRecordBean, Integer> {
     List<RentalRecordBean> searchByRenterAccount(String renterAccount);
+
+    List<RentalRecordBean> searchByProductGroupCreateAccount(String productGroupCreateAccount);
 }

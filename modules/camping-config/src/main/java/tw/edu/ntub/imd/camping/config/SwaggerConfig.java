@@ -31,7 +31,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                version = "1.4.2",
+                version = "1.4.3",
                 title = "借借露 - API",
                 description = "此為所有系統API功能列表，如有疑問，請洽負責人員\n" +
                         "\n" +
