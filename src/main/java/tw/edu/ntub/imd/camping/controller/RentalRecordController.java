@@ -23,6 +23,7 @@ import tw.edu.ntub.imd.camping.util.json.object.SingleValueObjectData;
 
 import javax.validation.Valid;
 import java.text.DecimalFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
@@ -84,6 +85,11 @@ public class RentalRecordController {
                     ContactInformationBean contactInformation = productGroup.getContactInformation();
                     rentalRecordData.add("id", rentalRecord.getId());
                     rentalRecordData.add("status", rentalRecord.getStatus().ordinal());
+                    rentalRecordData.add("borrowRange", String.format(
+                            "%s-%s",
+                            rentalRecord.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")),
+                            rentalRecord.getBorrowEndDate().format(DateTimeFormatter.ofPattern("MM/dd"))
+                    ));
                     rentalRecordData.add("name", productGroup.getName());
                     rentalRecordData.add("coverImage", productGroup.getCoverImage());
                     rentalRecordData.add("areaName", productGroup.getCityAreaName());
@@ -136,6 +142,8 @@ public class RentalRecordController {
         private Integer id;
         @Schema(description = "狀態(0:取消/ 1: 未取貨/ 2:未歸還/ 3:已歸還/ 4: 已檢查)", minimum = "0", maximum = "4", example = "4")
         private Integer status;
+        @Schema(description = "租借期間", example = "2020/12/10-12/13")
+        private String borrowRange;
         @Schema(description = "商品群組名稱", example = "4人帳四角睡帳客廳帳 桌椅 營燈 廚具")
         private String name;
         @Schema(description = "封面圖URL", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
