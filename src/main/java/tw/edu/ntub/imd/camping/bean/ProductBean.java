@@ -63,6 +63,7 @@ public class ProductBean {
     private String memo;
 
     @Schema(description = "商品圖片")
+    @Size(max = 5, message = "商品圖 - 最多{max}張")
     private List<@Valid ProductImageBean> imageArray;
 
     private List<

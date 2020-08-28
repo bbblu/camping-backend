@@ -80,4 +80,9 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     public List<RentalRecordBean> searchByRenterAccount(String renterAccount) {
         return transformer.transferToBeanList(recordDAO.findByRenterAccountAndEnableIsTrue(renterAccount, Sort.by(Sort.Order.desc(RentalRecord_.RENTAL_DATE))));
     }
+
+    @Override
+    public List<RentalRecordBean> searchByProductGroupCreateAccount(String productGroupCreateAccount) {
+        return transformer.transferToBeanList(recordDAO.findAllBorrowRecord(productGroupCreateAccount, Sort.by(Sort.Order.desc(RentalRecord_.RENTAL_DATE))));
+    }
 }
