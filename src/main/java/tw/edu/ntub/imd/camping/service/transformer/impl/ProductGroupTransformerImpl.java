@@ -9,6 +9,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.service.transformer.ContactInformationTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.ProductGroupTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.ProductTransformer;
+import tw.edu.ntub.imd.camping.service.transformer.UserTransformer;
 
 import javax.annotation.Nonnull;
 
@@ -17,15 +18,17 @@ public class ProductGroupTransformerImpl implements ProductGroupTransformer {
     private final ContactInformationTransformer contactInformationTransformer;
     private final ProductDAO productDAO;
     private final ProductTransformer productTransformer;
+    private final UserTransformer userTransformer;
 
     public ProductGroupTransformerImpl(
             ContactInformationTransformer contactInformationTransformer,
             ProductDAO productDAO,
-            ProductTransformer productTransformer
-    ) {
+            ProductTransformer productTransformer,
+            UserTransformer userTransformer) {
         this.contactInformationTransformer = contactInformationTransformer;
         this.productDAO = productDAO;
         this.productTransformer = productTransformer;
+        this.userTransformer = userTransformer;
     }
 
     @Nonnull
@@ -42,6 +45,9 @@ public class ProductGroupTransformerImpl implements ProductGroupTransformer {
             result.setContactInformation(contactInformationTransformer.transferToBean(
                     productGroup.getContactInformationByContactInformationId()
             ));
+        }
+        if (productGroup.getUserByCreateAccount() != null) {
+            result.setCreateUser(userTransformer.transferToBean(productGroup.getUserByCreateAccount()));
         }
         if (productGroup.getId() != null && CollectionUtils.isEmpty(result.getProductArray())) {
             result.setProductArray(productTransformer.transferToBeanList(

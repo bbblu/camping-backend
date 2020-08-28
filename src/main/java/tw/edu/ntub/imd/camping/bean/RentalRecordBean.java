@@ -1,11 +1,13 @@
 package tw.edu.ntub.imd.camping.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import tw.edu.ntub.birc.common.annotation.AliasName;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.dto.CreditCard;
 
@@ -19,7 +21,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class RentalRecordBean {
     @Hidden
-    @Null(message = "編號 - 不得在新增時填寫")
+    @Null(message = "id - 不得填寫")
     private Integer id;
 
     @Schema(description = "租借商品編號", example = "1")
@@ -29,15 +31,15 @@ public class RentalRecordBean {
 
     @Hidden
     @Getter(AccessLevel.NONE)
-    @Null(message = "是否啟用 - 不得在新增時填寫")
+    @Null(message = "enable - 不得填寫")
     private Boolean enable;
 
     @Hidden
-    @Null(message = "狀態 - 不得在新增時填寫")
+    @Null(message = "status - 不得填寫")
     private RentalRecordStatus status;
 
     @Hidden
-    @Null(message = "租借者帳號 - 不得在新增時填寫")
+    @Null(message = "renterAccount - 不得填寫")
     private String renterAccount;
 
     @Schema(description = "租借者信用卡資料")
@@ -51,7 +53,7 @@ public class RentalRecordBean {
     private Integer renterContactInformationId;
 
     @Hidden
-    @Null(message = "租借時間 - 不得在新增時填寫")
+    @Null(message = "rentalDate - 不得填寫")
     private LocalDateTime rentalDate;
 
     @Schema(description = "預計租借起始時間(yyyy/MM/dd HH:mm)", type = "string", example = "2020/08/16 15:28")
@@ -69,27 +71,43 @@ public class RentalRecordBean {
     private Integer campId;
 
     @Hidden
-    @Null(message = "取貨時間 - 不得在新增時填寫")
+    @JsonIgnore
+    @Null(message = "camp - 不得填寫")
+    @AliasName("campByCampId.name")
+    private String campName;
+
+    @Hidden
+    @JsonIgnore
+    @Null(message = "pickDate - 不得填寫")
     private LocalDateTime pickDate;
 
     @Hidden
-    @Null(message = "歸還時間 - 不得在新增時填寫")
+    @JsonIgnore
+    @Null(message = "returnDate - 不得填寫")
     private LocalDateTime returnDate;
 
     @Hidden
-    @Null(message = "檢查時間 - 不得在新增時填寫")
+    @JsonIgnore
+    @Null(message = "checkDate - 不得填寫")
     private LocalDateTime checkDate;
 
     @Hidden
-    @Null(message = "檢查結果 - 不得在新增時填寫")
+    @Null(message = "checkResult - 不得填寫")
     private String checkResult;
 
     @Hidden
-    @Null(message = "取消時間 - 不得在新增時填寫")
+    @JsonIgnore
+    @Null(message = "cancelDate - 不得填寫")
     private LocalDateTime cancelDate;
 
     @Hidden
-    @Null(message = "詳細記錄 - 不得在新增時填寫")
+    @JsonIgnore
+    @Null(message = "productGroup - 不得填寫")
+    private ProductGroupBean productGroup;
+
+    @Hidden
+    @JsonIgnore
+    @Null(message = "detailBeanList - 不得填寫")
     private List<RentalDetailBean> detailBeanList;
 
     @Hidden

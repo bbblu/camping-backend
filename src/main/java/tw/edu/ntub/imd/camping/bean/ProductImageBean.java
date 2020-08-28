@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.validator.constraints.URL;
 import org.springframework.web.multipart.MultipartFile;
 import tw.edu.ntub.birc.common.util.BooleanUtils;
 import tw.edu.ntub.birc.common.util.StringUtils;
@@ -22,7 +21,6 @@ public class ProductImageBean {
     private Integer productId;
 
     @Schema(description = "圖片連結", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
-    @URL(message = "圖片連結 - 請輸入網址連結")
     private String url;
 
     @Schema(description = "圖片檔", type = "file")
