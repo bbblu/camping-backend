@@ -36,5 +36,21 @@ public class RentalRecordListener {
     public void preUpdate(RentalRecord rentalRecord) {
         rentalRecord.setLastModifyAccount(SecurityUtils.getLoginUserAccount());
         rentalRecord.setLastModifyDate(LocalDateTime.now());
+        switch (rentalRecord.getStatus()) {
+            case CANCEL:
+                rentalRecord.setCancelDate(LocalDateTime.now());
+                break;
+            case NOT_PICK_UP:
+                break;
+            case NOT_RETURN:
+                rentalRecord.setPickDate(LocalDateTime.now());
+                break;
+            case RETRIEVE:
+                rentalRecord.setReturnDate(LocalDateTime.now());
+                break;
+            case CHECKED:
+                rentalRecord.setCheckDate(LocalDateTime.now());
+                break;
+        }
     }
 }

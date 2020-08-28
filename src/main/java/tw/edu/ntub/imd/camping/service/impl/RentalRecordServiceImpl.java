@@ -4,10 +4,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.RentalRecordBean;
+import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord_;
+import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
+import tw.edu.ntub.imd.camping.exception.CanceledRentalRecordException;
+import tw.edu.ntub.imd.camping.exception.LastRentalRecordStatusException;
+import tw.edu.ntub.imd.camping.exception.NotFoundException;
+import tw.edu.ntub.imd.camping.exception.NotRentalRecordOwnerException;
 import tw.edu.ntub.imd.camping.service.RentalRecordService;
 import tw.edu.ntub.imd.camping.service.transformer.RentalDetailTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.RentalRecordTransformer;
@@ -15,6 +21,7 @@ import tw.edu.ntub.imd.camping.util.OwnerChecker;
 import tw.edu.ntub.imd.camping.util.TransactionUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -84,5 +91,24 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     @Override
     public List<RentalRecordBean> searchByProductGroupCreateAccount(String productGroupCreateAccount) {
         return transformer.transferToBeanList(recordDAO.findAllBorrowRecord(productGroupCreateAccount, Sort.by(Sort.Order.desc(RentalRecord_.RENTAL_DATE))));
+    }
+
+    @Override
+    public void updateStatusToNext(int id) {
+        Optional<RentalRecord> optionalRentalRecord = recordDAO.findById(id);
+        RentalRecord rentalRecord = optionalRentalRecord.orElseThrow(() -> new NotFoundException("無此紀錄" + id));
+        if (recordDAO.isNotRenterAndProductGroupCreator(id, SecurityUtils.getLoginUserAccount())) {
+            throw new NotRentalRecordOwnerException(id, SecurityUtils.getLoginUserAccount());
+        }
+
+        RentalRecordStatus status = rentalRecord.getStatus();
+        if (status == RentalRecordStatus.CANCEL) {
+            throw new CanceledRentalRecordException(id);
+        } else if (status == RentalRecordStatus.CHECKED) {
+            throw new LastRentalRecordStatusException();
+        } else {
+            rentalRecord.setStatus(status.next());
+            recordDAO.save(rentalRecord);
+        }
     }
 }

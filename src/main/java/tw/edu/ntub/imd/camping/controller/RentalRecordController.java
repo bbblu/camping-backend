@@ -1,6 +1,7 @@
 package tw.edu.ntub.imd.camping.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,6 +23,7 @@ import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 import tw.edu.ntub.imd.camping.util.json.object.SingleValueObjectData;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -151,6 +153,25 @@ public class RentalRecordController {
                         rentalRecordService.searchByProductGroupCreateAccount(SecurityUtils.getLoginUserAccount()),
                         this::addRentalRecordToData
                 )
+                .build();
+    }
+
+    @Operation(
+            tags = "Rental",
+            method = "PATCH",
+            summary = "更新租借紀錄狀態",
+            description = "更新租借紀錄狀態至下一階段",
+            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1"),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "更新成功"
+            )
+    )
+    @PatchMapping(path = "/{id}/status")
+    public ResponseEntity<String> updateStatusToNext(@PathVariable(name = "id") @Positive(message = "id - 應大於0") int id) {
+        rentalRecordService.updateStatusToNext(id);
+        return ResponseEntityBuilder.success()
+                .message("更新成功")
                 .build();
     }
 
