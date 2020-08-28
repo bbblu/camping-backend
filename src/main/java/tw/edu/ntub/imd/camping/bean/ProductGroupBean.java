@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.validator.constraints.URL;
 import org.springframework.web.multipart.MultipartFile;
 import tw.edu.ntub.birc.common.util.BooleanUtils;
 import tw.edu.ntub.birc.common.util.StringUtils;
@@ -34,7 +33,6 @@ public class ProductGroupBean {
     private String name;
 
     @Schema(description = "封面圖連結，與封面圖檔擇一上傳", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
-    @URL(message = "封面圖連結 - 請輸入網址連結")
     private String coverImage;
 
     @Schema(description = "封面圖檔，與封面圖連結擇一上傳", type = "file")
@@ -77,6 +75,10 @@ public class ProductGroupBean {
     @Schema(description = "商品")
     @Size(groups = CreateProductGroup.class, min = 1, message = "商品 - 至少需新增一項")
     private List<@Valid ProductBean> productArray;
+
+    @Hidden
+    @Null(message = "createUser - 不得填寫")
+    private UserBean createUser;
 
     @Hidden
     @AssertTrue(message = "租借起始日期應等於結束日期或在結束日期之前")

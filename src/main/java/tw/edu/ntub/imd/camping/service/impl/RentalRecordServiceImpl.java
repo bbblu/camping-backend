@@ -1,17 +1,20 @@
 package tw.edu.ntub.imd.camping.service.impl;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.RentalRecordBean;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord_;
 import tw.edu.ntub.imd.camping.service.RentalRecordService;
 import tw.edu.ntub.imd.camping.service.transformer.RentalDetailTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.RentalRecordTransformer;
 import tw.edu.ntub.imd.camping.util.OwnerChecker;
 import tw.edu.ntub.imd.camping.util.TransactionUtils;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -71,5 +74,10 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
                 .peek(rentalDetail -> rentalDetail.setRecordId(recordId))
                 .collect(Collectors.toList())
         );
+    }
+
+    @Override
+    public List<RentalRecordBean> searchByRenterAccount(String renterAccount) {
+        return transformer.transferToBeanList(recordDAO.findByRenterAccountAndEnableIsTrue(renterAccount, Sort.by(Sort.Order.desc(RentalRecord_.RENTAL_DATE))));
     }
 }
