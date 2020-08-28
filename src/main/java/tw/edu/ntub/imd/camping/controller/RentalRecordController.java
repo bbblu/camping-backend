@@ -84,7 +84,9 @@ public class RentalRecordController {
                     ContactInformationBean contactInformation = productGroup.getContactInformation();
                     rentalRecordData.add("id", rentalRecord.getId());
                     rentalRecordData.add("status", rentalRecord.getStatus().ordinal());
+                    rentalRecordData.add("name", productGroup.getName());
                     rentalRecordData.add("coverImage", productGroup.getCoverImage());
+                    rentalRecordData.add("areaName", productGroup.getCityAreaName());
                     rentalRecordData.add("price", PRICE_FORMATTER.format(productGroup.getPrice()));
                     UserBean createUser = productGroup.getCreateUser();
                     ObjectData sellerData = rentalRecordData.addObject("seller");
@@ -134,8 +136,12 @@ public class RentalRecordController {
         private Integer id;
         @Schema(description = "狀態(0:取消/ 1: 未取貨/ 2:未歸還/ 3:已歸還/ 4: 已檢查)", minimum = "0", maximum = "4", example = "4")
         private Integer status;
+        @Schema(description = "商品群組名稱", example = "4人帳四角睡帳客廳帳 桌椅 營燈 廚具")
+        private String name;
         @Schema(description = "封面圖URL", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
         private String coverImage;
+        @Schema(description = "城市區域名稱", example = "中和區")
+        private String areaName;
         @Schema(description = "租借價格", example = "$ 3,990")
         private String price;
         @Schema(description = "賣方")
