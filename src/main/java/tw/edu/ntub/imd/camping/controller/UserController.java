@@ -22,6 +22,7 @@ import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
 import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 import tw.edu.ntub.imd.camping.validation.CreateUser;
+import tw.edu.ntub.imd.camping.validation.UpdateUser;
 
 import javax.validation.Valid;
 import java.util.Arrays;
@@ -121,7 +122,7 @@ public class UserController {
     )
     @PatchMapping(path = "")
     public ResponseEntity<String> updateUserInfo(
-            @Valid @RequestBody UserBean user,
+            @Validated(UpdateUser.class) @RequestBody UserBean user,
             BindingResult bindingResult
     ) {
         String account = SecurityUtils.getLoginUserAccount();
