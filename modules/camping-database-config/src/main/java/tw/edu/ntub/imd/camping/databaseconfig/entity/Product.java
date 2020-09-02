@@ -85,6 +85,14 @@ public class Product {
     private String brand;
 
     /**
+     * 外觀狀況
+     *
+     * @since 1.4.5
+     */
+    @Column(name = "appearance", length = 500, nullable = false)
+    private String appearance;
+
+    /**
      * 使用方式
      *
      * @since 1.0.0

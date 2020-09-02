@@ -10,10 +10,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord_;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
-import tw.edu.ntub.imd.camping.exception.CanceledRentalRecordException;
-import tw.edu.ntub.imd.camping.exception.LastRentalRecordStatusException;
-import tw.edu.ntub.imd.camping.exception.NotFoundException;
-import tw.edu.ntub.imd.camping.exception.NotRentalRecordOwnerException;
+import tw.edu.ntub.imd.camping.exception.*;
 import tw.edu.ntub.imd.camping.service.RentalRecordService;
 import tw.edu.ntub.imd.camping.service.transformer.RentalDetailTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.RentalRecordTransformer;
@@ -95,20 +92,38 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
 
     @Override
     public void updateStatusToNext(int id) {
-        Optional<RentalRecord> optionalRentalRecord = recordDAO.findById(id);
-        RentalRecord rentalRecord = optionalRentalRecord.orElseThrow(() -> new NotFoundException("無此紀錄" + id));
-        if (recordDAO.isNotRenterAndProductGroupCreator(id, SecurityUtils.getLoginUserAccount())) {
-            throw new NotRentalRecordOwnerException(id, SecurityUtils.getLoginUserAccount());
-        }
-
+        RentalRecord rentalRecord = getUpdateRentalRecord(id);
         RentalRecordStatus status = rentalRecord.getStatus();
-        if (status == RentalRecordStatus.CANCEL) {
-            throw new CanceledRentalRecordException(id);
-        } else if (status == RentalRecordStatus.CHECKED) {
+        if (status == RentalRecordStatus.CHECKED) {
             throw new LastRentalRecordStatusException();
         } else {
             rentalRecord.setStatus(status.next());
             recordDAO.save(rentalRecord);
+        }
+    }
+
+    private RentalRecord getUpdateRentalRecord(int id) {
+        Optional<RentalRecord> optionalRentalRecord = recordDAO.findById(id);
+        RentalRecord rentalRecord = optionalRentalRecord.orElseThrow(() -> new NotFoundException("無此紀錄：" + id));
+        if (recordDAO.isNotRenterAndProductGroupCreator(id, SecurityUtils.getLoginUserAccount())) {
+            throw new NotRentalRecordOwnerException(id, SecurityUtils.getLoginUserAccount());
+        }
+        RentalRecordStatus status = rentalRecord.getStatus();
+        if (status == RentalRecordStatus.CANCEL) {
+            throw new CanceledRentalRecordException(id);
+        }
+        return rentalRecord;
+    }
+
+    @Override
+    public void updateStatus(int id, RentalRecordStatus status) {
+        RentalRecord rentalRecord = getUpdateRentalRecord(id);
+        RentalRecordStatus oldStatus = rentalRecord.getStatus();
+        if (oldStatus.isCanChangeTo(status)) {
+            rentalRecord.setStatus(status);
+            recordDAO.save(rentalRecord);
+        } else {
+            throw new RentalRecordStatusChangeException(oldStatus, status);
         }
     }
 }

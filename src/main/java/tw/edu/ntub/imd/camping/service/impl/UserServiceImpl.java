@@ -4,10 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.UserBean;
+import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.UserDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.User;
 import tw.edu.ntub.imd.camping.exception.DuplicateCreateException;
+import tw.edu.ntub.imd.camping.exception.NotAccountOwnerException;
 import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.service.transformer.UserTransformer;
 
@@ -35,6 +38,15 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
             return transformer.transferToBean(saveResult);
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateCreateException(userBean.getAccount() + "帳號已有人註冊");
+        }
+    }
+
+    @Override
+    public void update(String account, UserBean userBean) {
+        if (StringUtils.isEquals(account, SecurityUtils.getLoginUserAccount())) {
+            throw new NotAccountOwnerException();
+        } else {
+            super.update(account, userBean);
         }
     }
 }
