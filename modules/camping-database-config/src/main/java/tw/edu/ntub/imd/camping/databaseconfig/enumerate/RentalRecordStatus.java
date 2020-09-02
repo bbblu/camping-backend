@@ -21,4 +21,18 @@ public enum RentalRecordStatus {
                 return null;
         }
     }
+
+    public boolean isCanChangeTo(RentalRecordStatus status) {
+        switch (this) {
+            case NOT_PICK_UP:
+            case NOT_RETURN:
+            case RETRIEVE:
+                return status == next();
+            case CANCEL:
+                return true;
+            case CHECKED:
+            default:
+                return false;
+        }
+    }
 }
