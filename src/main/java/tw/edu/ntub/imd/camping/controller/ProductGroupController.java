@@ -233,8 +233,10 @@ public class ProductGroupController {
     private void addProductData(ObjectData productData, ProductBean product) {
         productData.add("id", product.getId());
         productData.add("type", product.getTypeName());
+        productData.add("name", product.getName());
         productData.add("count", product.getCount());
         productData.add("brand", product.getBrand());
+        productData.add("appearance", product.getAppearance());
         productData.add("useInformation", product.getUseInformation());
         productData.add("brokenCompensation", product.getBrokenCompensation());
         productData.add("memo", product.getMemo());
@@ -317,7 +319,6 @@ public class ProductGroupController {
             )
     )
     @PatchMapping(path = "/{groupId}/product")
-    @SuppressWarnings("unused")
     public ResponseEntity<String> updateProduct(
             @PathVariable(name = "groupId") @Positive(message = "商品群組編號 - 應為大於0的數字") Integer groupId,
             @Valid @RequestBody List<@Valid ProductBean> productList,
@@ -486,10 +487,14 @@ public class ProductGroupController {
             private Integer id;
             @Schema(description = "商品類型", example = "睡帳")
             private String type;
+            @Schema(description = "商品名稱", example = "OO牌睡帳")
+            private String name;
             @Schema(description = "商品數量", example = "2")
             private Integer count;
             @Schema(description = "商品品牌", example = "OO")
             private String brand;
+            @Schema(description = "商品外觀狀況", example = "300cm*300cm*250cm(高)")
+            private String appearance;
             @Schema(description = "使用說明", example = "內附搭帳棚說明書")
             private String useInformation;
             @Schema(description = "損壞賠償", example = "缺少零件：1/$200、布劃破：$1000")
@@ -563,6 +568,8 @@ public class ProductGroupController {
         private Integer count;
         @Schema(description = "品牌", example = "OO")
         private String brand;
+        @Schema(description = "商品外觀狀況", example = "300cm*300cm*250cm(高)")
+        private String appearance;
         @Schema(description = "使用方式", example = "內附搭帳篷說明書")
         private String useInformation;
         @Schema(description = "損壞賠償", example = "缺少零件：1/$200、布劃破：$1000")

@@ -35,22 +35,27 @@ public class ProductBean {
     @AliasName("productTypeByType.name")
     private String typeName;
 
-    @Schema(description = "商品名稱", example = "OO牌帳篷")
+    @Schema(description = "商品名稱", example = "快搭客廳炊事帳")
     @NotBlank(groups = {CreateProductGroup.class, CreateProduct.class}, message = "商品名稱 - 未填寫")
     @Size(max = 200, message = "商品名稱 - 輸入字數大於{max}個字")
     private String name;
 
-    @Schema(description = "數量", example = "2")
+    @Schema(description = "數量", example = "1")
     @NotNull(groups = {CreateProductGroup.class, CreateProduct.class}, message = "數量 - 未填寫")
     @Positive(message = "數量 - 應為大於0的正數")
     private Integer count;
 
-    @Schema(description = "品牌", example = "OO")
+    @Schema(description = "品牌", example = "雜牌")
     @NotBlank(groups = {CreateProductGroup.class, CreateProduct.class}, message = "品牌 - 未填寫")
     @Size(max = 100, message = "品牌 - 輸入字數大於{max}個字")
     private String brand;
 
-    @Schema(description = "使用方式", example = "內附搭帳篷說明書")
+    @Schema(description = "外觀狀況", example = "300cm*300cm*250cm(高)")
+    @NotBlank(groups = {CreateProductGroup.class, CreateProduct.class}, message = "外觀狀況 - 未填寫")
+    @Size(max = 500, message = "外觀狀況 - 輸入字數大於{max}個字")
+    private String appearance;
+
+    @Schema(description = "使用方式", example = "四人同時向外拉，並往上推，小心不要夾到手，若遇下雨，必須曬乾再收起來。")
     @NotBlank(groups = {CreateProductGroup.class, CreateProduct.class}, message = "使用方式 - 未填寫")
     private String useInformation;
 
