@@ -291,7 +291,7 @@ public class ProductGroupController {
     ) {
         BindingResultUtils.validate(bindingResult);
         productGroupService.update(id, productGroup);
-        return ResponseEntityBuilder.success().message("更新成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -328,7 +328,7 @@ public class ProductGroupController {
                         .peek(productBean -> productBean.setGroupId(groupId))
                         .collect(Collectors.toList())
         );
-        return ResponseEntityBuilder.success().message("更新成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -364,7 +364,7 @@ public class ProductGroupController {
         BindingResultUtils.validate(bindingResult);
         product.setId(productId);
         productGroupService.updateProduct(Collections.singletonList(product));
-        return ResponseEntityBuilder.success().message("更新成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -384,7 +384,7 @@ public class ProductGroupController {
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<String> delete(@PathVariable(name = "id") @Positive(message = "編號 - 應為大於0的數字") Integer id) {
         productGroupService.delete(id);
-        return ResponseEntityBuilder.success().message("刪除成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
     }
 
     @Operation(
@@ -402,9 +402,11 @@ public class ProductGroupController {
             )
     )
     @DeleteMapping(path = "/product/{productId}")
-    public ResponseEntity<String> deleteProduct(@PathVariable(name = "productId") @Positive(message = "編號 - 應為大於0的數字") Integer productId) {
+    public ResponseEntity<String> deleteProduct(
+            @PathVariable(name = "productId") @Positive(message = "編號 - 應為大於0的數字") Integer productId
+    ) {
         productGroupService.deleteProduct(productId);
-        return ResponseEntityBuilder.success().message("刪除成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
     }
 
     @Operation(
@@ -422,9 +424,11 @@ public class ProductGroupController {
             )
     )
     @DeleteMapping(path = "/product/image/{imageId}")
-    public ResponseEntity<String> deleteProductImage(@PathVariable(name = "imageId") @Positive(message = "編號 - 應為大於0的數字") Integer imageId) {
+    public ResponseEntity<String> deleteProductImage(
+            @PathVariable(name = "imageId") @Positive(message = "編號 - 應為大於0的數字") Integer imageId
+    ) {
         productGroupService.deleteProductImage(imageId);
-        return ResponseEntityBuilder.success().message("刪除成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
     }
 
     @Operation(
@@ -444,7 +448,7 @@ public class ProductGroupController {
     @DeleteMapping(path = "/product/related-link/{relatedLinkId}")
     public ResponseEntity<String> deleteProductRelatedLink(@PathVariable(name = "relatedLinkId") @Positive(message = "編號 - 應為大於0的數字") Integer relatedLinkId) {
         productGroupService.deleteProductRelatedLink(relatedLinkId);
-        return ResponseEntityBuilder.success().message("刪除成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|

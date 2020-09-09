@@ -57,7 +57,7 @@ public class UserController {
     public ResponseEntity<String> register(@Validated(CreateUser.class) @RequestBody UserBean userBean, BindingResult bindingResult) {
         BindingResultUtils.validate(bindingResult);
         userService.save(userBean);
-        return ResponseEntityBuilder.success().message("註冊成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("註冊成功");
     }
 
     @Operation(
@@ -128,7 +128,7 @@ public class UserController {
 
         BindingResultUtils.validate(bindingResult);
         userService.update(account, user);
-        return ResponseEntityBuilder.success().message("更新成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -151,7 +151,7 @@ public class UserController {
     ) {
         BindingResultUtils.validate(bindingResult);
         contactInformationService.save(contactInformationBean);
-        return ResponseEntityBuilder.success().message("新增成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("新增成功");
     }
 
     @Operation(

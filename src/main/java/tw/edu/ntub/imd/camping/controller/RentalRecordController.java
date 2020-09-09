@@ -171,9 +171,7 @@ public class RentalRecordController {
     @PatchMapping(path = "/{id}/status")
     public ResponseEntity<String> updateStatusToNext(@PathVariable(name = "id") @Positive(message = "id - 應大於0") int id) {
         rentalRecordService.updateStatusToNext(id);
-        return ResponseEntityBuilder.success()
-                .message("更新成功")
-                .build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -190,9 +188,7 @@ public class RentalRecordController {
     @PatchMapping(path = "/{id}/pick")
     public ResponseEntity<String> updateStatusToPickedUp(@PathVariable(name = "id") @Positive(message = "id - 應大於0") int id) {
         rentalRecordService.updateStatus(id, RentalRecordStatus.NOT_RETURN);
-        return ResponseEntityBuilder.success()
-                .message("更新成功")
-                .build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -209,9 +205,7 @@ public class RentalRecordController {
     @PatchMapping(path = "/{id}/retrieve")
     public ResponseEntity<String> updateStatusToRetrieve(@PathVariable(name = "id") @Positive(message = "id - 應大於0") int id) {
         rentalRecordService.updateStatus(id, RentalRecordStatus.RETRIEVE);
-        return ResponseEntityBuilder.success()
-                .message("更新成功")
-                .build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
