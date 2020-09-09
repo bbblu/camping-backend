@@ -41,8 +41,7 @@ public class BankController {
     )
     @GetMapping(path = "")
     public ResponseEntity<String> searchAll() {
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(bankService.searchAll(), this::addBankToObjectData)
                 .build();
     }

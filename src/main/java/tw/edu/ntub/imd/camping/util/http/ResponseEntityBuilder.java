@@ -46,7 +46,11 @@ public class ResponseEntityBuilder {
     }
 
     public static ResponseEntity<String> buildSuccessMessage(String message) {
-        return success().message(message).build();
+        return success(message).build();
+    }
+
+    public static ResponseEntityBuilder success(String message) {
+        return success().message(message);
     }
 
     public static ResponseEntityBuilder success() {

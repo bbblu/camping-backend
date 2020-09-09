@@ -59,8 +59,7 @@ public class RentalRecordController {
     public ResponseEntity<String> create(@RequestBody @Valid RentalRecordBean rentalRecordBean, BindingResult bindingResult) {
         BindingResultUtils.validate(bindingResult);
         RentalRecordBean saveResult = rentalRecordService.save(rentalRecordBean);
-        return ResponseEntityBuilder.success()
-                .message("租借成功")
+        return ResponseEntityBuilder.success("租借成功")
                 .data(SingleValueObjectData.create("id", saveResult.getId()))
                 .build();
     }
@@ -81,8 +80,7 @@ public class RentalRecordController {
     )
     @GetMapping(path = "")
     public ResponseEntity<String> searchAll() {
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(
                         rentalRecordService.searchByRenterAccount(SecurityUtils.getLoginUserAccount()),
                         this::addRentalRecordToData
@@ -148,8 +146,7 @@ public class RentalRecordController {
     )
     @GetMapping(path = "/borrow")
     public ResponseEntity<String> searchAllBorrowRecord() {
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(
                         rentalRecordService.searchByProductGroupCreateAccount(SecurityUtils.getLoginUserAccount()),
                         this::addRentalRecordToData

@@ -75,7 +75,7 @@ public class ProductGroupController {
     public ResponseEntity<String> create(@Validated(CreateProductGroup.class) ProductGroupBean productGroup, BindingResult bindingResult) {
         BindingResultUtils.validate(bindingResult);
         productGroupService.save(productGroup);
-        return ResponseEntityBuilder.success().message("上架成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("上架成功");
     }
 
     @Operation(
@@ -94,8 +94,7 @@ public class ProductGroupController {
     )
     @GetMapping(path = "/product/type")
     public ResponseEntity<String> searchProductType() {
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(productGroupService.searchAllProductType(), this::addProductTypeToObjectData)
                 .build();
     }
@@ -126,8 +125,7 @@ public class ProductGroupController {
         CollectionObjectData collectionData = data.createCollectionData();
         collectionData.add("type", typeList, this::addProductTypeToObjectData);
         addCityToObjectData(cityService.searchAllEnableCity(), data);
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(data)
                 .build();
     }
@@ -169,8 +167,7 @@ public class ProductGroupController {
     )
     @GetMapping(path = "")
     public ResponseEntity<String> searchCanBorrowProductGroup(ProductGroupFilterDataBean filterData) {
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(productGroupService.searchCanBorrowProductGroup(filterData), (data, canBorrowProductGroup) -> {
                     data.add("id", canBorrowProductGroup.getId());
                     data.add("coverImage", canBorrowProductGroup.getCoverImage());

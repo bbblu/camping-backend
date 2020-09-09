@@ -91,8 +91,7 @@ public class UserController {
             data.add("experience", userBean.getExperience().ordinal());
             data.add("email", userBean.getEmail());
             data.add("address", userBean.getAddress());
-            return ResponseEntityBuilder.success()
-                    .message("查詢成功")
+            return ResponseEntityBuilder.success("查詢成功")
                     .data(data)
                     .build();
         } else {
@@ -170,8 +169,7 @@ public class UserController {
     )
     @GetMapping(path = "/experience")
     public ResponseEntity<String> getExperienceList() {
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(Arrays.asList(Experience.values()), this::addExperienceToObjectData)
                 .build();
     }
