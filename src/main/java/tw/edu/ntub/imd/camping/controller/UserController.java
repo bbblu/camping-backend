@@ -105,13 +105,6 @@ public class UserController {
             method = "PATCH",
             summary = "更新使用者資訊",
             description = "更新使用者資訊",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UpdateUserInfoSchema.class)
-                    )
-            ),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "更新成功",
@@ -122,7 +115,13 @@ public class UserController {
     )
     @PatchMapping(path = "")
     public ResponseEntity<String> updateUserInfo(
-            @Validated(UpdateUser.class) @RequestBody UserBean user,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UpdateUserInfoSchema.class)
+                    )
+            ) @Validated(UpdateUser.class) @RequestBody UserBean user,
             BindingResult bindingResult
     ) {
         String account = SecurityUtils.getLoginUserAccount();

@@ -269,13 +269,6 @@ public class ProductGroupController {
             summary = "更新商品群組",
             description = "更新商品群組以及商品",
             parameters = @Parameter(name = "id", description = "商品群組編號", example = "1"),
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema(implementation = UpdateProductGroupSchema.class)
-                    )
-            ),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "更新成功",
@@ -287,7 +280,13 @@ public class ProductGroupController {
     @PatchMapping(path = "/{id}")
     public ResponseEntity<String> update(
             @PathVariable(name = "id") @Positive(message = "群組編號 - 應為大於0的數字") Integer id,
-            @Valid ProductGroupBean productGroup,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(implementation = UpdateProductGroupSchema.class)
+                    )
+            ) @Valid ProductGroupBean productGroup,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
@@ -303,13 +302,6 @@ public class ProductGroupController {
             parameters = {
                     @Parameter(name = "groupId", description = "商品群組編號", example = "1")
             },
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UpdateProductSchema.class)
-                    )
-            ),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "更新成功",
@@ -321,7 +313,13 @@ public class ProductGroupController {
     @PatchMapping(path = "/{groupId}/product")
     public ResponseEntity<String> updateProduct(
             @PathVariable(name = "groupId") @Positive(message = "商品群組編號 - 應為大於0的數字") Integer groupId,
-            @Valid @RequestBody List<@Valid ProductBean> productList,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UpdateProductSchema.class)
+                    )
+            ) @Valid @RequestBody List<@Valid ProductBean> productList,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
@@ -342,13 +340,6 @@ public class ProductGroupController {
                     @Parameter(name = "groupId", description = "商品群組編號", example = "1"),
                     @Parameter(name = "productId", description = "商品編號", example = "1")
             },
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UpdateProductSchema.class)
-                    )
-            ),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "更新成功",
@@ -358,11 +349,16 @@ public class ProductGroupController {
             )
     )
     @PatchMapping(path = "/{groupId}/product/{productId}")
-    @SuppressWarnings("unused")
     public ResponseEntity<String> updateProduct(
             @PathVariable(name = "groupId") @Positive(message = "商品群組編號 - 應為大於0的數字") Integer groupId,
             @PathVariable(name = "productId") @Positive(message = "商品群組編號 - 應為大於0的數字") Integer productId,
-            @Valid @RequestBody ProductBean product,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UpdateProductSchema.class)
+                    )
+            ) @Valid @RequestBody ProductBean product,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
@@ -558,8 +554,6 @@ public class ProductGroupController {
     @Schema(name = "更新商品", description = "更新商品")
     @Data
     private static class UpdateProductSchema {
-        @Schema(description = "商品編號", minimum = "1", example = "1")
-        private Integer id;
         @Schema(description = "商品類型", minimum = "1", example = "1")
         private Integer type;
         @Schema(description = "商品名稱", example = "OO牌帳篷")
