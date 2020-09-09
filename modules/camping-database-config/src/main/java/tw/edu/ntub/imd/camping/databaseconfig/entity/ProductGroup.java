@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
  */
 @Data
 @EqualsAndHashCode(exclude = {
-        "contactInformationByContactInformationId",
         "userByCreateAccount",
         "userByLastModifyAccount"
 })
@@ -111,14 +110,6 @@ public class ProductGroup {
     private LocalDateTime borrowEndDate;
 
     /**
-     * 聯絡方式編號
-     *
-     * @since 1.0.0
-     */
-    @Column(name = "contact_information_id", nullable = false, columnDefinition = "UNSIGNED")
-    private Integer contactInformationId;
-
-    /**
      * 商品上架者帳號
      *
      * @since 1.0.0
@@ -162,16 +153,6 @@ public class ProductGroup {
             @JoinColumn(name = "city_area_name", referencedColumnName = "area_name", nullable = false, insertable = false, updatable = false)
     })
     private City city;
-
-    /**
-     * 聯絡方式
-     *
-     * @see ContactInformation
-     * @since 1.0.0
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contact_information_id", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
-    private ContactInformation contactInformationByContactInformationId;
 
     /**
      * 商品上架者

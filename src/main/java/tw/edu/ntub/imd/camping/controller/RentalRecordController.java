@@ -90,7 +90,6 @@ public class RentalRecordController {
 
     private void addRentalRecordToData(ObjectData rentalRecordData, RentalRecordBean rentalRecord) {
         ProductGroupBean productGroup = rentalRecord.getProductGroup();
-        ContactInformationBean contactInformation = productGroup.getContactInformation();
         rentalRecordData.add("id", rentalRecord.getId());
         rentalRecordData.add("status", rentalRecord.getStatus().ordinal());
         rentalRecordData.add("borrowRange", String.format(
@@ -106,7 +105,6 @@ public class RentalRecordController {
         ObjectData sellerData = rentalRecordData.addObject("seller");
         sellerData.add("nickName", createUser.getNickName());
         sellerData.add("email", createUser.getEmail());
-        rentalRecordData.add("contactInformation", contactInformation.getContent());
         rentalRecordData.add("rentalDate", rentalRecord.getRentalDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
 
         CollectionObjectData collectionObjectData = rentalRecordData.createCollectionData();
@@ -236,7 +234,7 @@ public class RentalRecordController {
         @Schema(description = "賣方")
         private User seller;
         @Schema(description = "賣方聯絡方式", example = "LineId : 1234")
-        private String contactInformation;
+        private String contact;
         @Schema(description = "租借日期", example = "2020/08/28 15:03")
         private String rentalDate;
         @ArraySchema(minItems = 1, uniqueItems = true, schema = @Schema(implementation = Detail.class))

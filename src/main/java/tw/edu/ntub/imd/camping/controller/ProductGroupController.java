@@ -213,8 +213,8 @@ public class ProductGroupController {
                     productGroupBean.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                     productGroupBean.getBorrowEndDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm"))
             ));
-            ContactInformationBean contactInformation = productGroupBean.getContactInformation();
-            data.add("contactInformation", contactInformation.getContent());
+            UserBean createUser = productGroupBean.getCreateUser();
+            data.add("contact", createUser.getEmail());
 
             CollectionObjectData collectionData = data.createCollectionData();
             collectionData.add("productArray", productGroupBean.getProductArray(), this::addProductData);
@@ -347,7 +347,6 @@ public class ProductGroupController {
     )
     @PatchMapping(path = "/{groupId}/product/{productId}")
     public ResponseEntity<String> updateProduct(
-            @PathVariable(name = "groupId") @Positive(message = "商品群組編號 - 應為大於0的數字") Integer groupId,
             @PathVariable(name = "productId") @Positive(message = "商品群組編號 - 應為大於0的數字") Integer productId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -472,8 +471,8 @@ public class ProductGroupController {
         private String price;
         @Schema(description = "可租借時間範圍", example = "2020/08/14 15:00 ~ 2020/08/20 00:00")
         private String borrowDateRange;
-        @Schema(description = "聯絡方式", example = "Email: 10646007@ntub.edu.tw")
-        private String contactInformation;
+        @Schema(description = "聯絡方式", example = "10646007@ntub.edu.tw")
+        private String contact;
         @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(description = "商品陣列"))
         private ProductContentSchema productArray;
 
@@ -546,8 +545,6 @@ public class ProductGroupController {
         private LocalDateTime borrowStartDate;
         @Schema(description = "租借結束日期(需在起始日期之後)", example = "2020/08/12")
         private LocalDateTime borrowEndDate;
-        @Schema(description = "聯絡方式編號", example = "1")
-        private Integer contactInformationId;
         @ArraySchema(minItems = 0, schema = @Schema(description = "商品", implementation = UpdateProductSchema.class))
         private List<UpdateProductSchema> productArray;
     }

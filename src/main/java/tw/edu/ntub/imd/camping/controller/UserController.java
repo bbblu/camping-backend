@@ -12,11 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import tw.edu.ntub.imd.camping.bean.ContactInformationBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
-import tw.edu.ntub.imd.camping.service.ContactInformationService;
 import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
@@ -24,7 +22,6 @@ import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 import tw.edu.ntub.imd.camping.validation.CreateUser;
 import tw.edu.ntub.imd.camping.validation.UpdateUser;
 
-import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -33,11 +30,9 @@ import java.util.Optional;
 @RequestMapping(path = "/user")
 public class UserController {
     private final UserService userService;
-    private final ContactInformationService contactInformationService;
 
-    public UserController(UserService userService, ContactInformationService contactInformationService) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.contactInformationService = contactInformationService;
     }
 
     @Operation(
@@ -128,29 +123,6 @@ public class UserController {
         BindingResultUtils.validate(bindingResult);
         userService.update(account, user);
         return ResponseEntityBuilder.buildSuccessMessage("更新成功");
-    }
-
-    @Operation(
-            tags = "User",
-            method = "POST",
-            summary = "新增聯絡方式",
-            description = "新增登入者的聯絡方式",
-            responses = @ApiResponse(
-                    responseCode = "200",
-                    description = "新增成功",
-                    content = @Content(
-                            mediaType = "application/json"
-                    )
-            )
-    )
-    @PostMapping(path = "/contact-information")
-    public ResponseEntity<String> createContactInformation(
-            @Valid @RequestBody ContactInformationBean contactInformationBean,
-            BindingResult bindingResult
-    ) {
-        BindingResultUtils.validate(bindingResult);
-        contactInformationService.save(contactInformationBean);
-        return ResponseEntityBuilder.buildSuccessMessage("新增成功");
     }
 
     @Operation(

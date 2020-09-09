@@ -63,15 +63,6 @@ public class ProductGroupBean {
     @FutureOrPresent(message = "租借結束日期 - 應選擇現在或未來時間")
     private LocalDateTime borrowEndDate;
 
-    @Schema(description = "聯絡方式編號", example = "1")
-    @NotNull(groups = CreateProductGroup.class, message = "聯絡方式編號 - 未填寫")
-    @Positive(message = "聯絡方式編號 - 應為大於0的數字")
-    private Integer contactInformationId;
-
-    @Hidden
-    @Null(message = "聯絡方式 - 不得填寫")
-    private ContactInformationBean contactInformation;
-
     @Schema(description = "商品")
     @Size(groups = CreateProductGroup.class, min = 1, message = "商品 - 至少需新增一項")
     private List<@Valid ProductBean> productArray;
