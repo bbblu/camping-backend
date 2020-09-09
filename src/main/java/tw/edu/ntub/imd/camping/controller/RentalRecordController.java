@@ -59,8 +59,7 @@ public class RentalRecordController {
     public ResponseEntity<String> create(@RequestBody @Valid RentalRecordBean rentalRecordBean, BindingResult bindingResult) {
         BindingResultUtils.validate(bindingResult);
         RentalRecordBean saveResult = rentalRecordService.save(rentalRecordBean);
-        return ResponseEntityBuilder.success()
-                .message("租借成功")
+        return ResponseEntityBuilder.success("租借成功")
                 .data(SingleValueObjectData.create("id", saveResult.getId()))
                 .build();
     }
@@ -81,8 +80,7 @@ public class RentalRecordController {
     )
     @GetMapping(path = "")
     public ResponseEntity<String> searchAll() {
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(
                         rentalRecordService.searchByRenterAccount(SecurityUtils.getLoginUserAccount()),
                         this::addRentalRecordToData
@@ -92,7 +90,6 @@ public class RentalRecordController {
 
     private void addRentalRecordToData(ObjectData rentalRecordData, RentalRecordBean rentalRecord) {
         ProductGroupBean productGroup = rentalRecord.getProductGroup();
-        ContactInformationBean contactInformation = productGroup.getContactInformation();
         rentalRecordData.add("id", rentalRecord.getId());
         rentalRecordData.add("status", rentalRecord.getStatus().ordinal());
         rentalRecordData.add("borrowRange", String.format(
@@ -108,7 +105,6 @@ public class RentalRecordController {
         ObjectData sellerData = rentalRecordData.addObject("seller");
         sellerData.add("nickName", createUser.getNickName());
         sellerData.add("email", createUser.getEmail());
-        rentalRecordData.add("contactInformation", contactInformation.getContent());
         rentalRecordData.add("rentalDate", rentalRecord.getRentalDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
 
         CollectionObjectData collectionObjectData = rentalRecordData.createCollectionData();
@@ -148,8 +144,7 @@ public class RentalRecordController {
     )
     @GetMapping(path = "/borrow")
     public ResponseEntity<String> searchAllBorrowRecord() {
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(
                         rentalRecordService.searchByProductGroupCreateAccount(SecurityUtils.getLoginUserAccount()),
                         this::addRentalRecordToData
@@ -171,9 +166,7 @@ public class RentalRecordController {
     @PatchMapping(path = "/{id}/status")
     public ResponseEntity<String> updateStatusToNext(@PathVariable(name = "id") @Positive(message = "id - 應大於0") int id) {
         rentalRecordService.updateStatusToNext(id);
-        return ResponseEntityBuilder.success()
-                .message("更新成功")
-                .build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -190,9 +183,7 @@ public class RentalRecordController {
     @PatchMapping(path = "/{id}/pick")
     public ResponseEntity<String> updateStatusToPickedUp(@PathVariable(name = "id") @Positive(message = "id - 應大於0") int id) {
         rentalRecordService.updateStatus(id, RentalRecordStatus.NOT_RETURN);
-        return ResponseEntityBuilder.success()
-                .message("更新成功")
-                .build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -209,9 +200,7 @@ public class RentalRecordController {
     @PatchMapping(path = "/{id}/retrieve")
     public ResponseEntity<String> updateStatusToRetrieve(@PathVariable(name = "id") @Positive(message = "id - 應大於0") int id) {
         rentalRecordService.updateStatus(id, RentalRecordStatus.RETRIEVE);
-        return ResponseEntityBuilder.success()
-                .message("更新成功")
-                .build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
@@ -245,7 +234,7 @@ public class RentalRecordController {
         @Schema(description = "賣方")
         private User seller;
         @Schema(description = "賣方聯絡方式", example = "LineId : 1234")
-        private String contactInformation;
+        private String contact;
         @Schema(description = "租借日期", example = "2020/08/28 15:03")
         private String rentalDate;
         @ArraySchema(minItems = 1, uniqueItems = true, schema = @Schema(implementation = Detail.class))

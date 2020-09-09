@@ -12,17 +12,6 @@ import java.util.List;
 @UtilityClass
 public class OwnerChecker {
 
-    public void checkContactInformationOwner(ContactInformationDAO contactInformationDAO, int contactInformationId) {
-        if (BooleanUtils.isFalse(
-                contactInformationDAO.existsByIdAndUserAccount(
-                        contactInformationId,
-                        SecurityUtils.getLoginUserAccount()
-                )
-        )) {
-            throw new NotFoundException("找不到對應的聯絡方式");
-        }
-    }
-
     public void checkCanBorrowProductGroup(CanBorrowProductGroupDAO canBorrowProductGroupDAO, Integer productGroupId) {
         if (BooleanUtils.isFalse(canBorrowProductGroupDAO.existsById(productGroupId))) {
             throw new CouldNotBorrowException();

@@ -75,7 +75,7 @@ public class ProductGroupController {
     public ResponseEntity<String> create(@Validated(CreateProductGroup.class) ProductGroupBean productGroup, BindingResult bindingResult) {
         BindingResultUtils.validate(bindingResult);
         productGroupService.save(productGroup);
-        return ResponseEntityBuilder.success().message("上架成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("上架成功");
     }
 
     @Operation(
@@ -94,8 +94,7 @@ public class ProductGroupController {
     )
     @GetMapping(path = "/product/type")
     public ResponseEntity<String> searchProductType() {
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(productGroupService.searchAllProductType(), this::addProductTypeToObjectData)
                 .build();
     }
@@ -126,8 +125,7 @@ public class ProductGroupController {
         CollectionObjectData collectionData = data.createCollectionData();
         collectionData.add("type", typeList, this::addProductTypeToObjectData);
         addCityToObjectData(cityService.searchAllEnableCity(), data);
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(data)
                 .build();
     }
@@ -169,8 +167,7 @@ public class ProductGroupController {
     )
     @GetMapping(path = "")
     public ResponseEntity<String> searchCanBorrowProductGroup(ProductGroupFilterDataBean filterData) {
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(productGroupService.searchCanBorrowProductGroup(filterData), (data, canBorrowProductGroup) -> {
                     data.add("id", canBorrowProductGroup.getId());
                     data.add("coverImage", canBorrowProductGroup.getCoverImage());
@@ -216,8 +213,8 @@ public class ProductGroupController {
                     productGroupBean.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                     productGroupBean.getBorrowEndDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm"))
             ));
-            ContactInformationBean contactInformation = productGroupBean.getContactInformation();
-            data.add("contactInformation", contactInformation.getContent());
+            UserBean createUser = productGroupBean.getCreateUser();
+            data.add("contact", createUser.getEmail());
 
             CollectionObjectData collectionData = data.createCollectionData();
             collectionData.add("productArray", productGroupBean.getProductArray(), this::addProductData);
@@ -269,13 +266,6 @@ public class ProductGroupController {
             summary = "更新商品群組",
             description = "更新商品群組以及商品",
             parameters = @Parameter(name = "id", description = "商品群組編號", example = "1"),
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema(implementation = UpdateProductGroupSchema.class)
-                    )
-            ),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "更新成功",
@@ -287,12 +277,18 @@ public class ProductGroupController {
     @PatchMapping(path = "/{id}")
     public ResponseEntity<String> update(
             @PathVariable(name = "id") @Positive(message = "群組編號 - 應為大於0的數字") Integer id,
-            @Valid ProductGroupBean productGroup,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(implementation = UpdateProductGroupSchema.class)
+                    )
+            ) @Valid ProductGroupBean productGroup,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
         productGroupService.update(id, productGroup);
-        return ResponseEntityBuilder.success().message("更新成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -303,13 +299,6 @@ public class ProductGroupController {
             parameters = {
                     @Parameter(name = "groupId", description = "商品群組編號", example = "1")
             },
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UpdateProductSchema.class)
-                    )
-            ),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "更新成功",
@@ -321,7 +310,13 @@ public class ProductGroupController {
     @PatchMapping(path = "/{groupId}/product")
     public ResponseEntity<String> updateProduct(
             @PathVariable(name = "groupId") @Positive(message = "商品群組編號 - 應為大於0的數字") Integer groupId,
-            @Valid @RequestBody List<@Valid ProductBean> productList,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UpdateProductSchema.class)
+                    )
+            ) @Valid @RequestBody List<@Valid ProductBean> productList,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
@@ -330,7 +325,7 @@ public class ProductGroupController {
                         .peek(productBean -> productBean.setGroupId(groupId))
                         .collect(Collectors.toList())
         );
-        return ResponseEntityBuilder.success().message("更新成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -342,13 +337,6 @@ public class ProductGroupController {
                     @Parameter(name = "groupId", description = "商品群組編號", example = "1"),
                     @Parameter(name = "productId", description = "商品編號", example = "1")
             },
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UpdateProductSchema.class)
-                    )
-            ),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "更新成功",
@@ -358,17 +346,21 @@ public class ProductGroupController {
             )
     )
     @PatchMapping(path = "/{groupId}/product/{productId}")
-    @SuppressWarnings("unused")
     public ResponseEntity<String> updateProduct(
-            @PathVariable(name = "groupId") @Positive(message = "商品群組編號 - 應為大於0的數字") Integer groupId,
             @PathVariable(name = "productId") @Positive(message = "商品群組編號 - 應為大於0的數字") Integer productId,
-            @Valid @RequestBody ProductBean product,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UpdateProductSchema.class)
+                    )
+            ) @Valid @RequestBody ProductBean product,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
         product.setId(productId);
         productGroupService.updateProduct(Collections.singletonList(product));
-        return ResponseEntityBuilder.success().message("更新成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -388,7 +380,7 @@ public class ProductGroupController {
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<String> delete(@PathVariable(name = "id") @Positive(message = "編號 - 應為大於0的數字") Integer id) {
         productGroupService.delete(id);
-        return ResponseEntityBuilder.success().message("刪除成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
     }
 
     @Operation(
@@ -406,9 +398,11 @@ public class ProductGroupController {
             )
     )
     @DeleteMapping(path = "/product/{productId}")
-    public ResponseEntity<String> deleteProduct(@PathVariable(name = "productId") @Positive(message = "編號 - 應為大於0的數字") Integer productId) {
+    public ResponseEntity<String> deleteProduct(
+            @PathVariable(name = "productId") @Positive(message = "編號 - 應為大於0的數字") Integer productId
+    ) {
         productGroupService.deleteProduct(productId);
-        return ResponseEntityBuilder.success().message("刪除成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
     }
 
     @Operation(
@@ -426,9 +420,11 @@ public class ProductGroupController {
             )
     )
     @DeleteMapping(path = "/product/image/{imageId}")
-    public ResponseEntity<String> deleteProductImage(@PathVariable(name = "imageId") @Positive(message = "編號 - 應為大於0的數字") Integer imageId) {
+    public ResponseEntity<String> deleteProductImage(
+            @PathVariable(name = "imageId") @Positive(message = "編號 - 應為大於0的數字") Integer imageId
+    ) {
         productGroupService.deleteProductImage(imageId);
-        return ResponseEntityBuilder.success().message("刪除成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
     }
 
     @Operation(
@@ -448,7 +444,7 @@ public class ProductGroupController {
     @DeleteMapping(path = "/product/related-link/{relatedLinkId}")
     public ResponseEntity<String> deleteProductRelatedLink(@PathVariable(name = "relatedLinkId") @Positive(message = "編號 - 應為大於0的數字") Integer relatedLinkId) {
         productGroupService.deleteProductRelatedLink(relatedLinkId);
-        return ResponseEntityBuilder.success().message("刪除成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
@@ -475,8 +471,8 @@ public class ProductGroupController {
         private String price;
         @Schema(description = "可租借時間範圍", example = "2020/08/14 15:00 ~ 2020/08/20 00:00")
         private String borrowDateRange;
-        @Schema(description = "聯絡方式", example = "Email: 10646007@ntub.edu.tw")
-        private String contactInformation;
+        @Schema(description = "聯絡方式", example = "10646007@ntub.edu.tw")
+        private String contact;
         @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(description = "商品陣列"))
         private ProductContentSchema productArray;
 
@@ -549,8 +545,6 @@ public class ProductGroupController {
         private LocalDateTime borrowStartDate;
         @Schema(description = "租借結束日期(需在起始日期之後)", example = "2020/08/12")
         private LocalDateTime borrowEndDate;
-        @Schema(description = "聯絡方式編號", example = "1")
-        private Integer contactInformationId;
         @ArraySchema(minItems = 0, schema = @Schema(description = "商品", implementation = UpdateProductSchema.class))
         private List<UpdateProductSchema> productArray;
     }
@@ -558,8 +552,6 @@ public class ProductGroupController {
     @Schema(name = "更新商品", description = "更新商品")
     @Data
     private static class UpdateProductSchema {
-        @Schema(description = "商品編號", minimum = "1", example = "1")
-        private Integer id;
         @Schema(description = "商品類型", minimum = "1", example = "1")
         private Integer type;
         @Schema(description = "商品名稱", example = "OO牌帳篷")

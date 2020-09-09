@@ -50,8 +50,7 @@ public class CityController {
             nameArray.add(name);
             areaNameArray.addStringArray(areaNameList);
         });
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(data)
                 .build();
     }

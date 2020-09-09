@@ -12,11 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import tw.edu.ntub.imd.camping.bean.ContactInformationBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
-import tw.edu.ntub.imd.camping.service.ContactInformationService;
 import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
@@ -24,7 +22,6 @@ import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 import tw.edu.ntub.imd.camping.validation.CreateUser;
 import tw.edu.ntub.imd.camping.validation.UpdateUser;
 
-import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -33,11 +30,9 @@ import java.util.Optional;
 @RequestMapping(path = "/user")
 public class UserController {
     private final UserService userService;
-    private final ContactInformationService contactInformationService;
 
-    public UserController(UserService userService, ContactInformationService contactInformationService) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.contactInformationService = contactInformationService;
     }
 
     @Operation(
@@ -57,7 +52,7 @@ public class UserController {
     public ResponseEntity<String> register(@Validated(CreateUser.class) @RequestBody UserBean userBean, BindingResult bindingResult) {
         BindingResultUtils.validate(bindingResult);
         userService.save(userBean);
-        return ResponseEntityBuilder.success().message("註冊成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("註冊成功");
     }
 
     @Operation(
@@ -91,8 +86,7 @@ public class UserController {
             data.add("experience", userBean.getExperience().ordinal());
             data.add("email", userBean.getEmail());
             data.add("address", userBean.getAddress());
-            return ResponseEntityBuilder.success()
-                    .message("查詢成功")
+            return ResponseEntityBuilder.success("查詢成功")
                     .data(data)
                     .build();
         } else {
@@ -105,13 +99,6 @@ public class UserController {
             method = "PATCH",
             summary = "更新使用者資訊",
             description = "更新使用者資訊",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UpdateUserInfoSchema.class)
-                    )
-            ),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "更新成功",
@@ -122,37 +109,20 @@ public class UserController {
     )
     @PatchMapping(path = "")
     public ResponseEntity<String> updateUserInfo(
-            @Validated(UpdateUser.class) @RequestBody UserBean user,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UpdateUserInfoSchema.class)
+                    )
+            ) @Validated(UpdateUser.class) @RequestBody UserBean user,
             BindingResult bindingResult
     ) {
         String account = SecurityUtils.getLoginUserAccount();
 
         BindingResultUtils.validate(bindingResult);
         userService.update(account, user);
-        return ResponseEntityBuilder.success().message("更新成功").build();
-    }
-
-    @Operation(
-            tags = "User",
-            method = "POST",
-            summary = "新增聯絡方式",
-            description = "新增登入者的聯絡方式",
-            responses = @ApiResponse(
-                    responseCode = "200",
-                    description = "新增成功",
-                    content = @Content(
-                            mediaType = "application/json"
-                    )
-            )
-    )
-    @PostMapping(path = "/contact-information")
-    public ResponseEntity<String> createContactInformation(
-            @Valid @RequestBody ContactInformationBean contactInformationBean,
-            BindingResult bindingResult
-    ) {
-        BindingResultUtils.validate(bindingResult);
-        contactInformationService.save(contactInformationBean);
-        return ResponseEntityBuilder.success().message("新增成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -171,8 +141,7 @@ public class UserController {
     )
     @GetMapping(path = "/experience")
     public ResponseEntity<String> getExperienceList() {
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(Arrays.asList(Experience.values()), this::addExperienceToObjectData)
                 .build();
     }

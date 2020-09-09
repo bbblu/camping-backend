@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(exclude = {
         "productGroupByProductGroupId",
         "userByRenterAccount",
-        "contactInformationByRenterContactInformationId",
         "campByCampId",
         "userByLastModifyAccount"
 })
@@ -88,14 +87,6 @@ public class RentalRecord {
      */
     @Column(name = "renter_credit_card_id", length = 16, nullable = false)
     private String renterCreditCardId;
-
-    /**
-     * 租借人的聯絡方式編號
-     *
-     * @since 1.0.0
-     */
-    @Column(name = "renter_contact_information_id", nullable = false, columnDefinition = "UNSIGNED")
-    private Integer renterContactInformationId;
 
     /**
      * 點選我要租借的時間，即建立時間
@@ -204,16 +195,6 @@ public class RentalRecord {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "renter_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User userByRenterAccount;
-
-    /**
-     * 租借人的聯絡方式
-     *
-     * @see ContactInformation
-     * @since 1.0.0
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "renter_contact_information_id", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
-    private ContactInformation contactInformationByRenterContactInformationId;
 
     /**
      * 露營區、露營地

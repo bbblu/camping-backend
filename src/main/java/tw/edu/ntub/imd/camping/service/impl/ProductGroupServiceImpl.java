@@ -38,7 +38,6 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     private final ProductRelatedLinkDAO relatedLinkDAO;
     private final CanBorrowProductGroupDAO canBorrowProductGroupDAO;
     private final CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer;
-    private final ContactInformationDAO contactInformationDAO;
     private final TransactionUtils transactionUtils;
 
     public ProductGroupServiceImpl(
@@ -54,7 +53,6 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             ProductRelatedLinkDAO relatedLinkDAO,
             CanBorrowProductGroupDAO canBorrowProductGroupDAO,
             CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer,
-            ContactInformationDAO contactInformationDAO,
             TransactionUtils transactionUtils) {
         super(groupDAO, transformer);
         this.uploader = uploader;
@@ -69,14 +67,11 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         this.relatedLinkDAO = relatedLinkDAO;
         this.canBorrowProductGroupDAO = canBorrowProductGroupDAO;
         this.canBorrowProductGroupBeanTransformer = canBorrowProductGroupBeanTransformer;
-        this.contactInformationDAO = contactInformationDAO;
         this.transactionUtils = transactionUtils;
     }
 
     @Override
     public ProductGroupBean save(ProductGroupBean productGroupBean) {
-        OwnerChecker.checkContactInformationOwner(contactInformationDAO, productGroupBean.getContactInformationId());
-
         ProductGroup productGroup = transformer.transferToEntity(productGroupBean);
         transactionUtils.createBankAccount(new BankAccount(productGroup.getBankAccount()));
         ProductGroup saveResult = groupDAO.saveAndFlush(productGroup);

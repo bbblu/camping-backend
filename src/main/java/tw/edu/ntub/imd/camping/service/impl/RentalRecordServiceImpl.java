@@ -30,7 +30,6 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     private final ProductGroupDAO productGroupDAO;
     private final ProductDAO productDAO;
     private final CanBorrowProductGroupDAO canBorrowProductGroupDAO;
-    private final ContactInformationDAO contactInformationDAO;
     private final TransactionUtils transactionUtils;
 
     public RentalRecordServiceImpl(
@@ -41,7 +40,6 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             ProductGroupDAO productGroupDAO,
             ProductDAO productDAO,
             CanBorrowProductGroupDAO canBorrowProductGroupDAO,
-            ContactInformationDAO contactInformationDAO,
             TransactionUtils transactionUtils) {
         super(recordDAO, transformer);
         this.recordDAO = recordDAO;
@@ -51,14 +49,12 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         this.productGroupDAO = productGroupDAO;
         this.productDAO = productDAO;
         this.canBorrowProductGroupDAO = canBorrowProductGroupDAO;
-        this.contactInformationDAO = contactInformationDAO;
         this.transactionUtils = transactionUtils;
     }
 
     @Override
     public RentalRecordBean save(RentalRecordBean rentalRecordBean) {
         OwnerChecker.checkCanBorrowProductGroup(canBorrowProductGroupDAO, rentalRecordBean.getProductGroupId());
-        OwnerChecker.checkContactInformationOwner(contactInformationDAO, rentalRecordBean.getRenterContactInformationId());
 
         RentalRecord rentalRecord = transformer.transferToEntity(rentalRecordBean);
         ProductGroup productGroup = productGroupDAO.findById(rentalRecordBean.getProductGroupId()).orElseThrow();

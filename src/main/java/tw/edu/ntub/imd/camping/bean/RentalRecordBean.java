@@ -47,11 +47,6 @@ public class RentalRecordBean {
     @Valid
     private CreditCard renterCreditCard;
 
-    @Schema(description = "租借者聯絡方式", example = "1")
-    @NotNull(message = "租借者聯絡方式 - 未填寫")
-    @Min(value = 1, message = "租借者聯絡方式 - 應為大於等於{value}的數字")
-    private Integer renterContactInformationId;
-
     @Hidden
     @Null(message = "rentalDate - 不得填寫")
     private LocalDateTime rentalDate;
