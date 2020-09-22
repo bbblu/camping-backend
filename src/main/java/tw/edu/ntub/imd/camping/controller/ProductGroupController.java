@@ -26,6 +26,8 @@ import tw.edu.ntub.imd.camping.util.json.array.ArrayData;
 import tw.edu.ntub.imd.camping.util.json.object.CollectionObjectData;
 import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 import tw.edu.ntub.imd.camping.validation.CreateProductGroup;
+import tw.edu.ntub.imd.camping.validation.UpdateProduct;
+import tw.edu.ntub.imd.camping.validation.UpdateProductGroup;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -273,7 +275,7 @@ public class ProductGroupController {
                             mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
                             schema = @Schema(implementation = UpdateProductGroupSchema.class)
                     )
-            ) @RequestBody @Valid ProductGroupBean productGroup,
+            ) @RequestBody @Validated(UpdateProductGroup.class) ProductGroupBean productGroup,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
@@ -306,7 +308,7 @@ public class ProductGroupController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UpdateProductSchema.class)
                     )
-            ) @RequestBody @Valid List<@Valid ProductBean> productList,
+            ) @RequestBody @Validated(UpdateProduct.class) List<@Valid ProductBean> productList,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
@@ -321,8 +323,8 @@ public class ProductGroupController {
     @Operation(
             tags = "Product",
             method = "PATCH",
-            summary = "更新商品群組",
-            description = "更新商品群組以及商品",
+            summary = "更新商品",
+            description = "更新商品",
             parameters = {
                     @Parameter(name = "groupId", description = "商品群組編號", example = "1"),
                     @Parameter(name = "productId", description = "商品編號", example = "1")
@@ -344,7 +346,7 @@ public class ProductGroupController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UpdateProductSchema.class)
                     )
-            ) @Valid @RequestBody ProductBean product,
+            ) @Validated(UpdateProduct.class) @RequestBody ProductBean product,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
