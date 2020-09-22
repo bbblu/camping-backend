@@ -7,18 +7,13 @@ import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductImage;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductRelatedLink;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.view.CanBorrowProductGroup;
 import tw.edu.ntub.imd.camping.dto.BankAccount;
-import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
-import tw.edu.ntub.imd.camping.dto.file.uploader.UploadResult;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.service.transformer.*;
 import tw.edu.ntub.imd.camping.util.OwnerChecker;
 import tw.edu.ntub.imd.camping.util.TransactionUtils;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
@@ -26,7 +21,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, ProductGroup, Integer> implements ProductGroupService {
-    private final MultipartFileUploader uploader;
     private final ProductGroupDAO groupDAO;
     private final ProductGroupTransformer transformer;
     private final ProductDAO productDAO;
@@ -35,13 +29,11 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     private final ProductTypeTransformer typeTransformer;
     private final ProductImageDAO imageDAO;
     private final ProductImageTransformer imageTransformer;
-    private final ProductRelatedLinkDAO relatedLinkDAO;
     private final CanBorrowProductGroupDAO canBorrowProductGroupDAO;
     private final CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer;
     private final TransactionUtils transactionUtils;
 
     public ProductGroupServiceImpl(
-            MultipartFileUploader uploader,
             ProductGroupDAO groupDAO,
             ProductGroupTransformer transformer,
             ProductDAO productDAO,
@@ -50,12 +42,10 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             ProductTypeTransformer typeTransformer,
             ProductImageDAO imageDAO,
             ProductImageTransformer imageTransformer,
-            ProductRelatedLinkDAO relatedLinkDAO,
             CanBorrowProductGroupDAO canBorrowProductGroupDAO,
             CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer,
             TransactionUtils transactionUtils) {
         super(groupDAO, transformer);
-        this.uploader = uploader;
         this.groupDAO = groupDAO;
         this.transformer = transformer;
         this.productDAO = productDAO;
@@ -64,7 +54,6 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         this.typeTransformer = typeTransformer;
         this.imageDAO = imageDAO;
         this.imageTransformer = imageTransformer;
-        this.relatedLinkDAO = relatedLinkDAO;
         this.canBorrowProductGroupDAO = canBorrowProductGroupDAO;
         this.canBorrowProductGroupBeanTransformer = canBorrowProductGroupBeanTransformer;
         this.transactionUtils = transactionUtils;
@@ -75,12 +64,6 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         ProductGroup productGroup = transformer.transferToEntity(productGroupBean);
         transactionUtils.createBankAccount(new BankAccount(productGroup.getBankAccount()));
         ProductGroup saveResult = groupDAO.saveAndFlush(productGroup);
-        if (productGroupBean.getCoverImageFile() != null) {
-            UploadResult uploadResult =
-                    uploader.upload(productGroupBean.getCoverImageFile(), "product-group", String.valueOf(saveResult.getId()));
-            saveResult.setCoverImage(uploadResult.getUrl());
-            groupDAO.save(saveResult);
-        }
         if (CollectionUtils.isNotEmpty(productGroupBean.getProductArray())) {
             saveProduct(saveResult.getId(), productGroupBean.getProductArray());
         }
@@ -96,10 +79,7 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             ProductBean saveResult = saveResultList.get(i);
             ProductBean productBean = productBeanList.get(i);
             if (CollectionUtils.isNotEmpty(productBean.getImageArray())) {
-                saveImage(saveResult.getGroupId(), saveResult.getId(), productBean.getImageArray());
-            }
-            if (CollectionUtils.isNotEmpty(productBean.getRelatedLinkArray())) {
-                saveRelatedLinkUrl(saveResult.getId(), productBean.getRelatedLinkArray());
+                saveImage(saveResult.getId(), productBean.getImageArray());
             }
         }
     }
@@ -111,44 +91,11 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         return productTransformer.transferToBeanList(saveResult);
     }
 
-    private void saveImage(int groupId, int productId, List<ProductImageBean> productImageBeanList) {
-        String productGroupIdString = String.valueOf(groupId);
-        String productIdString = String.valueOf(productId);
-        List<ProductImage> productImageList = new ArrayList<>();
-        for (ProductImageBean productImageBean : productImageBeanList) {
-            ProductImage productImage = imageTransformer.transferToEntity(productImageBean);
-            productImage.setProductId(productId);
-            String imageUrl;
-            if (productImageBean.getImageFile() != null) {
-                UploadResult uploadResult =
-                        uploader.upload(
-                                productImageBean.getImageFile(),
-                                "product-group", productGroupIdString, "product", productIdString
-                        );
-                imageUrl = uploadResult.getUrl();
-            } else {
-                imageUrl = productImageBean.getUrl();
-            }
-            productImage.setUrl(imageUrl);
-            productImageList.add(productImage);
-        }
-        imageDAO.saveAll(productImageList);
-    }
-
-    private void saveRelatedLinkUrl(int productId, List<String> urlList) {
-        saveRelatedLink(
-                productId,
-                urlList.stream()
-                        .map(ProductRelatedLink::new)
-                        .collect(Collectors.toList())
-        );
-    }
-
-    private void saveRelatedLink(int productId, List<ProductRelatedLink> relatedLinkList) {
-        relatedLinkDAO.saveAll(
-                relatedLinkList.stream()
-                        .peek(productRelatedLink -> productRelatedLink.setProductId(productId))
-                        .collect(Collectors.toList())
+    private void saveImage(int productId, List<ProductImageBean> productImageBeanList) {
+        imageDAO.saveAll(productImageBeanList.stream()
+                .map(imageTransformer::transferToEntity)
+                .peek(image -> image.setProductId(productId))
+                .collect(Collectors.toList())
         );
     }
 
@@ -178,7 +125,6 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         List<Product> productList = productDAO.findByGroupId(id);
         List<Integer> productIdList = productList.stream().map(Product::getId).collect(Collectors.toList());
         imageDAO.updateEnableByProductIdList(productIdList, false);
-        relatedLinkDAO.updateEnableByProductIdList(productIdList, false);
         productDAO.updateEnableByGroupId(id, false);
         groupDAO.updateEnableById(id, false);
     }
@@ -212,18 +158,11 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         OwnerChecker.checkIsAllProductOwner(productDAO, Collections.singletonList(productId));
         productDAO.updateEnableById(productId, false);
         imageDAO.updateEnableByProductIdList(Collections.singletonList(productId), false);
-        relatedLinkDAO.updateEnableByProductIdList(Collections.singletonList(productId), false);
     }
 
     @Override
     public void deleteProductImage(Integer productImageId) {
         OwnerChecker.checkIsProductImageOwner(imageDAO, productImageId);
         imageDAO.updateEnableById(Collections.singletonList(productImageId), false);
-    }
-
-    @Override
-    public void deleteProductRelatedLink(Integer productRelatedLinkId) {
-        OwnerChecker.checkIsProductRelatedLinkOwner(relatedLinkDAO, productRelatedLinkId);
-        relatedLinkDAO.updateEnableById(Collections.singletonList(productRelatedLinkId), false);
     }
 }

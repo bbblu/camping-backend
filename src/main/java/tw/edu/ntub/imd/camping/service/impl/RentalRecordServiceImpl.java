@@ -2,6 +2,7 @@ package tw.edu.ntub.imd.camping.service.impl;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.RentalRecordBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
@@ -10,7 +11,10 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord_;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
-import tw.edu.ntub.imd.camping.exception.*;
+import tw.edu.ntub.imd.camping.exception.CanceledRentalRecordException;
+import tw.edu.ntub.imd.camping.exception.LastRentalRecordStatusException;
+import tw.edu.ntub.imd.camping.exception.NotFoundException;
+import tw.edu.ntub.imd.camping.exception.NotRentalRecordOwnerException;
 import tw.edu.ntub.imd.camping.service.RentalRecordService;
 import tw.edu.ntub.imd.camping.service.transformer.RentalDetailTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.RentalRecordTransformer;
@@ -112,14 +116,8 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     }
 
     @Override
-    public void updateStatus(int id, RentalRecordStatus status) {
+    @Transactional
+    public void cancelRecord(int id, String cancelDetail) {
         RentalRecord rentalRecord = getUpdateRentalRecord(id);
-        RentalRecordStatus oldStatus = rentalRecord.getStatus();
-        if (oldStatus.isCanChangeTo(status)) {
-            rentalRecord.setStatus(status);
-            recordDAO.save(rentalRecord);
-        } else {
-            throw new RentalRecordStatusChangeException(oldStatus, status);
-        }
     }
 }

@@ -14,6 +14,4 @@ public interface ProductGroupService extends BaseService<ProductGroupBean, Integ
     void deleteProduct(Integer productId);
 
     void deleteProductImage(Integer productImageId);
-
-    void deleteProductRelatedLink(Integer productRelatedLinkId);
 }

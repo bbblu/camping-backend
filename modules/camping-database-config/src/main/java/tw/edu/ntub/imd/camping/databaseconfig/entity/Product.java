@@ -109,6 +109,14 @@ public class Product {
     private String brokenCompensation;
 
     /**
+     * 相關連結
+     *
+     * @since 1.4.8
+     */
+    @Column(name = "related_link", length = 600)
+    private String relatedLink;
+
+    /**
      * 備註
      *
      * @since 1.0.0

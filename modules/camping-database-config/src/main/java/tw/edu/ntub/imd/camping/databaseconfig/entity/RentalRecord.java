@@ -145,20 +145,20 @@ public class RentalRecord {
     private LocalDateTime checkDate;
 
     /**
-     * 出借者檢查結果
-     *
-     * @since 1.0.0
-     */
-    @Column(name = "check_result", length = 1000)
-    private String checkResult;
-
-    /**
      * 取消時間
      *
      * @since 1.0.0
      */
     @Column(name = "cancel_date")
     private LocalDateTime cancelDate;
+
+    /**
+     * 取消原因
+     *
+     * @since 1.4.7
+     */
+    @Column(name = "cancel_detail")
+    private String cancelDetail;
 
     /**
      * 最後修改人帳號

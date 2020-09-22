@@ -4,7 +4,7 @@ import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
-import tw.edu.ntub.imd.camping.databaseconfig.exception.EmptyCheckResultException;
+import tw.edu.ntub.imd.camping.databaseconfig.exception.EmptyCancelDetailException;
 
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -40,6 +40,9 @@ public class RentalRecordListener {
         rentalRecord.setLastModifyDate(LocalDateTime.now());
         switch (rentalRecord.getStatus()) {
             case CANCEL:
+                if (StringUtils.isBlank(rentalRecord.getCancelDetail())) {
+                    throw new EmptyCancelDetailException();
+                }
                 rentalRecord.setCancelDate(LocalDateTime.now());
                 break;
             case NOT_PICK_UP:
@@ -51,9 +54,6 @@ public class RentalRecordListener {
                 rentalRecord.setReturnDate(LocalDateTime.now());
                 break;
             case CHECKED:
-                if (StringUtils.isBlank(rentalRecord.getCheckResult())) {
-                    throw new EmptyCheckResultException();
-                }
                 rentalRecord.setCheckDate(LocalDateTime.now());
                 break;
         }
