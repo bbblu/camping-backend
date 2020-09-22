@@ -116,12 +116,9 @@ public class RentalRecordController {
             detailData.add("brand", product.getBrand());
             detailData.add("useInformation", product.getUseInformation());
             detailData.add("brokenCompensation", product.getBrokenCompensation());
+            detailData.add("relatedLink", product.getRelatedLink());
             detailData.addStringArray("imageArray", product.getImageArray() != null ?
-                    product.getImageArray().parallelStream().map(ProductImageBean::getUrl).collect(Collectors.toList()) :
-                    Collections.emptyList()
-            );
-            detailData.addStringArray("relatedLinkArray", product.getRelatedLinkList() != null ?
-                    product.getRelatedLinkList().parallelStream().map(ProductRelatedLinkBean::getUrl).collect(Collectors.toList()) :
+                    product.getImageArray().stream().map(ProductImageBean::getUrl).collect(Collectors.toList()) :
                     Collections.emptyList()
             );
         });
