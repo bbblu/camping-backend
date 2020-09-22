@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ProblemReportListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.ProblemReportStatus;
+import tw.edu.ntub.imd.camping.databaseconfig.enumerate.ProblemReportType;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -31,6 +32,15 @@ public class ProblemReport {
     private Integer id;
 
     /**
+     * 問題類型
+     *
+     * @since 1.4.9
+     */
+    @Enumerated
+    @Column(name = "type", length = 1, nullable = false)
+    private ProblemReportType type;
+
+    /**
      * 狀態(0: 未處理/ 1: 處理中/ 2: 已完成)
      *
      * @since 1.4.0
@@ -38,6 +48,14 @@ public class ProblemReport {
     @Enumerated
     @Column(name = "status", length = 1, nullable = false)
     private ProblemReportStatus status;
+
+    /**
+     * 回報者信箱
+     *
+     * @since 1.4.10
+     */
+    @Column(name = "reporter_email", nullable = false)
+    private String reporterEmail;
 
     /**
      * 回報日期
