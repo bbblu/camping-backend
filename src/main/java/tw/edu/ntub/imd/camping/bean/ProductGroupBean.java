@@ -4,9 +4,6 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springframework.web.multipart.MultipartFile;
-import tw.edu.ntub.birc.common.util.BooleanUtils;
-import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.validation.CreateProductGroup;
 
 import javax.validation.Valid;
@@ -32,11 +29,8 @@ public class ProductGroupBean {
     @Size(max = 300, message = "商品群組名稱 - 輸入字數大於{max}個字")
     private String name;
 
-    @Schema(description = "封面圖連結，與封面圖檔擇一上傳", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
+    @Schema(description = "封面圖連結", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
     private String coverImage;
-
-    @Schema(description = "封面圖檔，與封面圖連結擇一上傳", type = "file")
-    private MultipartFile coverImageFile;
 
     @Schema(description = "城市名稱，如臺北市、宜蘭縣", example = "臺北市")
     @NotBlank(groups = CreateProductGroup.class, message = "城市名稱 - 未填寫")
@@ -79,19 +73,5 @@ public class ProductGroupBean {
         } else {
             return true;
         }
-    }
-
-    @Hidden
-    @AssertTrue(groups = CreateProductGroup.class, message = "請上傳封面圖檔或封面圖連結")
-    private boolean isUploadCoverImage() {
-        return (coverImageFile != null && BooleanUtils.isFalse(coverImageFile.isEmpty())) ||
-                StringUtils.isNotBlank(coverImage);
-    }
-
-    @Hidden
-    @AssertTrue(groups = CreateProductGroup.class, message = "封面圖檔與封面圖連結請擇一上傳")
-    private boolean isOnlyUploadCoverImageOrOnlySendCoverImageUrl() {
-        return (coverImageFile != null && BooleanUtils.isFalse(coverImageFile.isEmpty()) && StringUtils.isBlank(coverImage)) ||
-                ((coverImageFile == null || coverImageFile.isEmpty()) && StringUtils.isNotBlank(coverImage));
     }
 }

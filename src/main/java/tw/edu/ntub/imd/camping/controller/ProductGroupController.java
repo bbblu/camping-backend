@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.http.MediaType;
@@ -15,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
 import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.service.CityService;
@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@AllArgsConstructor
 @Tag(name = "Product", description = "商品相關API")
 @RestController
 @RequestMapping(path = "/product-group")
@@ -45,11 +46,6 @@ public class ProductGroupController {
     private final DecimalFormat priceFormat = new DecimalFormat("$ #,###");
     private final ProductGroupService productGroupService;
     private final CityService cityService;
-
-    public ProductGroupController(ProductGroupService productGroupService, CityService cityService) {
-        this.productGroupService = productGroupService;
-        this.cityService = cityService;
-    }
 
     @Operation(
             tags = "Product",
@@ -72,7 +68,10 @@ public class ProductGroupController {
             )
     )
     @PostMapping(path = "")
-    public ResponseEntity<String> create(@Validated(CreateProductGroup.class) ProductGroupBean productGroup, BindingResult bindingResult) {
+    public ResponseEntity<String> create(
+            @RequestBody @Validated(CreateProductGroup.class) ProductGroupBean productGroup,
+            BindingResult bindingResult
+    ) {
         BindingResultUtils.validate(bindingResult);
         productGroupService.save(productGroup);
         return ResponseEntityBuilder.buildSuccessMessage("上架成功");
@@ -283,7 +282,7 @@ public class ProductGroupController {
                             mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
                             schema = @Schema(implementation = UpdateProductGroupSchema.class)
                     )
-            ) @Valid ProductGroupBean productGroup,
+            ) @RequestBody @Valid ProductGroupBean productGroup,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
@@ -316,7 +315,7 @@ public class ProductGroupController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UpdateProductSchema.class)
                     )
-            ) @Valid @RequestBody List<@Valid ProductBean> productList,
+            ) @RequestBody @Valid List<@Valid ProductBean> productList,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
@@ -531,10 +530,8 @@ public class ProductGroupController {
         private String bankAccount;
         @Schema(description = "商品群組名稱", example = "便宜帳篷、桌椅三件套，限時特價$3990")
         private String name;
-        @Schema(description = "封面圖連結，與封面圖檔擇一上傳", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
+        @Schema(description = "封面圖連結", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
         private String coverImage;
-        @Schema(description = "封面圖檔，與封面圖連結擇一上傳", type = "file")
-        private MultipartFile coverImageFile;
         @Schema(description = "城市名稱，如臺北市、宜蘭縣", example = "臺北市")
         private String cityName;
         @Schema(description = "區名稱，如中正區、宜蘭市", example = "中正區")
