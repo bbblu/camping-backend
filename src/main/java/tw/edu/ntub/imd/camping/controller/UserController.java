@@ -16,7 +16,6 @@ import tw.edu.ntub.imd.camping.bean.ContactInformationBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
-import tw.edu.ntub.imd.camping.exception.InvalidOldPasswordException;
 import tw.edu.ntub.imd.camping.service.ContactInformationService;
 import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
@@ -26,6 +25,7 @@ import tw.edu.ntub.imd.camping.validation.CreateUser;
 
 import javax.validation.Valid;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 
 @Tag(name = "User", description = "使用者API")
@@ -154,26 +154,14 @@ public class UserController {
     )
     @PostMapping(path = "/change-password")
     public ResponseEntity<String> changePassword(
-            @RequestBody String password,
-            @RequestBody String newPassword
+            @Valid @RequestBody Map<String, String> request
     ) {
-        System.out.println(password);
-        System.out.println(newPassword);
+        String password = request.get("password");
+        String newPassword = request.get("newPassword");
         String account = SecurityUtils.getLoginUserAccount();
+        userService.changePassword(account, password, newPassword);
 
-        Optional<UserBean> optionalUser = userService.getById(account);
-        if (optionalUser.isPresent()) {
-            UserBean userBean = optionalUser.get();
-            if (!userService.isOldPasswordValid(userBean, password)) {
-                throw new InvalidOldPasswordException();
-            }
-
-            userService.changePassword(userBean, newPassword);
-
-            return ResponseEntityBuilder.success().message("更新成功").build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntityBuilder.success().message("更新成功").build();
     }
 
 
