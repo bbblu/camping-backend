@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
 import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
-import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.service.RentalRecordService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
@@ -163,43 +162,9 @@ public class RentalRecordController {
                     description = "更新成功"
             )
     )
-    @PatchMapping(path = "/{id}/status")
+    @PatchMapping(path = "/{id}/status/next")
     public ResponseEntity<String> updateStatusToNext(@PathVariable(name = "id") @Positive(message = "id - 應大於0") int id) {
         rentalRecordService.updateStatusToNext(id);
-        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "取貨",
-            description = "更新租借紀錄狀態為已取貨",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1"),
-            responses = @ApiResponse(
-                    responseCode = "200",
-                    description = "變更成功"
-            )
-    )
-    @PatchMapping(path = "/{id}/pick")
-    public ResponseEntity<String> updateStatusToPickedUp(@PathVariable(name = "id") @Positive(message = "id - 應大於0") int id) {
-        rentalRecordService.updateStatus(id, RentalRecordStatus.NOT_RETURN);
-        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "歸還",
-            description = "更新租借紀錄狀態為已歸還",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1"),
-            responses = @ApiResponse(
-                    responseCode = "200",
-                    description = "變更成功"
-            )
-    )
-    @PatchMapping(path = "/{id}/retrieve")
-    public ResponseEntity<String> updateStatusToRetrieve(@PathVariable(name = "id") @Positive(message = "id - 應大於0") int id) {
-        rentalRecordService.updateStatus(id, RentalRecordStatus.RETRIEVE);
         return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
