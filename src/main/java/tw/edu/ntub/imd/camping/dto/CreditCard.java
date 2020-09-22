@@ -4,10 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.YearMonth;
 
 @Schema(name = "信用卡資料", description = "信用卡資料")
@@ -25,9 +22,20 @@ public class CreditCard {
     @Pattern(regexp = "^[0-9]{3,4}$", message = "信用卡卡號 - 應為3到4位數字")
     private String safeCode;
 
-    @Schema(type = "string", description = "過期時間(MM/yy，例如：2020年9月過期，則為09/20)", example = "09/20")
-    @NotNull(message = "過期時間 - 未填寫")
+    @Null(message = "expireDate - 不得填寫")
     private YearMonth expireDate;
+
+    @Schema(type = "string", description = "有效年份", example = "00")
+    @NotNull(message = "有效年份 - 未填寫")
+    @PositiveOrZero(message = "有效年份 - 應為大於等於0的正數")
+    @Max(value = 99, message = "有效年份 - 最多為{value}")
+    private Integer expireYear;
+
+    @Schema(type = "string", description = "有效月份", example = "11")
+    @NotNull(message = "有效月份 - 未填寫")
+    @Positive(message = "有效月份 - 應為大於0的正數")
+    @Max(value = 12, message = "有效月份 - 最多為{value}")
+    private Integer expireMonth;
 
     @Schema(description = "帳單地址", example = "台北市中正區濟南路321號")
     @NotBlank(message = "帳單地址 - 未填寫")

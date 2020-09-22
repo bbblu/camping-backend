@@ -125,7 +125,13 @@ public class TransactionUtils {
     public int createTransaction(@Valid CreditCard creditCard, String payeeBankAccount, int money) {
         try {
             ObjectData body = new ObjectData(mapper.writeValueAsString(creditCard));
-            body.add("expireDate", creditCard.getExpireDate().format(DateTimeFormatter.ofPattern("MM/yy")));
+            String expireDate;
+            if (creditCard.getExpireDate() != null) {
+                expireDate = creditCard.getExpireDate().format(DateTimeFormatter.ofPattern("MM/yy"));
+            } else {
+                expireDate = String.format("%2d/%2d", creditCard.getExpireYear(), creditCard.getExpireMonth());
+            }
+            body.add("expireDate", expireDate);
             body.add("payeeBankAccount", payeeBankAccount);
             body.add("money", money);
             TransactionId id = sendPostRequest(createTransactionUrl, body, new TypeReference<>() {
