@@ -171,6 +171,7 @@ public class ProductGroupController {
         return ResponseEntityBuilder.success("查詢成功")
                 .data(productGroupService.searchCanBorrowProductGroup(filterData), (data, canBorrowProductGroup) -> {
                     data.add("id", canBorrowProductGroup.getId());
+                    data.add("name", canBorrowProductGroup.getName());
                     data.add("coverImage", canBorrowProductGroup.getCoverImage());
                     data.add("price", priceFormat.format(canBorrowProductGroup.getPrice()));
                     data.add("borrowStartDate", canBorrowProductGroup.getBorrowStartDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));

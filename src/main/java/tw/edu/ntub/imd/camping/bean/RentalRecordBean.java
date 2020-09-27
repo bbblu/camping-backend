@@ -7,7 +7,6 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import tw.edu.ntub.birc.common.annotation.AliasName;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.dto.CreditCard;
 
@@ -60,16 +59,6 @@ public class RentalRecordBean {
     @NotNull(message = "預借租借結束時間 - 未填寫")
     @FutureOrPresent(message = "預借租借結束時間 - 應選擇現在或未來時間")
     private LocalDateTime borrowEndDate;
-
-    @Schema(description = "露營地編號", example = "1")
-    @Min(value = 1, message = "露營地 - 應為大於等於{value}的數字")
-    private Integer campId;
-
-    @Hidden
-    @JsonIgnore
-    @Null(message = "camp - 不得填寫")
-    @AliasName("campByCampId.name")
-    private String campName;
 
     @Hidden
     @JsonIgnore

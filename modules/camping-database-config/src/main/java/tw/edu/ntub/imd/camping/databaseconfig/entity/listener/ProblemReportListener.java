@@ -18,6 +18,9 @@ public class ProblemReportListener {
         if (problemReport.getReportDate() == null) {
             problemReport.setReportDate(LocalDateTime.now());
         }
+        if (problemReport.getLastModifyAccount() == null) {
+            problemReport.setLastModifyAccount(SecurityUtils.getLoginUserAccount());
+        }
         if (problemReport.getModifyDate() == null) {
             problemReport.setModifyDate(LocalDateTime.now());
         }
@@ -25,7 +28,7 @@ public class ProblemReportListener {
 
     @PreUpdate
     public void preUpdate(ProblemReport problemReport) {
-        problemReport.setModifyId(SecurityUtils.getLoginUserAccount());
+        problemReport.setLastModifyAccount(SecurityUtils.getLoginUserAccount());
         problemReport.setModifyDate(LocalDateTime.now());
     }
 }
