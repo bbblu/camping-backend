@@ -2,6 +2,7 @@ package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ProblemReportListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.ProblemReportStatus;
@@ -16,7 +17,6 @@ import java.time.LocalDateTime;
  * @since 1.4.0
  */
 @Data
-@EqualsAndHashCode(exclude = {"userByHandler", "userByModifyId"})
 @Entity
 @EntityListeners(ProblemReportListener.class)
 @Table(name = "problem_report", schema = Config.DATABASE_NAME)
@@ -94,8 +94,8 @@ public class ProblemReport {
      *
      * @since 1.4.0
      */
-    @Column(name = "modify_id", length = 100, nullable = false)
-    private String modifyId;
+    @Column(name = "last_modify_account", length = 100, nullable = false)
+    private String lastModifyAccount;
 
     /**
      * 最後修改日期
@@ -111,6 +111,8 @@ public class ProblemReport {
      * @see User
      * @since 1.4.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "handler", referencedColumnName = "account", insertable = false, updatable = false)
     private User userByHandler;
@@ -121,7 +123,9 @@ public class ProblemReport {
      * @see User
      * @since 1.4.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "modify_id", referencedColumnName = "account", insertable = false, updatable = false)
-    private User userByModifyId;
+    @JoinColumn(name = "last_modify_account", referencedColumnName = "account", insertable = false, updatable = false)
+    private User userByModifyLastModifyAccount;
 }
