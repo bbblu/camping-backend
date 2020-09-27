@@ -30,6 +30,14 @@ public class CanBorrowProductGroup {
     private Integer id;
 
     /**
+     * 商品群組名稱
+     *
+     * @since 1.4.10
+     */
+    @Column(name = "name", length = 300, nullable = false)
+    private String name;
+
+    /**
      * 商品群組封面圖
      *
      * @since 1.0.0
