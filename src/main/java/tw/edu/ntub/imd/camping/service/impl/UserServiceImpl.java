@@ -10,9 +10,13 @@ import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.UserDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.User;
 import tw.edu.ntub.imd.camping.exception.DuplicateCreateException;
+import tw.edu.ntub.imd.camping.exception.InvalidOldPasswordException;
 import tw.edu.ntub.imd.camping.exception.NotAccountOwnerException;
+import tw.edu.ntub.imd.camping.exception.NotFoundException;
 import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.service.transformer.UserTransformer;
+
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> implements UserService {
@@ -33,7 +37,6 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
         try {
             User user = transformer.transferToEntity(userBean);
             user.setPassword(passwordEncoder.encode(userBean.getPassword()));
-            user.setLastModifyAccount(userBean.getAccount());
             User saveResult = userDAO.saveAndFlush(user);
             return transformer.transferToBean(saveResult);
         } catch (DataIntegrityViolationException e) {
@@ -47,6 +50,19 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
             throw new NotAccountOwnerException();
         } else {
             super.update(account, userBean);
+        }
+    }
+
+    @Override
+    public void updatePassword(String account, String oldPassword, String newPassword) {
+        Optional<User> optionalUser = userDAO.findById(account);
+        User user = optionalUser.orElseThrow(() -> new NotFoundException("無此使用者"));
+
+        if (passwordEncoder.matches(oldPassword, user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userDAO.save(user);
+        } else {
+            throw new InvalidOldPasswordException();
         }
     }
 }
