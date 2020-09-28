@@ -42,7 +42,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
     }
 
     @Override
-    public void changePassword(String account, String oldPassword, String newPassword) {
+    public void updatePassword(String account, String oldPassword, String newPassword) {
         Optional<User> optionalUser = userDAO.findById(account);
         User user = optionalUser.orElseThrow(() -> new NotFoundException("無此使用者"));
 

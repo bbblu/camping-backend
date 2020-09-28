@@ -13,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.imd.camping.bean.ContactInformationBean;
+import tw.edu.ntub.imd.camping.bean.UpdatePasswordBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
@@ -25,7 +26,6 @@ import tw.edu.ntub.imd.camping.validation.CreateUser;
 
 import javax.validation.Valid;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 
 @Tag(name = "User", description = "使用者API")
@@ -141,7 +141,7 @@ public class UserController {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ChangePasswordSchema.class)
+                            schema = @Schema(implementation = UpdatePasswordBean.class)
                     )
             ),
             responses = @ApiResponse(
@@ -152,14 +152,16 @@ public class UserController {
                     )
             )
     )
-    @PostMapping(path = "/change-password")
+    @PatchMapping(path = "/password")
     public ResponseEntity<String> changePassword(
-            @Valid @RequestBody Map<String, String> request
+            @Valid @RequestBody UpdatePasswordBean updatePasswordBean,
+            BindingResult bindingResult
     ) {
-        String password = request.get("password");
-        String newPassword = request.get("newPassword");
+        BindingResultUtils.validate(bindingResult);
+        String password = updatePasswordBean.getPassword();
+        String newPassword = updatePasswordBean.getNewPassword();
         String account = SecurityUtils.getLoginUserAccount();
-        userService.changePassword(account, password, newPassword);
+        userService.updatePassword(account, password, newPassword);
 
         return ResponseEntityBuilder.success().message("更新成功").build();
     }
@@ -233,16 +235,6 @@ public class UserController {
 
         @Schema(description = "地址", example = "台北市中正區濟南路321號")
         private String address;
-    }
-
-    @Schema(name = "修改密碼", description = "修改密碼")
-    @Data
-    private static class ChangePasswordSchema {
-        @Schema(description = "舊密碼", example = "hello")
-        private String password;
-
-        @Schema(description = "新密碼", example = "goodbye")
-        private String newPassword;
     }
 
     @Schema(name = "露營經驗", description = "露營經驗")
