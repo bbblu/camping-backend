@@ -14,6 +14,9 @@ public class CanBorrowProductGroupBean {
     @Schema(description = "群組編號", minimum = "1", example = "1")
     private Integer id;
 
+    @Schema(description = "商品群組名稱", example = "便宜帳篷、桌椅三件套")
+    private String name;
+
     @Schema(description = "封面圖網址", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
     private String coverImage;
 

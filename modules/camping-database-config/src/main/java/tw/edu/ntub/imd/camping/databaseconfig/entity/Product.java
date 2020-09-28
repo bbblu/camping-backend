@@ -85,6 +85,14 @@ public class Product {
     private String brand;
 
     /**
+     * 外觀狀況
+     *
+     * @since 1.4.5
+     */
+    @Column(name = "appearance", length = 500, nullable = false)
+    private String appearance;
+
+    /**
      * 使用方式
      *
      * @since 1.0.0
@@ -99,6 +107,14 @@ public class Product {
      */
     @Column(name = "broken_compensation", length = 200, nullable = false)
     private String brokenCompensation;
+
+    /**
+     * 相關連結
+     *
+     * @since 1.4.8
+     */
+    @Column(name = "related_link", length = 600)
+    private String relatedLink;
 
     /**
      * 備註

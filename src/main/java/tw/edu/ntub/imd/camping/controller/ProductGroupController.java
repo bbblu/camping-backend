@@ -9,13 +9,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
 import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.service.CityService;
@@ -26,6 +26,8 @@ import tw.edu.ntub.imd.camping.util.json.array.ArrayData;
 import tw.edu.ntub.imd.camping.util.json.object.CollectionObjectData;
 import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 import tw.edu.ntub.imd.camping.validation.CreateProductGroup;
+import tw.edu.ntub.imd.camping.validation.UpdateProduct;
+import tw.edu.ntub.imd.camping.validation.UpdateProductGroup;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -38,6 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Tag(name = "Product", description = "商品相關API")
 @RestController
 @RequestMapping(path = "/product-group")
@@ -45,11 +48,6 @@ public class ProductGroupController {
     private final DecimalFormat priceFormat = new DecimalFormat("$ #,###");
     private final ProductGroupService productGroupService;
     private final CityService cityService;
-
-    public ProductGroupController(ProductGroupService productGroupService, CityService cityService) {
-        this.productGroupService = productGroupService;
-        this.cityService = cityService;
-    }
 
     @Operation(
             tags = "Product",
@@ -72,10 +70,13 @@ public class ProductGroupController {
             )
     )
     @PostMapping(path = "")
-    public ResponseEntity<String> create(@Validated(CreateProductGroup.class) ProductGroupBean productGroup, BindingResult bindingResult) {
+    public ResponseEntity<String> create(
+            @RequestBody @Validated(CreateProductGroup.class) ProductGroupBean productGroup,
+            BindingResult bindingResult
+    ) {
         BindingResultUtils.validate(bindingResult);
         productGroupService.save(productGroup);
-        return ResponseEntityBuilder.success().message("上架成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("上架成功");
     }
 
     @Operation(
@@ -94,8 +95,7 @@ public class ProductGroupController {
     )
     @GetMapping(path = "/product/type")
     public ResponseEntity<String> searchProductType() {
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(productGroupService.searchAllProductType(), this::addProductTypeToObjectData)
                 .build();
     }
@@ -126,8 +126,7 @@ public class ProductGroupController {
         CollectionObjectData collectionData = data.createCollectionData();
         collectionData.add("type", typeList, this::addProductTypeToObjectData);
         addCityToObjectData(cityService.searchAllEnableCity(), data);
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(data)
                 .build();
     }
@@ -169,10 +168,10 @@ public class ProductGroupController {
     )
     @GetMapping(path = "")
     public ResponseEntity<String> searchCanBorrowProductGroup(ProductGroupFilterDataBean filterData) {
-        return ResponseEntityBuilder.success()
-                .message("查詢成功")
+        return ResponseEntityBuilder.success("查詢成功")
                 .data(productGroupService.searchCanBorrowProductGroup(filterData), (data, canBorrowProductGroup) -> {
                     data.add("id", canBorrowProductGroup.getId());
+                    data.add("name", canBorrowProductGroup.getName());
                     data.add("coverImage", canBorrowProductGroup.getCoverImage());
                     data.add("price", priceFormat.format(canBorrowProductGroup.getPrice()));
                     data.add("borrowStartDate", canBorrowProductGroup.getBorrowStartDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
@@ -216,8 +215,8 @@ public class ProductGroupController {
                     productGroupBean.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                     productGroupBean.getBorrowEndDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm"))
             ));
-            ContactInformationBean contactInformation = productGroupBean.getContactInformation();
-            data.add("contactInformation", contactInformation.getContent());
+            UserBean createUser = productGroupBean.getCreateUser();
+            data.add("contact", createUser.getEmail());
 
             CollectionObjectData collectionData = data.createCollectionData();
             collectionData.add("productArray", productGroupBean.getProductArray(), this::addProductData);
@@ -233,21 +232,19 @@ public class ProductGroupController {
     private void addProductData(ObjectData productData, ProductBean product) {
         productData.add("id", product.getId());
         productData.add("type", product.getTypeName());
+        productData.add("name", product.getName());
         productData.add("count", product.getCount());
         productData.add("brand", product.getBrand());
+        productData.add("appearance", product.getAppearance());
         productData.add("useInformation", product.getUseInformation());
         productData.add("brokenCompensation", product.getBrokenCompensation());
+        productData.add("relatedLink", product.getRelatedLink());
         productData.add("memo", product.getMemo());
         CollectionObjectData productCollectionData = productData.createCollectionData();
         if (CollectionUtils.isNotEmpty(product.getImageArray())) {
             productCollectionData.add("imageArray", product.getImageArray(), this::addProductImageData);
         } else {
             productData.addStringArray("imageArray", new String[0]);
-        }
-        if (CollectionUtils.isNotEmpty(product.getRelatedLinkList())) {
-            productCollectionData.add("relatedLinkArray", product.getRelatedLinkList(), this::addProductRelatedLinkData);
-        } else {
-            productData.addStringArray("relatedLinkArray", new String[0]);
         }
     }
 
@@ -256,24 +253,12 @@ public class ProductGroupController {
         productImageData.add("url", productImage.getUrl());
     }
 
-    private void addProductRelatedLinkData(ObjectData productRelatedLinkData, ProductRelatedLinkBean productRelatedLink) {
-        productRelatedLinkData.add("id", productRelatedLink.getId());
-        productRelatedLinkData.add("url", productRelatedLink.getUrl());
-    }
-
     @Operation(
             tags = "Product",
             method = "PATCH",
             summary = "更新商品群組",
             description = "更新商品群組以及商品",
             parameters = @Parameter(name = "id", description = "商品群組編號", example = "1"),
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema(implementation = UpdateProductGroupSchema.class)
-                    )
-            ),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "更新成功",
@@ -285,12 +270,18 @@ public class ProductGroupController {
     @PatchMapping(path = "/{id}")
     public ResponseEntity<String> update(
             @PathVariable(name = "id") @Positive(message = "群組編號 - 應為大於0的數字") Integer id,
-            @Valid ProductGroupBean productGroup,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(implementation = UpdateProductGroupSchema.class)
+                    )
+            ) @RequestBody @Validated(UpdateProductGroup.class) ProductGroupBean productGroup,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
         productGroupService.update(id, productGroup);
-        return ResponseEntityBuilder.success().message("更新成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -301,13 +292,6 @@ public class ProductGroupController {
             parameters = {
                     @Parameter(name = "groupId", description = "商品群組編號", example = "1")
             },
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UpdateProductSchema.class)
-                    )
-            ),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "更新成功",
@@ -317,10 +301,15 @@ public class ProductGroupController {
             )
     )
     @PatchMapping(path = "/{groupId}/product")
-    @SuppressWarnings("unused")
     public ResponseEntity<String> updateProduct(
             @PathVariable(name = "groupId") @Positive(message = "商品群組編號 - 應為大於0的數字") Integer groupId,
-            @Valid @RequestBody List<@Valid ProductBean> productList,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UpdateProductSchema.class)
+                    )
+            ) @RequestBody @Validated(UpdateProduct.class) List<@Valid ProductBean> productList,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
@@ -329,25 +318,18 @@ public class ProductGroupController {
                         .peek(productBean -> productBean.setGroupId(groupId))
                         .collect(Collectors.toList())
         );
-        return ResponseEntityBuilder.success().message("更新成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
             tags = "Product",
             method = "PATCH",
-            summary = "更新商品群組",
-            description = "更新商品群組以及商品",
+            summary = "更新商品",
+            description = "更新商品",
             parameters = {
                     @Parameter(name = "groupId", description = "商品群組編號", example = "1"),
                     @Parameter(name = "productId", description = "商品編號", example = "1")
             },
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UpdateProductSchema.class)
-                    )
-            ),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "更新成功",
@@ -357,17 +339,21 @@ public class ProductGroupController {
             )
     )
     @PatchMapping(path = "/{groupId}/product/{productId}")
-    @SuppressWarnings("unused")
     public ResponseEntity<String> updateProduct(
-            @PathVariable(name = "groupId") @Positive(message = "商品群組編號 - 應為大於0的數字") Integer groupId,
             @PathVariable(name = "productId") @Positive(message = "商品群組編號 - 應為大於0的數字") Integer productId,
-            @Valid @RequestBody ProductBean product,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UpdateProductSchema.class)
+                    )
+            ) @Validated(UpdateProduct.class) @RequestBody ProductBean product,
             BindingResult bindingResult
     ) {
         BindingResultUtils.validate(bindingResult);
         product.setId(productId);
         productGroupService.updateProduct(Collections.singletonList(product));
-        return ResponseEntityBuilder.success().message("更新成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
     }
 
     @Operation(
@@ -387,7 +373,7 @@ public class ProductGroupController {
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<String> delete(@PathVariable(name = "id") @Positive(message = "編號 - 應為大於0的數字") Integer id) {
         productGroupService.delete(id);
-        return ResponseEntityBuilder.success().message("刪除成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
     }
 
     @Operation(
@@ -405,9 +391,11 @@ public class ProductGroupController {
             )
     )
     @DeleteMapping(path = "/product/{productId}")
-    public ResponseEntity<String> deleteProduct(@PathVariable(name = "productId") @Positive(message = "編號 - 應為大於0的數字") Integer productId) {
+    public ResponseEntity<String> deleteProduct(
+            @PathVariable(name = "productId") @Positive(message = "編號 - 應為大於0的數字") Integer productId
+    ) {
         productGroupService.deleteProduct(productId);
-        return ResponseEntityBuilder.success().message("刪除成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
     }
 
     @Operation(
@@ -425,29 +413,11 @@ public class ProductGroupController {
             )
     )
     @DeleteMapping(path = "/product/image/{imageId}")
-    public ResponseEntity<String> deleteProductImage(@PathVariable(name = "imageId") @Positive(message = "編號 - 應為大於0的數字") Integer imageId) {
+    public ResponseEntity<String> deleteProductImage(
+            @PathVariable(name = "imageId") @Positive(message = "編號 - 應為大於0的數字") Integer imageId
+    ) {
         productGroupService.deleteProductImage(imageId);
-        return ResponseEntityBuilder.success().message("刪除成功").build();
-    }
-
-    @Operation(
-            tags = "Product",
-            method = "DELETE",
-            summary = "刪除商品相關連結",
-            description = "刪除商品相關連結",
-            parameters = @Parameter(name = "relatedLinkId", description = "商品相關連結編號", example = "1"),
-            responses = @ApiResponse(
-                    responseCode = "200",
-                    description = "刪除成功",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
-                    )
-            )
-    )
-    @DeleteMapping(path = "/product/related-link/{relatedLinkId}")
-    public ResponseEntity<String> deleteProductRelatedLink(@PathVariable(name = "relatedLinkId") @Positive(message = "編號 - 應為大於0的數字") Integer relatedLinkId) {
-        productGroupService.deleteProductRelatedLink(relatedLinkId);
-        return ResponseEntityBuilder.success().message("刪除成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
@@ -474,8 +444,8 @@ public class ProductGroupController {
         private String price;
         @Schema(description = "可租借時間範圍", example = "2020/08/14 15:00 ~ 2020/08/20 00:00")
         private String borrowDateRange;
-        @Schema(description = "聯絡方式", example = "Email: 10646007@ntub.edu.tw")
-        private String contactInformation;
+        @Schema(description = "聯絡方式", example = "10646007@ntub.edu.tw")
+        private String contact;
         @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(description = "商品陣列"))
         private ProductContentSchema productArray;
 
@@ -486,10 +456,14 @@ public class ProductGroupController {
             private Integer id;
             @Schema(description = "商品類型", example = "睡帳")
             private String type;
+            @Schema(description = "商品名稱", example = "OO牌睡帳")
+            private String name;
             @Schema(description = "商品數量", example = "2")
             private Integer count;
             @Schema(description = "商品品牌", example = "OO")
             private String brand;
+            @Schema(description = "商品外觀狀況", example = "300cm*300cm*250cm(高)")
+            private String appearance;
             @Schema(description = "使用說明", example = "內附搭帳棚說明書")
             private String useInformation;
             @Schema(description = "損壞賠償", example = "缺少零件：1/$200、布劃破：$1000")
@@ -498,8 +472,6 @@ public class ProductGroupController {
             private String memo;
             @ArraySchema(minItems = 0, schema = @Schema(description = "商品圖片陣列", implementation = ProductImageContentSchema.class))
             private ProductImageContentSchema[] imageArray;
-            @ArraySchema(minItems = 0, schema = @Schema(description = "商品相關連結陣列", implementation = ProductRelatedLinkContentSchema.class))
-            private ProductRelatedLinkContentSchema[] relatedLinkArray;
 
             @Schema(name = "商品圖片", description = "商品圖片")
             @Hidden
@@ -508,16 +480,6 @@ public class ProductGroupController {
                 @Schema(description = "商品圖片編號", example = "1")
                 private Integer id;
                 @Schema(description = "商品圖片網址", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
-                private String url;
-            }
-
-            @Schema(name = "商品相關連結", description = "商品相關連結")
-            @Hidden
-            @Data
-            private static class ProductRelatedLinkContentSchema {
-                @Schema(description = "商品相關連結編號", example = "1")
-                private Integer id;
-                @Schema(description = "商品相關連結網址", example = "https://www.fooish.com/jquery/")
                 private String url;
             }
         }
@@ -530,10 +492,8 @@ public class ProductGroupController {
         private String bankAccount;
         @Schema(description = "商品群組名稱", example = "便宜帳篷、桌椅三件套，限時特價$3990")
         private String name;
-        @Schema(description = "封面圖連結，與封面圖檔擇一上傳", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
+        @Schema(description = "封面圖連結", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
         private String coverImage;
-        @Schema(description = "封面圖檔，與封面圖連結擇一上傳", type = "file")
-        private MultipartFile coverImageFile;
         @Schema(description = "城市名稱，如臺北市、宜蘭縣", example = "臺北市")
         private String cityName;
         @Schema(description = "區名稱，如中正區、宜蘭市", example = "中正區")
@@ -544,8 +504,6 @@ public class ProductGroupController {
         private LocalDateTime borrowStartDate;
         @Schema(description = "租借結束日期(需在起始日期之後)", example = "2020/08/12")
         private LocalDateTime borrowEndDate;
-        @Schema(description = "聯絡方式編號", example = "1")
-        private Integer contactInformationId;
         @ArraySchema(minItems = 0, schema = @Schema(description = "商品", implementation = UpdateProductSchema.class))
         private List<UpdateProductSchema> productArray;
     }
@@ -553,8 +511,6 @@ public class ProductGroupController {
     @Schema(name = "更新商品", description = "更新商品")
     @Data
     private static class UpdateProductSchema {
-        @Schema(description = "商品編號", minimum = "1", example = "1")
-        private Integer id;
         @Schema(description = "商品類型", minimum = "1", example = "1")
         private Integer type;
         @Schema(description = "商品名稱", example = "OO牌帳篷")
@@ -563,10 +519,13 @@ public class ProductGroupController {
         private Integer count;
         @Schema(description = "品牌", example = "OO")
         private String brand;
+        @Schema(description = "商品外觀狀況", example = "300cm*300cm*250cm(高)")
+        private String appearance;
         @Schema(description = "使用方式", example = "內附搭帳篷說明書")
         private String useInformation;
         @Schema(description = "損壞賠償", example = "缺少零件：1/$200、布劃破：$1000")
         private String brokenCompensation;
+        private String relatedLink;
         @Schema(description = "備註", example = "附有教學影片，若在搭設過程有疑問，都可以聯絡我")
         private String memo;
     }

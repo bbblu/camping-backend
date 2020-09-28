@@ -1,9 +1,6 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.RentalRecordListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
@@ -17,13 +14,6 @@ import java.time.LocalDateTime;
  * @since 1.0.0
  */
 @Data
-@EqualsAndHashCode(exclude = {
-        "productGroupByProductGroupId",
-        "userByRenterAccount",
-        "contactInformationByRenterContactInformationId",
-        "campByCampId",
-        "userByLastModifyAccount"
-})
 @Entity
 @EntityListeners(RentalRecordListener.class)
 @Table(name = "rental_record", schema = Config.DATABASE_NAME)
@@ -90,14 +80,6 @@ public class RentalRecord {
     private String renterCreditCardId;
 
     /**
-     * 租借人的聯絡方式編號
-     *
-     * @since 1.0.0
-     */
-    @Column(name = "renter_contact_information_id", nullable = false, columnDefinition = "UNSIGNED")
-    private Integer renterContactInformationId;
-
-    /**
      * 點選我要租借的時間，即建立時間
      *
      * @since 1.0.0
@@ -120,14 +102,6 @@ public class RentalRecord {
      */
     @Column(name = "borrow_end_date", nullable = false)
     private LocalDateTime borrowEndDate;
-
-    /**
-     * 露營區、露營地編號
-     *
-     * @since 1.0.0
-     */
-    @Column(name = "camp_id", columnDefinition = "UNSIGNED")
-    private Integer campId;
 
     /**
      * 取貨時間
@@ -154,20 +128,20 @@ public class RentalRecord {
     private LocalDateTime checkDate;
 
     /**
-     * 出借者檢查結果
-     *
-     * @since 1.0.0
-     */
-    @Column(name = "check_result", length = 1000)
-    private String checkResult;
-
-    /**
      * 取消時間
      *
      * @since 1.0.0
      */
     @Column(name = "cancel_date")
     private LocalDateTime cancelDate;
+
+    /**
+     * 取消原因
+     *
+     * @since 1.4.7
+     */
+    @Column(name = "cancel_detail")
+    private String cancelDetail;
 
     /**
      * 最後修改人帳號
@@ -191,6 +165,8 @@ public class RentalRecord {
      * @see ProductGroup
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_group_id", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
     private ProductGroup productGroupByProductGroupId;
@@ -201,29 +177,11 @@ public class RentalRecord {
      * @see User
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "renter_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User userByRenterAccount;
-
-    /**
-     * 租借人的聯絡方式
-     *
-     * @see ContactInformation
-     * @since 1.0.0
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "renter_contact_information_id", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
-    private ContactInformation contactInformationByRenterContactInformationId;
-
-    /**
-     * 露營區、露營地
-     *
-     * @see Camp
-     * @since 1.0.0
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "camp_id", referencedColumnName = "id", columnDefinition = "UNSIGNED", insertable = false, updatable = false)
-    private Camp campByCampId;
 
     /**
      * 最後修改人
@@ -231,6 +189,8 @@ public class RentalRecord {
      * @see User
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_modify_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User userByLastModifyAccount;

@@ -6,26 +6,25 @@ import tw.edu.ntub.birc.common.util.JavaBeanUtils;
 import tw.edu.ntub.imd.camping.bean.ProductGroupBean;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.ProductDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
-import tw.edu.ntub.imd.camping.service.transformer.ContactInformationTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.ProductGroupTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.ProductTransformer;
+import tw.edu.ntub.imd.camping.service.transformer.UserTransformer;
 
 import javax.annotation.Nonnull;
 
 @Component
 public class ProductGroupTransformerImpl implements ProductGroupTransformer {
-    private final ContactInformationTransformer contactInformationTransformer;
     private final ProductDAO productDAO;
     private final ProductTransformer productTransformer;
+    private final UserTransformer userTransformer;
 
     public ProductGroupTransformerImpl(
-            ContactInformationTransformer contactInformationTransformer,
             ProductDAO productDAO,
-            ProductTransformer productTransformer
-    ) {
-        this.contactInformationTransformer = contactInformationTransformer;
+            ProductTransformer productTransformer,
+            UserTransformer userTransformer) {
         this.productDAO = productDAO;
         this.productTransformer = productTransformer;
+        this.userTransformer = userTransformer;
     }
 
     @Nonnull
@@ -38,10 +37,8 @@ public class ProductGroupTransformerImpl implements ProductGroupTransformer {
     @Override
     public ProductGroupBean transferToBean(@Nonnull ProductGroup productGroup) {
         ProductGroupBean result = JavaBeanUtils.copy(productGroup, new ProductGroupBean());
-        if (result.getContactInformation() == null) {
-            result.setContactInformation(contactInformationTransformer.transferToBean(
-                    productGroup.getContactInformationByContactInformationId()
-            ));
+        if (productGroup.getUserByCreateAccount() != null) {
+            result.setCreateUser(userTransformer.transferToBean(productGroup.getUserByCreateAccount()));
         }
         if (productGroup.getId() != null && CollectionUtils.isEmpty(result.getProductArray())) {
             result.setProductArray(productTransformer.transferToBeanList(

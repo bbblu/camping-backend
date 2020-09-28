@@ -2,9 +2,11 @@ package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ProblemReportListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.ProblemReportStatus;
+import tw.edu.ntub.imd.camping.databaseconfig.enumerate.ProblemReportType;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -15,7 +17,6 @@ import java.time.LocalDateTime;
  * @since 1.4.0
  */
 @Data
-@EqualsAndHashCode(exclude = {"userByHandler", "userByModifyId"})
 @Entity
 @EntityListeners(ProblemReportListener.class)
 @Table(name = "problem_report", schema = Config.DATABASE_NAME)
@@ -31,6 +32,15 @@ public class ProblemReport {
     private Integer id;
 
     /**
+     * 問題類型
+     *
+     * @since 1.4.9
+     */
+    @Enumerated
+    @Column(name = "type", length = 1, nullable = false)
+    private ProblemReportType type;
+
+    /**
      * 狀態(0: 未處理/ 1: 處理中/ 2: 已完成)
      *
      * @since 1.4.0
@@ -38,6 +48,14 @@ public class ProblemReport {
     @Enumerated
     @Column(name = "status", length = 1, nullable = false)
     private ProblemReportStatus status;
+
+    /**
+     * 回報者信箱
+     *
+     * @since 1.4.10
+     */
+    @Column(name = "reporter_email", nullable = false)
+    private String reporterEmail;
 
     /**
      * 回報日期
@@ -76,8 +94,8 @@ public class ProblemReport {
      *
      * @since 1.4.0
      */
-    @Column(name = "modify_id", length = 100, nullable = false)
-    private String modifyId;
+    @Column(name = "last_modify_account", length = 100, nullable = false)
+    private String lastModifyAccount;
 
     /**
      * 最後修改日期
@@ -93,6 +111,8 @@ public class ProblemReport {
      * @see User
      * @since 1.4.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "handler", referencedColumnName = "account", insertable = false, updatable = false)
     private User userByHandler;
@@ -103,7 +123,9 @@ public class ProblemReport {
      * @see User
      * @since 1.4.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "modify_id", referencedColumnName = "account", insertable = false, updatable = false)
-    private User userByModifyId;
+    @JoinColumn(name = "last_modify_account", referencedColumnName = "account", insertable = false, updatable = false)
+    private User userByModifyLastModifyAccount;
 }
