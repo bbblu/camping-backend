@@ -91,6 +91,8 @@ public class RentalRecordController {
         ProductGroupBean productGroup = rentalRecord.getProductGroup();
         rentalRecordData.add("id", rentalRecord.getId());
         rentalRecordData.add("status", rentalRecord.getStatus().ordinal());
+        rentalRecordData.add("borrowStartDate", rentalRecord.getBorrowStartDate(), DateTimePattern.DEFAULT_DATE);
+        rentalRecordData.add("borrowEndDate", rentalRecord.getBorrowEndDate(), DateTimePattern.DEFAULT_DATE);
         rentalRecordData.add("borrowRange", String.format(
                 "%s-%s",
                 rentalRecord.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")),
@@ -185,6 +187,10 @@ public class RentalRecordController {
         private Integer status;
         @Schema(description = "租借期間", example = "2020/12/10-12/13")
         private String borrowRange;
+        @Schema(description = "租借開始時間", example = "2020/12/10")
+        private String borrowStartDate;
+        @Schema(description = "租借結束時間", example = "2020/12/13")
+        private String borrowEndDate;
         @Schema(description = "商品群組名稱", example = "4人帳四角睡帳客廳帳 桌椅 營燈 廚具")
         private String name;
         @Schema(description = "封面圖URL", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
