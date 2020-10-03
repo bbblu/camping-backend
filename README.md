@@ -312,11 +312,11 @@
 
         1. 依序展開：`camping、src/main/java、tw.edu.ntub.imd.camping`
 
-            ![.README-media/50.png](.README-media/50.png)
+            ![.README-media/50.png](./README-media/50.png)
 
         2. 對著`CampingApplication.java`點右鍵，選擇`Run As → 3 Spring Boot App`即可
 
-            ![.README-media/51.png](.README-media/51.png)
+            ![.README-media/51.png](./README-media/51.png)
 
 - 常見通用問題
 
