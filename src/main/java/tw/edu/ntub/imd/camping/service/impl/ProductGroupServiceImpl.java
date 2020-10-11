@@ -180,12 +180,12 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         if (MathUtils.isInRange(comment, 1, 5)) {
             if (groupDAO.existsById(id)) {
                 if (commentDAO.existsByGroupIdAndCommentAccount(id, SecurityUtils.getLoginUserAccount())) {
+                    throw new DuplicateCommentException();
+                } else {
                     ProductGroupComment productGroupComment = new ProductGroupComment();
                     productGroupComment.setGroupId(id);
                     productGroupComment.setComment(comment);
                     commentDAO.save(productGroupComment);
-                } else {
-                    throw new DuplicateCommentException();
                 }
             } else {
                 throw new NotFoundException("無此商品群組");
