@@ -1,6 +1,7 @@
 package tw.edu.ntub.imd.camping.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -86,6 +87,7 @@ public class UserController {
             data.add("experience", userBean.getExperience().ordinal());
             data.add("email", userBean.getEmail());
             data.add("address", userBean.getAddress());
+            data.add("comment", userBean.getComment());
             return ResponseEntityBuilder.success("查詢成功")
                     .data(data)
                     .build();
@@ -151,6 +153,39 @@ public class UserController {
         data.add("display", experience.toString());
     }
 
+    @Operation(
+            tags = "User",
+            method = "POST",
+            summary = "新增使用者評價",
+            description = "評價使用者，不得重複評價，評價分數介於1 <= comment <= 5",
+            parameters = @Parameter(name = "account", description = "使用者帳號", example = "test"),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "評價成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    )
+            )
+    )
+    @PostMapping(path = "/{account}/comment")
+    public ResponseEntity<String> createComment(
+            @PathVariable String account,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(
+                                    implementation = UserCommentSchema.class
+                            )
+                    )
+            ) @RequestBody String requestBodyJsonString
+    ) {
+        ObjectData requestBody = new ObjectData(requestBodyJsonString);
+        Integer comment = requestBody.getInt("comment");
+        userService.createComment(account, comment.byteValue());
+        return ResponseEntityBuilder.buildSuccessMessage("評價成功");
+    }
+
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
     // |----------------------------------------------------------以下為Swagger所需使用的Schema---------------------------------------------------------|
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
@@ -179,5 +214,12 @@ public class UserController {
 
         @Schema(description = "顯示文字", example = "0~5次 新手")
         private String display;
+    }
+
+    @Schema(name = "使用者評價資料", description = "使用者評價資料")
+    @Data
+    private static class UserCommentSchema {
+        @Schema(description = "評價分數", minimum = "1", maximum = "5")
+        private Byte comment;
     }
 }

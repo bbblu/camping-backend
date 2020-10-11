@@ -14,6 +14,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.view.CanBorrowProductGroup;
 import tw.edu.ntub.imd.camping.dto.BankAccount;
 import tw.edu.ntub.imd.camping.exception.DuplicateCommentException;
 import tw.edu.ntub.imd.camping.exception.InvalidCommentRangeException;
+import tw.edu.ntub.imd.camping.exception.NotFoundException;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.service.transformer.*;
 import tw.edu.ntub.imd.camping.util.OwnerChecker;
@@ -177,13 +178,17 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     @Override
     public void createComment(int id, byte comment) {
         if (MathUtils.isInRange(comment, 1, 5)) {
-            if (commentDAO.existsByGroupIdAndCommentAccount(id, SecurityUtils.getLoginUserAccount())) {
-                ProductGroupComment productGroupComment = new ProductGroupComment();
-                productGroupComment.setGroupId(id);
-                productGroupComment.setComment(comment);
-                commentDAO.save(productGroupComment);
+            if (groupDAO.existsById(id)) {
+                if (commentDAO.existsByGroupIdAndCommentAccount(id, SecurityUtils.getLoginUserAccount())) {
+                    ProductGroupComment productGroupComment = new ProductGroupComment();
+                    productGroupComment.setGroupId(id);
+                    productGroupComment.setComment(comment);
+                    commentDAO.save(productGroupComment);
+                } else {
+                    throw new DuplicateCommentException();
+                }
             } else {
-                throw new DuplicateCommentException();
+                throw new NotFoundException("無此商品群組");
             }
         } else {
             throw new InvalidCommentRangeException(comment);
