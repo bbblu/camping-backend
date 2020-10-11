@@ -47,7 +47,5 @@ public interface BaseViewDAO<E, ID extends Serializable> extends Repository<E, I
     @Nonnull
     <S extends E> Page<S> findAll(@Nonnull Example<S> example, @Nonnull Pageable pageable);
 
-    boolean existsById(ID id);
-
     long count();
 }
