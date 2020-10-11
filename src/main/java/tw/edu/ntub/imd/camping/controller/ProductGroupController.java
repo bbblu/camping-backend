@@ -424,10 +424,32 @@ public class ProductGroupController {
         return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
     }
 
+    @Operation(
+            tags = "Product",
+            method = "POST",
+            summary = "新增商品評價",
+            description = "評價商品，不得重複評價，評價分數介於1 <= comment <= 5",
+            parameters = @Parameter(name = "id", description = "商品群組編號", example = "1"),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "評價成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    )
+            )
+    )
     @PostMapping(path = "/{id}/comment")
     public ResponseEntity<String> createComment(
             @PathVariable @Positive(message = "編號 - 應為大於0的數字") int id,
-            @RequestBody String requestBodyJsonString
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(
+                                    implementation = ProductGroupCommentSchema.class
+                            )
+                    )
+            ) @RequestBody String requestBodyJsonString
     ) {
         ObjectData requestBody = new ObjectData(requestBodyJsonString);
         Integer comment = requestBody.getInt("comment");
@@ -543,5 +565,12 @@ public class ProductGroupController {
         private String relatedLink;
         @Schema(description = "備註", example = "附有教學影片，若在搭設過程有疑問，都可以聯絡我")
         private String memo;
+    }
+
+    @Schema(name = "商品群組評價資料", description = "商品群組評價資料")
+    @Data
+    private static class ProductGroupCommentSchema {
+        @Schema(description = "評價分數", minimum = "1", maximum = "5")
+        private Byte comment;
     }
 }
