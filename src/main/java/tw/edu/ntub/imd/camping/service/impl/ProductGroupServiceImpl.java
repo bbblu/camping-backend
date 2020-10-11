@@ -3,12 +3,17 @@ package tw.edu.ntub.imd.camping.service.impl;
 import org.springframework.stereotype.Service;
 import tw.edu.ntub.birc.common.util.CollectionUtils;
 import tw.edu.ntub.birc.common.util.JavaBeanUtils;
+import tw.edu.ntub.birc.common.util.MathUtils;
 import tw.edu.ntub.imd.camping.bean.*;
+import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroupComment;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.view.CanBorrowProductGroup;
 import tw.edu.ntub.imd.camping.dto.BankAccount;
+import tw.edu.ntub.imd.camping.exception.DuplicateCommentException;
+import tw.edu.ntub.imd.camping.exception.InvalidCommentRangeException;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.service.transformer.*;
 import tw.edu.ntub.imd.camping.util.OwnerChecker;
@@ -32,6 +37,7 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     private final CanBorrowProductGroupDAO canBorrowProductGroupDAO;
     private final CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer;
     private final TransactionUtils transactionUtils;
+    private final ProductGroupCommentDAO commentDAO;
 
     public ProductGroupServiceImpl(
             ProductGroupDAO groupDAO,
@@ -44,7 +50,8 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             ProductImageTransformer imageTransformer,
             CanBorrowProductGroupDAO canBorrowProductGroupDAO,
             CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer,
-            TransactionUtils transactionUtils) {
+            TransactionUtils transactionUtils,
+            ProductGroupCommentDAO commentDAO) {
         super(groupDAO, transformer);
         this.groupDAO = groupDAO;
         this.transformer = transformer;
@@ -57,6 +64,7 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         this.canBorrowProductGroupDAO = canBorrowProductGroupDAO;
         this.canBorrowProductGroupBeanTransformer = canBorrowProductGroupBeanTransformer;
         this.transactionUtils = transactionUtils;
+        this.commentDAO = commentDAO;
     }
 
     @Override
@@ -149,7 +157,7 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
                 filterData.isBorrowStartDateNullOrBefore(canBorrowProductGroup.getBorrowStartDate().toLocalDate()) &&
                         filterData.isBorrowEndDateNullOrAfter(canBorrowProductGroup.getBorrowEndDate().toLocalDate()) &&
                         filterData.isCityAreaNameNullOrEquals(canBorrowProductGroup.getCityAreaName()) &&
-                        filterData.isTypeArrayNullOrAllMatchContains(canBorrowProductGroup.getProductTypeArray()) &&
+                        filterData.isTypeArrayNullOrAllMatchContains(canBorrowProductGroup.getProductType()) &&
                         filterData.isPriceNullOrBetween(canBorrowProductGroup.getPrice());
     }
 
@@ -164,5 +172,21 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     public void deleteProductImage(Integer productImageId) {
         OwnerChecker.checkIsProductImageOwner(imageDAO, productImageId);
         imageDAO.updateEnableById(Collections.singletonList(productImageId), false);
+    }
+
+    @Override
+    public void createComment(int id, byte comment) {
+        if (MathUtils.isInRange(comment, 1, 5)) {
+            if (commentDAO.existsByGroupIdAndCommentAccount(id, SecurityUtils.getLoginUserAccount())) {
+                ProductGroupComment productGroupComment = new ProductGroupComment();
+                productGroupComment.setGroupId(id);
+                productGroupComment.setComment(comment);
+                commentDAO.save(productGroupComment);
+            } else {
+                throw new DuplicateCommentException();
+            }
+        } else {
+            throw new InvalidCommentRangeException(comment);
+        }
     }
 }

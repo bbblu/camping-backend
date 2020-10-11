@@ -105,8 +105,21 @@ public class CanBorrowProductGroup {
     @Column(name = "user_name", length = 152, nullable = false)
     private String userName;
 
+    /**
+     * 商品類型陣列
+     *
+     * @since 1.5.0
+     */
     @Column(name = "product_type")
-    private String productTypeArray;
+    private String productType;
+
+    /**
+     * 商品群組評價平均
+     *
+     * @since 1.5.0
+     */
+    @Column(name = "comment", nullable = false)
+    private Double comment;
 
     /**
      * 商品群組

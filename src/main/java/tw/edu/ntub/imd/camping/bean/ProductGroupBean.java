@@ -67,6 +67,10 @@ public class ProductGroupBean {
     private UserBean createUser;
 
     @Hidden
+    @Null(groups = {CreateProductGroup.class, UpdateProductGroup.class}, message = "comment - 不得填寫")
+    private Double comment;
+
+    @Hidden
     @AssertTrue(groups = {CreateProductGroup.class, UpdateProductGroup.class}, message = "租借起始日期應等於結束日期或在結束日期之前")
     private boolean isBorrowStartDateAfterOrEqualEndDate() {
         if (borrowStartDate != null && borrowEndDate != null) {

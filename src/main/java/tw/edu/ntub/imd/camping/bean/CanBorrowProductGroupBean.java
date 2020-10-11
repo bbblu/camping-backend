@@ -40,4 +40,10 @@ public class CanBorrowProductGroupBean {
 
     @Schema(description = "出租者帳號(暱稱)", example = "admin(管理員)")
     private String userName;
+
+    @Schema(description = "商品群組陣列", example = "1")
+    private String[] productTypeArray;
+
+    @Schema(description = "商品群組平均評價", example = "3.8")
+    private Double comment;
 }

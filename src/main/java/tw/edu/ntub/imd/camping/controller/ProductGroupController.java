@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import tw.edu.ntub.birc.common.util.MathUtils;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
 import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.service.CityService;
@@ -178,6 +179,8 @@ public class ProductGroupController {
                     data.add("borrowEndDate", canBorrowProductGroup.getBorrowEndDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
                     data.add("city", canBorrowProductGroup.getCity());
                     data.add("userName", canBorrowProductGroup.getUserName());
+                    data.addStringArray("productTypeArray", canBorrowProductGroup.getProductTypeArray());
+                    data.add("comment", MathUtils.round(canBorrowProductGroup.getComment(), 2));
                 })
                 .build();
     }
@@ -217,6 +220,7 @@ public class ProductGroupController {
             ));
             UserBean createUser = productGroupBean.getCreateUser();
             data.add("contact", createUser.getEmail());
+            data.add("comment", productGroupBean.getComment());
 
             CollectionObjectData collectionData = data.createCollectionData();
             collectionData.add("productArray", productGroupBean.getProductArray(), this::addProductData);
@@ -418,6 +422,17 @@ public class ProductGroupController {
     ) {
         productGroupService.deleteProductImage(imageId);
         return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
+    }
+
+    @PostMapping(path = "/{id}/comment")
+    public ResponseEntity<String> createComment(
+            @PathVariable @Positive(message = "編號 - 應為大於0的數字") int id,
+            @RequestBody String requestBodyJsonString
+    ) {
+        ObjectData requestBody = new ObjectData(requestBodyJsonString);
+        Integer comment = requestBody.getInt("comment");
+        productGroupService.createComment(id, comment.byteValue());
+        return ResponseEntityBuilder.buildSuccessMessage("評價成功");
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
