@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -29,16 +30,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Tag(name = "Rental", description = "商品租借API")
 @RestController
 @RequestMapping(path = "/rental")
 public class RentalRecordController {
     private static final DecimalFormat PRICE_FORMATTER = new DecimalFormat("$ #,###");
     private final RentalRecordService rentalRecordService;
-
-    public RentalRecordController(RentalRecordService rentalRecordService) {
-        this.rentalRecordService = rentalRecordService;
-    }
 
     @Operation(
             tags = "Rental",
@@ -91,6 +89,8 @@ public class RentalRecordController {
         ProductGroupBean productGroup = rentalRecord.getProductGroup();
         rentalRecordData.add("id", rentalRecord.getId());
         rentalRecordData.add("status", rentalRecord.getStatus().ordinal());
+        rentalRecordData.add("borrowStartDate", rentalRecord.getBorrowStartDate(), DateTimePattern.DEFAULT_DATE);
+        rentalRecordData.add("borrowEndDate", rentalRecord.getBorrowEndDate(), DateTimePattern.DEFAULT_DATE);
         rentalRecordData.add("borrowRange", String.format(
                 "%s-%s",
                 rentalRecord.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")),
@@ -160,9 +160,59 @@ public class RentalRecordController {
             )
     )
     @PatchMapping(path = "/{id}/status/next")
-    public ResponseEntity<String> updateStatusToNext(@PathVariable(name = "id") @Positive(message = "id - 應大於0") int id) {
+    public ResponseEntity<String> updateStatusToNext(@PathVariable @Positive(message = "id - 應大於0") int id) {
         rentalRecordService.updateStatusToNext(id);
         return ResponseEntityBuilder.buildSuccessMessage("更新成功");
+    }
+
+    @Operation(
+            tags = "Rental",
+            method = "POST",
+            summary = "取消租借紀錄",
+            description = "請求對方取消租借",
+            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
+    )
+    @PostMapping(path = "/{id}/cancel")
+    public ResponseEntity<String> requestCancelRecord(
+            @PathVariable @Positive(message = "id - 應大於0") int id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(schema = @Schema(implementation = CancelDetail.class))
+            ) @RequestBody String requestBodyJsonString
+    ) {
+        ObjectData requestBody = new ObjectData(requestBodyJsonString);
+        rentalRecordService.requestCancelRecord(id, requestBody.getString("cancelDetail"));
+        return ResponseEntityBuilder.buildSuccessMessage("請求取消成功，等待對方回應");
+    }
+
+    @Operation(
+            tags = "Rental",
+            method = "PATCH",
+            summary = "拒絕取消租借紀錄",
+            description = "拒絕取消租借",
+            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
+    )
+    @PatchMapping(path = "/{id}/cancel/denied")
+    public ResponseEntity<String> deniedCancel(
+            @PathVariable @Positive(message = "id - 應大於0") int id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(schema = @Schema(implementation = DeniedCancelDetail.class))
+            ) @RequestBody String requestBodyJsonString) {
+        ObjectData requestBody = new ObjectData(requestBodyJsonString);
+        rentalRecordService.deniedCancel(id, requestBody.getString("deniedDetail"));
+        return ResponseEntityBuilder.buildSuccessMessage("成功拒絕");
+    }
+
+    @Operation(
+            tags = "Rental",
+            method = "PATCH",
+            summary = "同意取消租借紀錄",
+            description = "同意取消租借",
+            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
+    )
+    @PatchMapping(path = "/{id}/cancel/agree")
+    public ResponseEntity<String> agreeCancel(@PathVariable @Positive(message = "id - 應大於0") int id) {
+        rentalRecordService.agreeCancel(id);
+        return ResponseEntityBuilder.buildSuccessMessage("已同意對方的取消請求");
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
@@ -185,6 +235,10 @@ public class RentalRecordController {
         private Integer status;
         @Schema(description = "租借期間", example = "2020/12/10-12/13")
         private String borrowRange;
+        @Schema(description = "租借開始時間", example = "2020/12/10")
+        private String borrowStartDate;
+        @Schema(description = "租借結束時間", example = "2020/12/13")
+        private String borrowEndDate;
         @Schema(description = "商品群組名稱", example = "4人帳四角睡帳客廳帳 桌椅 營燈 廚具")
         private String name;
         @Schema(description = "封面圖URL", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
@@ -233,5 +287,19 @@ public class RentalRecordController {
             @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(example = "https://www.ntub.edu.tw"))
             private String[] relatedLinkArray;
         }
+    }
+
+    @Schema(name = "取消原因", description = "取消租借時的傳遞資料")
+    @Data
+    private static class CancelDetail {
+        @Schema(description = "取消原因", example = "那天沒空")
+        private String cancelDetail;
+    }
+
+    @Schema(name = "拒絕取消原因", description = "拒絕取消租借時的傳遞資料")
+    @Data
+    private static class DeniedCancelDetail {
+        @Schema(description = "拒絕取消原因", example = "已出貨")
+        private String deniedDetail;
     }
 }

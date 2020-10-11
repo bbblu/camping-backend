@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import tw.edu.ntub.birc.common.util.MathUtils;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
 import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.service.CityService;
@@ -178,6 +179,8 @@ public class ProductGroupController {
                     data.add("borrowEndDate", canBorrowProductGroup.getBorrowEndDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
                     data.add("city", canBorrowProductGroup.getCity());
                     data.add("userName", canBorrowProductGroup.getUserName());
+                    data.addStringArray("productTypeArray", canBorrowProductGroup.getProductTypeArray());
+                    data.add("comment", MathUtils.round(canBorrowProductGroup.getComment(), 2));
                 })
                 .build();
     }
@@ -217,6 +220,7 @@ public class ProductGroupController {
             ));
             UserBean createUser = productGroupBean.getCreateUser();
             data.add("contact", createUser.getEmail());
+            data.add("comment", productGroupBean.getComment());
 
             CollectionObjectData collectionData = data.createCollectionData();
             collectionData.add("productArray", productGroupBean.getProductArray(), this::addProductData);
@@ -420,6 +424,39 @@ public class ProductGroupController {
         return ResponseEntityBuilder.buildSuccessMessage("刪除成功");
     }
 
+    @Operation(
+            tags = "Product",
+            method = "POST",
+            summary = "新增商品評價",
+            description = "評價商品，不得重複評價，評價分數介於1 <= comment <= 5",
+            parameters = @Parameter(name = "id", description = "商品群組編號", example = "1"),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "評價成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    )
+            )
+    )
+    @PostMapping(path = "/{id}/comment")
+    public ResponseEntity<String> createComment(
+            @PathVariable @Positive(message = "編號 - 應為大於0的數字") int id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(
+                                    implementation = ProductGroupCommentSchema.class
+                            )
+                    )
+            ) @RequestBody String requestBodyJsonString
+    ) {
+        ObjectData requestBody = new ObjectData(requestBodyJsonString);
+        Integer comment = requestBody.getInt("comment");
+        productGroupService.createComment(id, comment.byteValue());
+        return ResponseEntityBuilder.buildSuccessMessage("評價成功");
+    }
+
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
     // |---------------------------------------------------------以下為Swagger所需使用的Schema---------------------------------------------------------|
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
@@ -528,5 +565,12 @@ public class ProductGroupController {
         private String relatedLink;
         @Schema(description = "備註", example = "附有教學影片，若在搭設過程有疑問，都可以聯絡我")
         private String memo;
+    }
+
+    @Schema(name = "商品群組評價資料", description = "商品群組評價資料")
+    @Data
+    private static class ProductGroupCommentSchema {
+        @Schema(description = "評價分數", minimum = "1", maximum = "5")
+        private Byte comment;
     }
 }

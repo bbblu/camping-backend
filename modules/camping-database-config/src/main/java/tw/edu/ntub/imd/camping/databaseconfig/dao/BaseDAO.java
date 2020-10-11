@@ -12,4 +12,7 @@ public interface BaseDAO<E, ID extends Serializable> extends BaseViewDAO<E, ID>,
     @Nonnull
     @Override
     Optional<E> findById(@Nonnull ID id);
+
+    @Override
+    boolean existsById(ID id);
 }
