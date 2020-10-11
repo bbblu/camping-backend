@@ -11,5 +11,9 @@ public interface RentalRecordService extends BaseService<RentalRecordBean, Integ
 
     void updateStatusToNext(int id);
 
-    void cancelRecord(int id, String cancelDetail);
+    Integer requestCancelRecord(int id, String cancelDetail);
+
+    void agreeCancel(int id);
+
+    void deniedCancel(int id, String deniedDetail);
 }

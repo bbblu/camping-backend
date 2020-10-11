@@ -9,7 +9,9 @@ import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecordCancel;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord_;
+import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordCancelStatus;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.exception.CanceledRentalRecordException;
 import tw.edu.ntub.imd.camping.exception.LastRentalRecordStatusException;
@@ -21,6 +23,7 @@ import tw.edu.ntub.imd.camping.service.transformer.RentalRecordTransformer;
 import tw.edu.ntub.imd.camping.util.OwnerChecker;
 import tw.edu.ntub.imd.camping.util.TransactionUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,6 +38,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     private final ProductDAO productDAO;
     private final CanBorrowProductGroupDAO canBorrowProductGroupDAO;
     private final TransactionUtils transactionUtils;
+    private final RentalRecordCancelDAO cancelDAO;
 
     public RentalRecordServiceImpl(
             RentalRecordDAO recordDAO,
@@ -44,7 +48,8 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             ProductGroupDAO productGroupDAO,
             ProductDAO productDAO,
             CanBorrowProductGroupDAO canBorrowProductGroupDAO,
-            TransactionUtils transactionUtils) {
+            TransactionUtils transactionUtils,
+            RentalRecordCancelDAO cancelDAO) {
         super(recordDAO, transformer);
         this.recordDAO = recordDAO;
         this.transformer = transformer;
@@ -54,6 +59,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         this.productDAO = productDAO;
         this.canBorrowProductGroupDAO = canBorrowProductGroupDAO;
         this.transactionUtils = transactionUtils;
+        this.cancelDAO = cancelDAO;
     }
 
     @Override
@@ -65,7 +71,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         int transactionId = transactionUtils.createTransaction(rentalRecordBean.getRenterCreditCard(), productGroup.getBankAccount(), productGroup.getPrice());
         rentalRecord.setTransactionId(transactionId);
         String creditCardId = rentalRecord.getRenterCreditCardId();
-        rentalRecord.setRenterCreditCardId("************".concat(StringUtils.mid(creditCardId, -4)));
+        rentalRecord.setRenterCreditCardId("*".repeat(12).concat(StringUtils.mid(creditCardId, -4)));
         RentalRecord saveResult = recordDAO.saveAndFlush(rentalRecord);
         saveDetail(saveResult.getId(), saveResult.getProductGroupId());
         return transformer.transferToBean(saveResult);
@@ -117,7 +123,48 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
 
     @Override
     @Transactional
-    public void cancelRecord(int id, String cancelDetail) {
-        RentalRecord rentalRecord = getUpdateRentalRecord(id);
+    public Integer requestCancelRecord(int id, String cancelDetail) {
+        Optional<RentalRecord> optionalRentalRecord = recordDAO.findById(id);
+        RentalRecord rentalRecord = optionalRentalRecord.orElseThrow(() -> new NotFoundException(""));
+        RentalRecordCancel rentalRecordCancel = new RentalRecordCancel();
+        rentalRecordCancel.setRecordId(id);
+        rentalRecordCancel.setCancelDetail(cancelDetail);
+        String loginUserAccount = SecurityUtils.getLoginUserAccount();
+        if (StringUtils.isEquals(loginUserAccount, rentalRecord.getRenterAccount())) {
+            rentalRecordCancel.setStatus(RentalRecordCancelStatus.WAIT_PRODUCT_OWNER_AGREE);
+            rentalRecordCancel.setRenterAgreeDate(LocalDateTime.now());
+        } else {
+            rentalRecordCancel.setStatus(RentalRecordCancelStatus.WAIT_RENTER_AGREE);
+            rentalRecordCancel.setProductOwnerAgreeDate(LocalDateTime.now());
+        }
+        RentalRecordCancel saveResult = cancelDAO.saveAndFlush(rentalRecordCancel);
+        return saveResult.getId();
+    }
+
+    @Override
+    public void agreeCancel(int id) {
+        Optional<RentalRecordCancel> optionalRentalRecordCancel = cancelDAO.findWaitResponseRecord(id);
+        optionalRentalRecordCancel.ifPresent(rentalRecordCancel -> {
+            rentalRecordCancel.setStatus(RentalRecordCancelStatus.CANCEL_SUCCESS);
+            if (rentalRecordCancel.getRenterAgreeDate() == null) {
+                rentalRecordCancel.setProductOwnerAgreeDate(LocalDateTime.now());
+            } else {
+                rentalRecordCancel.setRenterAgreeDate(LocalDateTime.now());
+            }
+            cancelDAO.save(rentalRecordCancel);
+            RentalRecord rentalRecord = rentalRecordCancel.getRentalRecord();
+            rentalRecord.setStatus(RentalRecordStatus.CANCEL);
+            recordDAO.save(rentalRecord);
+        });
+    }
+
+    @Override
+    public void deniedCancel(int id, String deniedDetail) {
+        Optional<RentalRecordCancel> optionalRentalRecordCancel = cancelDAO.findWaitResponseRecord(id);
+        optionalRentalRecordCancel.ifPresent(rentalRecordCancel -> {
+            rentalRecordCancel.setStatus(RentalRecordCancelStatus.CANCEL_DENIED);
+            rentalRecordCancel.setDeniedDetail(deniedDetail);
+            cancelDAO.save(rentalRecordCancel);
+        });
     }
 }
