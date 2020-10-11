@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import tw.edu.ntub.imd.camping.bean.UpdatePasswordBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
@@ -23,6 +24,7 @@ import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 import tw.edu.ntub.imd.camping.validation.CreateUser;
 import tw.edu.ntub.imd.camping.validation.UpdateUser;
 
+import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -125,6 +127,40 @@ public class UserController {
         BindingResultUtils.validate(bindingResult);
         userService.update(account, user);
         return ResponseEntityBuilder.buildSuccessMessage("更新成功");
+    }
+
+    @Operation(
+            tags = "User",
+            method = "POST",
+            summary = "修改密碼",
+            description = "修改密碼",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UpdatePasswordBean.class)
+                    )
+            ),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "修改成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    )
+            )
+    )
+    @PatchMapping(path = "/password")
+    public ResponseEntity<String> changePassword(
+            @Valid @RequestBody UpdatePasswordBean updatePasswordBean,
+            BindingResult bindingResult
+    ) {
+        BindingResultUtils.validate(bindingResult);
+        String password = updatePasswordBean.getPassword();
+        String newPassword = updatePasswordBean.getNewPassword();
+        String account = SecurityUtils.getLoginUserAccount();
+        userService.updatePassword(account, password, newPassword);
+
+        return ResponseEntityBuilder.success().message("更新成功").build();
     }
 
     @Operation(
