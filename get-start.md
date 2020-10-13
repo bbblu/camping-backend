@@ -15,9 +15,9 @@
 
 - 資料庫
     1. [下載MySQL資料庫](https://downloads.mysql.com/archives/installer/)(Windows) (如果您已經擁有MySQL 8的任意版本Server，可略過此步驟)
-    2. 下載專案資料庫備份檔(目前為1.2.5版)
+    2. 下載專案資料庫備份檔(目前為1.2.6版)
 
-        [camping(structure)-1.2.5.sql](./README-media/camping(structure)-1.2.5.sql)
+        [camping(structure)-1.2.6.sql](./README-media/camping(structure)-1.2.6.sql)
 
     3. 啟動`MySQL Workbench`，選擇左上方`Server → Data Import`
 

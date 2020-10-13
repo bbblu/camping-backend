@@ -43,6 +43,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
         try {
             User user = transformer.transferToEntity(userBean);
             user.setPassword(passwordEncoder.encode(userBean.getPassword()));
+            user.setLastModifyAccount(user.getAccount());
             User saveResult = userDAO.saveAndFlush(user);
             return transformer.transferToBean(saveResult);
         } catch (DataIntegrityViolationException e) {
