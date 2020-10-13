@@ -22,6 +22,9 @@ public class UserListener {
         if (user.getCreateDate() == null) {
             user.setCreateDate(LocalDateTime.now());
         }
+        if (user.getLastModifyAccount() == null) {
+            user.setLastModifyAccount(SecurityUtils.getLoginUserAccount());
+        }
         if (user.getLastModifyDate() == null) {
             user.setLastModifyDate(LocalDateTime.now());
         }
