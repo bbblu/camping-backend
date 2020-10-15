@@ -1,7 +1,7 @@
 package tw.edu.ntub.imd.camping.databaseconfig.enumerate;
 
 /**
- * 狀態(0: 未處理/ 1: 處理中/ 2: 已完成)
+ * 問題回報的處理狀態(0: 未處理/ 1: 處理中/ 2: 已完成)
  *
  * @since 1.4.0
  */
