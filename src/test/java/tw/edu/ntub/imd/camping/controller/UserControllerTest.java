@@ -13,9 +13,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import tw.edu.ntub.birc.common.enumerate.date.Month;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
-import tw.edu.ntub.birc.common.wrapper.date.DateWrapperImpl;
 import tw.edu.ntub.imd.camping.TestApplication;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.properties.FileProperties;
@@ -79,8 +77,7 @@ public class UserControllerTest {
                 .nickName("管理員")
                 .gender(Gender.MALE)
                 .email("10646000@ntub.edu.tw")
-                .address("台北市中正區濟南路一段321號")
-                .birthday(new DateWrapperImpl(1999, Month.APRIL, 3));
+                .address("台北市中正區濟南路一段321號");
     }
 
     private static ObjectData userBeanToObjectData(UserBean userBean) {
@@ -142,10 +139,7 @@ public class UserControllerTest {
                 Arguments.arguments(createValidUserBeanBuilder().address(null), "地址 - 未填寫"),
                 Arguments.arguments(createValidUserBeanBuilder().address(""), "地址 - 未填寫"),
                 Arguments.arguments(createValidUserBeanBuilder().address("測".repeat(51)), "地址 - 輸入字數大於50個字"),
-                Arguments.arguments(createValidUserBeanBuilder().birthday(null), "生日 - 未填寫"),
-                Arguments.arguments(createValidUserBeanBuilder().birthday(new DateWrapperImpl(2020, Month.AUGUST, 9)), "生日 - 應為過去日期"),
-                Arguments.arguments(createValidUserBeanBuilder().birthday(new DateWrapperImpl(2020, Month.AUGUST, 10)), "生日 - 應為過去日期"),
-                Arguments.arguments(createValidUserBeanBuilder().birthday(new DateWrapperImpl(2021, Month.AUGUST, 10)), "生日 - 應為過去日期")
+                Arguments.arguments(createValidUserBeanBuilder().birthday(null), "生日 - 未填寫")
         );
     }
 
