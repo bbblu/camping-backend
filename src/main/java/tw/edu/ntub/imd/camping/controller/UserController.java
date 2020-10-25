@@ -87,6 +87,7 @@ public class UserController {
             data.add("gender", userBean.getGenderName());
             data.add("birthday", userBean.getBirthday());
             data.add("experience", userBean.getExperience().ordinal());
+            data.add("cellPhone", userBean.getCellPhone());
             data.add("email", userBean.getEmail());
             data.add("address", userBean.getAddress());
             data.add("comment", userBean.getComment());

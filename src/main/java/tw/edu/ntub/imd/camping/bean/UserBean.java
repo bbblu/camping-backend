@@ -66,6 +66,11 @@ public class UserBean {
     @NotNull(groups = CreateUser.class, message = "性別 - 未填寫")
     private Gender gender;
 
+    @Schema(description = "手機號碼", pattern = "^09[0-9]{8}$", example = "0912345678")
+    @Pattern(regexp = "^09[0-9]{8}$", message = "手機號碼 - 格式不符")
+    @NotNull(groups = CreateUser.class, message = "手機號碼 - 未填寫")
+    private String cellPhone;
+
     @Schema(description = "信箱", example = "10646000@ntub.edu.tw")
     @NotBlank(groups = CreateUser.class, message = "信箱 - 未填寫")
     @Size(max = 255, message = "信箱 - 輸入字數大於{max}個字")
