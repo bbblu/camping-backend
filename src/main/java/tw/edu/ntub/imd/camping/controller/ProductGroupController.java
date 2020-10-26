@@ -211,13 +211,11 @@ public class ProductGroupController {
             ProductGroupBean productGroupBean = optionalGroup.get();
             ObjectData data = new ObjectData();
             data.add("name", productGroupBean.getName());
+            data.add("coverImage", productGroupBean.getCoverImage());
             data.add("city", String.format("%s %s", productGroupBean.getCityName(), productGroupBean.getCityAreaName()));
             data.add("price", priceFormat.format(productGroupBean.getPrice()));
-            data.add("borrowDateRange", String.format(
-                    "%s ~ %s",
-                    productGroupBean.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
-                    productGroupBean.getBorrowEndDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm"))
-            ));
+            data.add("borrowStartDate", productGroupBean.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
+            data.add("borrowEndDate", productGroupBean.getBorrowEndDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
             UserBean createUser = productGroupBean.getCreateUser();
             data.add("contact", createUser.getEmail());
             data.add("comment", productGroupBean.getComment());
@@ -477,12 +475,18 @@ public class ProductGroupController {
         private String name;
         @Schema(description = "城市", example = "台北市 中正區")
         private String city;
+        @Schema(description = "封面圖", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
+        private String coverImage;
         @Schema(description = "租借價格", minimum = "0", example = "$ 3,990")
         private String price;
-        @Schema(description = "可租借時間範圍", example = "2020/08/14 15:00 ~ 2020/08/20 00:00")
-        private String borrowDateRange;
+        @Schema(description = "可租借起始時間", example = "2020/08/14 15:00")
+        private String borrowStartDate;
+        @Schema(description = "可租借結束時間", example = "2020/08/20 00:00")
+        private String borrowEndDate;
         @Schema(description = "聯絡方式", example = "10646007@ntub.edu.tw")
         private String contact;
+        @Schema(description = "評價", example = "2.5")
+        private Double comment;
         @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(description = "商品陣列"))
         private ProductContentSchema productArray;
 

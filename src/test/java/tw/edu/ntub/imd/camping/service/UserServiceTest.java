@@ -9,9 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
-import tw.edu.ntub.birc.common.enumerate.date.Month;
 import tw.edu.ntub.birc.common.util.JavaBeanUtils;
-import tw.edu.ntub.birc.common.wrapper.date.DateWrapperImpl;
 import tw.edu.ntub.imd.camping.TestApplication;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.properties.FileProperties;
@@ -54,7 +52,6 @@ public class UserServiceTest {
                 .gender(Gender.MALE)
                 .email("10646000@ntub.edu.tw")
                 .address("台北市中正區濟南路一段321號")
-                .birthday(new DateWrapperImpl(1999, Month.APRIL, 3))
                 .lastModifyAccount("test")
                 .build();
         User saveUser = JavaBeanUtils.copy(userBean, new User());

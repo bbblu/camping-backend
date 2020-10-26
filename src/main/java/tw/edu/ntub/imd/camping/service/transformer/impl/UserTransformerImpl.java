@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import tw.edu.ntub.birc.common.util.JavaBeanUtils;
 import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.UserBean;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.UserCommentDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.User;
 import tw.edu.ntub.imd.camping.service.transformer.UserTransformer;
 

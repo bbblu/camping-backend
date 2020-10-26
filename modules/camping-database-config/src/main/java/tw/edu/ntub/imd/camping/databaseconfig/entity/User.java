@@ -107,6 +107,14 @@ public class User implements Persistable<String> {
     private Gender gender;
 
     /**
+     * 手機號碼
+     *
+     * @since 1.5.2
+     */
+    @Column(name = "cell_phone", length = 10, nullable = false)
+    private String cellPhone;
+
+    /**
      * 電子信箱
      *
      * @since 1.0.0
