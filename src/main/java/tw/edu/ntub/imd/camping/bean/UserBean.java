@@ -100,10 +100,6 @@ public class UserBean {
     @Null(groups = {CreateUser.class, UpdateUser.class}, message = "lastModifyDate - 不得填寫")
     private LocalDateTime lastModifyDate;
 
-    @Schema(description = "使用者平均評價", example = "4.8")
-    @Null(groups = {CreateUser.class, UpdateUser.class}, message = "comment - 不得填寫")
-    private Double comment;
-
     @Hidden
     public String getRoleName() {
         return roleId.name;
