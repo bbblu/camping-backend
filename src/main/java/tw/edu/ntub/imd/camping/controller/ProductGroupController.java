@@ -217,6 +217,7 @@ public class ProductGroupController {
             data.add("borrowStartDate", productGroupBean.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
             data.add("borrowEndDate", productGroupBean.getBorrowEndDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
             UserBean createUser = productGroupBean.getCreateUser();
+            data.add("productOwnerName", createUser.getFullName());
             data.add("contact", createUser.getEmail());
             data.add("comment", productGroupBean.getComment());
 
@@ -483,6 +484,8 @@ public class ProductGroupController {
         private String borrowStartDate;
         @Schema(description = "可租借結束時間", example = "2020/08/20 00:00")
         private String borrowEndDate;
+        @Schema(description = "出租方姓名", example = "account(nickName)")
+        private String productOwnerName;
         @Schema(description = "聯絡方式", example = "10646007@ntub.edu.tw")
         private String contact;
         @Schema(description = "評價", example = "2.5")
