@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -170,18 +171,46 @@ public class ProductGroupController {
     @GetMapping(path = "")
     public ResponseEntity<String> searchCanBorrowProductGroup(ProductGroupFilterDataBean filterData) {
         return ResponseEntityBuilder.success("查詢成功")
-                .data(productGroupService.searchCanBorrowProductGroup(filterData), (data, canBorrowProductGroup) -> {
-                    data.add("id", canBorrowProductGroup.getId());
-                    data.add("name", canBorrowProductGroup.getName());
-                    data.add("coverImage", canBorrowProductGroup.getCoverImage());
-                    data.add("price", priceFormat.format(canBorrowProductGroup.getPrice()));
-                    data.add("borrowStartDate", canBorrowProductGroup.getBorrowStartDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
-                    data.add("borrowEndDate", canBorrowProductGroup.getBorrowEndDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
-                    data.add("city", canBorrowProductGroup.getCity());
-                    data.add("userName", canBorrowProductGroup.getUserName());
-                    data.addStringArray("productTypeArray", canBorrowProductGroup.getProductTypeArray());
-                    data.add("comment", MathUtils.round(canBorrowProductGroup.getComment(), 2));
-                })
+                .data(productGroupService.searchCanBorrowProductGroup(filterData), getCanBorrowProductGroupConsumer())
+                .build();
+    }
+
+    private BiConsumer<ObjectData, CanBorrowProductGroupBean> getCanBorrowProductGroupConsumer() {
+        return (data, canBorrowProductGroup) -> {
+            data.add("id", canBorrowProductGroup.getId());
+            data.add("name", canBorrowProductGroup.getName());
+            data.add("coverImage", canBorrowProductGroup.getCoverImage());
+            data.add("price", priceFormat.format(canBorrowProductGroup.getPrice()));
+            data.add("borrowStartDate", canBorrowProductGroup.getBorrowStartDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
+            data.add("borrowEndDate", canBorrowProductGroup.getBorrowEndDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
+            data.add("city", canBorrowProductGroup.getCity());
+            data.add("userName", canBorrowProductGroup.getUserName());
+            data.addStringArray("productTypeArray", canBorrowProductGroup.getProductTypeArray());
+            data.add("comment", MathUtils.round(canBorrowProductGroup.getComment(), 2));
+        };
+    }
+
+    @Operation(
+            tags = "Product",
+            method = "GET",
+            summary = "查詢使用者商品群組列表",
+            description = "查詢使用者商品群組列表",
+            parameters = {
+                    @Parameter(name = "account", description = "使用者帳號", example = "admin")
+            },
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "查詢成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CanBorrowProductGroupBean.class)
+                    )
+            )
+    )
+    @GetMapping(path = "/user/{account}")
+    public ResponseEntity<String> searchCanBorrowProductGroup(@PathVariable String account) {
+        return ResponseEntityBuilder.success("查詢成功")
+                .data(productGroupService.searchCanBorrowProductGroupByCreateAccount(account), getCanBorrowProductGroupConsumer())
                 .build();
     }
 
@@ -484,7 +513,7 @@ public class ProductGroupController {
         private String borrowStartDate;
         @Schema(description = "可租借結束時間", example = "2020/08/20 00:00")
         private String borrowEndDate;
-        @Schema(description = "出租方姓名", example = "account(nickName)")
+        @Schema(description = "出租者帳號(暱稱)", example = "admin(管理員)")
         private String productOwnerName;
         @Schema(description = "聯絡方式", example = "10646007@ntub.edu.tw")
         private String contact;

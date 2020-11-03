@@ -114,6 +114,14 @@ public class CanBorrowProductGroup {
     private String productType;
 
     /**
+     * 出租者帳號
+     *
+     * @since 1.5.4
+     */
+    @Column(name = "create_account", nullable = false)
+    private String createAccount;
+
+    /**
      * 商品群組評價平均
      *
      * @since 1.5.0

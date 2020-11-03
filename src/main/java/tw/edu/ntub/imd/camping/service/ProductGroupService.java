@@ -9,6 +9,8 @@ public interface ProductGroupService extends BaseService<ProductGroupBean, Integ
 
     List<CanBorrowProductGroupBean> searchCanBorrowProductGroup(ProductGroupFilterDataBean filterData);
 
+    List<CanBorrowProductGroupBean> searchCanBorrowProductGroupByCreateAccount(String createAccount);
+
     void updateProduct(List<ProductBean> productBeanList);
 
     void deleteProduct(Integer productId);
