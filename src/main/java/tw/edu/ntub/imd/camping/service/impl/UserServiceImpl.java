@@ -50,7 +50,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
 
     @Override
     public void update(String account, UserBean userBean) {
-        if (StringUtils.isEquals(account, SecurityUtils.getLoginUserAccount())) {
+        if (StringUtils.isNotEquals(account, SecurityUtils.getLoginUserAccount())) {
             throw new NotAccountOwnerException();
         } else {
             super.update(account, userBean);
