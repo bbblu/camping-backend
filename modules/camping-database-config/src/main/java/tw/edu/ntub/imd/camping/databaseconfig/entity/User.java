@@ -218,7 +218,12 @@ public class User implements Persistable<String> {
     }
 
     @Override
-    public boolean isNew() {
+    public Boolean getSave() {
         return save;
+    }
+
+    @Override
+    public void setSave(Boolean isSave) {
+        this.save = isSave;
     }
 }

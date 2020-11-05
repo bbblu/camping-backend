@@ -20,19 +20,37 @@ public class PersistableAspect {
     public void savePointcut() {
     }
 
+    @Pointcut("execution(" +
+            "public * *+.update(tw.edu.ntub.imd.camping.databaseconfig.entity.Persistable)" +
+            ") || execution(" +
+            "public * *+.updateAndFlush(tw.edu.ntub.imd.camping.databaseconfig.entity.Persistable)" +
+            ") || execution(" +
+            "public * *+.updateAll(Iterable<tw.edu.ntub.imd.camping.databaseconfig.entity.Persistable>)" +
+            ")")
+    public void updatePointcut() {
+    }
+
     @Before("savePointcut()")
-    @SuppressWarnings("rawtypes")
     public void beforeSave(JoinPoint joinPoint) {
-        Object saveEntity = joinPoint.getArgs()[0];
-        if (saveEntity instanceof Iterable) {
-            Iterable persistableIterable = (Iterable) saveEntity;
-            for (Object persistable : persistableIterable) {
-                if (persistable instanceof Persistable<?>) {
-                    ((Persistable<?>) persistable).setSave(true);
+        setSave(joinPoint.getArgs()[0], true);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setSave(Object entity, boolean isSave) {
+        if (entity instanceof Iterable) {
+            Iterable<Persistable<?>> persistableIterable = (Iterable<Persistable<?>>) entity;
+            for (Persistable<?> persistable : persistableIterable) {
+                if (persistable.getSave() == null) {
+                    persistable.setSave(isSave);
                 }
             }
-        } else if (saveEntity instanceof Persistable<?>) {
-            ((Persistable<?>) saveEntity).setSave(true);
+        } else if (((Persistable<?>) entity).getSave() == null) {
+            ((Persistable<?>) entity).setSave(isSave);
         }
+    }
+
+    @Before("updatePointcut()")
+    public void beforeUpdate(JoinPoint joinPoint) {
+        setSave(joinPoint.getArgs()[0], false);
     }
 }
