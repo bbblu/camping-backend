@@ -9,6 +9,17 @@ body {
     height: 100%;
 }
 
+/* side nav */
+header, main, footer {
+    padding-left: 300px;
+}
+
+@media only screen and (max-width: 992px) {
+    header, main, footer {
+        padding-left: 0;
+    }
+}
+
 /* input */
 input:focus + label {
     color: #c0dd6f !important;

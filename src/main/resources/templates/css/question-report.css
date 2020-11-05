@@ -1,0 +1,53 @@
+nav {
+    background-color: #c0dd6f;
+}
+
+nav .brand-logo {
+    margin-right: 20px;
+    color: white;
+    font-size: 15px;
+}
+
+nav .brand-logo i {
+    font-size: 40px;
+}
+
+.sidenav li > a.home {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 40px 10px;
+}
+
+.sidenav li > a {
+    padding: 0;
+}
+
+.sidenav li > a:hover {
+    background: none;
+}
+
+.logo {
+    width: 50px;
+}
+
+.collection .collection-item {
+    border-bottom: none;
+}
+
+.container {
+    margin-top: 5%;
+    width: 100%;
+}
+
+table {
+    width: 100%;
+}
+
+.pagination {
+    margin-top: 5%;
+    text-align: center;
+}
