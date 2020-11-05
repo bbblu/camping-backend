@@ -83,7 +83,7 @@ public class LogAspect {
         record.setDeviceVersion(requestWrapper.getDeviceVersion());
         record.setSuccess(isSuccess);
         record.setErrorCode(errorCode);
-        record.setMessage(message);
+        record.setMessage(message != null ? message : "");
         logRecordDAO.saveAndFlush(record);
     }
 

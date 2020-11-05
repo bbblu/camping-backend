@@ -163,6 +163,13 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     }
 
     @Override
+    public List<CanBorrowProductGroupBean> searchCanBorrowProductGroupByCreateAccount(String createAccount) {
+        return canBorrowProductGroupBeanTransformer.transferToBeanList(
+                canBorrowProductGroupDAO.findByCreateAccount(createAccount)
+        );
+    }
+
+    @Override
     public void deleteProduct(Integer productId) {
         OwnerChecker.checkIsAllProductOwner(productDAO, Collections.singletonList(productId));
         productDAO.updateEnableById(productId, false);

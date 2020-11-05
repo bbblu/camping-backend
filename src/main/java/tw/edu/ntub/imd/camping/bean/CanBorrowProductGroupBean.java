@@ -38,6 +38,9 @@ public class CanBorrowProductGroupBean {
     @Hidden
     private String cityAreaName;
 
+    @Schema(description = "出租者帳號", example = "admin")
+    private String createAccount;
+
     @Schema(description = "出租者帳號(暱稱)", example = "admin(管理員)")
     private String userName;
 

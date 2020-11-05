@@ -1,97 +1,166 @@
 package tw.edu.ntub.imd.camping.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.ProblemReportBean;
+import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.ProblemReportType;
+import tw.edu.ntub.imd.camping.exception.form.InvalidFormException;
 import tw.edu.ntub.imd.camping.service.ProblemReportService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
 import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
+import tw.edu.ntub.imd.camping.validation.CreateProblemReport;
+import tw.edu.ntub.imd.camping.validation.HandleProblemReport;
 
-import javax.validation.Valid;
-import java.util.Arrays;
+import javax.validation.constraints.*;
 
-@Tag(name = "Problem Report", description = "問題回報API")
+@AllArgsConstructor
+@Tag(name = "ProblemReport", description = "問題回報")
 @RestController
-@RequestMapping("/problem-report")
+@RequestMapping(path = "/problem-report")
 public class ProblemReportController {
     private final ProblemReportService problemReportService;
 
-    @Autowired
-    public ProblemReportController(ProblemReportService problemReportService) {
-        this.problemReportService = problemReportService;
-    }
-
     @Operation(
-            tags = "Problem Report",
+            tags = "ProblemReport",
             method = "POST",
             summary = "新增問題回報",
             description = "新增問題回報",
             responses = @ApiResponse(
-                    responseCode = "200",
                     description = "新增成功",
+                    responseCode = "200",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                            mediaType = "application/json"
                     )
             )
     )
-    @PostMapping("")
+    @PostMapping(path = "")
     public ResponseEntity<String> create(
-            @Valid @RequestBody ProblemReportBean problemReportBean,
-            BindingResult bindingResult
-    ) {
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "新增問題回報的內容",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CreateProblemReportSchema.class)
+                    )
+            ) @RequestBody @Validated(CreateProblemReport.class) ProblemReportBean problemReportBean,
+            BindingResult bindingResult) {
         BindingResultUtils.validate(bindingResult);
         problemReportService.save(problemReportBean);
-        return ResponseEntityBuilder.success().message("新增成功").build();
+        return ResponseEntityBuilder.buildSuccessMessage("回報完成");
     }
 
     @Operation(
-            tags = "Problem Report",
-            method = "GET",
-            summary = "查詢問題類型列表",
-            description = "查詢問題類型列表",
+            tags = "ProblemReport",
+            method = "PATCH",
+            summary = "問題回報接單",
+            description = "問題回報接單",
+            parameters = @Parameter(name = "id", description = "問題回報編號", required = true, example = "1"),
             responses = @ApiResponse(
+                    description = "接單完成",
                     responseCode = "200",
-                    description = "查詢成功",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = ProblemReportController.ProblemReportTypeSchema.class))
+                            mediaType = "application/json"
                     )
             )
     )
-    @GetMapping(path = "/type")
-    public ResponseEntity<String> getExperienceList() {
+    @PreAuthorize("hasAnyAuthority('administrator', 'manager')")
+    @PatchMapping(path = "/{id}/handle")
+    public ResponseEntity<String> handle(@PathVariable @Positive(message = "id應為正數") int id) {
+        problemReportService.updateHandler(id);
+        return ResponseEntityBuilder.buildSuccessMessage("接單完成");
+    }
+
+    @Operation(
+            tags = "ProblemReport",
+            method = "PATCH",
+            summary = "問題回報處理結果",
+            description = "問題回報處理結果",
+            parameters = @Parameter(name = "id", description = "問題回報編號", required = true, example = "1"),
+            responses = @ApiResponse(
+                    description = "處理結果送出成功",
+                    responseCode = "200",
+                    content = @Content(
+                            mediaType = "application/json"
+                    )
+            )
+    )
+    @PreAuthorize("hasAnyAuthority('administrator', 'manager')")
+    @PatchMapping(path = "/{id}/handle/result")
+    public ResponseEntity<String> handleResult(
+            @PathVariable int id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "處理結果",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = HandleResultSchema.class)
+                    )
+            ) @RequestBody String requestBodyJsonString) {
+        ObjectData requestBody = new ObjectData(requestBodyJsonString);
+        String handleResult = requestBody.getString("handleResult");
+        if (StringUtils.isBlank(handleResult)) {
+            throw new InvalidFormException("處理結果 - 未填寫");
+        } else {
+            problemReportService.updateHandleResult(id, handleResult);
+        }
+        return ResponseEntityBuilder.buildSuccessMessage("處理結果送出成功");
+    }
+
+    @GetMapping(path = "")
+    public ResponseEntity<String> search() {
         return ResponseEntityBuilder.success("查詢成功")
-                .data(Arrays.asList(ProblemReportType.values()), this::addProblemReportTypeToObjectData)
+                .data(problemReportService.searchAll(), (data, problemReportBean) -> {
+                    data.add("id", problemReportBean.getId());
+                    data.add("type", problemReportBean.getType().ordinal());
+                    data.add("status", problemReportBean.getStatus().ordinal());
+                    data.add("reporterEmail", problemReportBean.getReporterEmail());
+                    data.add("reportContent", problemReportBean.getReportContent());
+                    data.add("reportDate", problemReportBean.getReportDate());
+                    UserBean handlerAsUser = problemReportBean.getHandlerAsUser();
+                    data.add("handler", handlerAsUser.getFullName());
+                    data.add("handleDate", problemReportBean.getHandleDate());
+                    data.add("handleResult", problemReportBean.getHandleResult());
+                })
                 .build();
     }
 
-    private void addProblemReportTypeToObjectData(ObjectData data, ProblemReportType problemReportType) {
-        data.add("id", problemReportType.id);
-        data.add("display", problemReportType.toString());
+    @Schema(name = "建立問題回報", description = "建立問題回報")
+    @Data
+    private static class CreateProblemReportSchema {
+        @Schema(description = "問題類型", example = "1")
+        @NotNull(message = "問題類型 - 未填寫")
+        @PositiveOrZero(message = "問題類型 - 應為大於等於0的正數")
+        private ProblemReportType type;
+
+        @Schema(description = "回報者信箱", example = "10646007@ntub.edu.tw")
+        @NotBlank(message = "回報者信箱 - 未填寫")
+        @Email(message = "回報者信箱 - 格式不符合信箱格式")
+        private String reporterEmail;
+
+        @Schema(description = "回報內容", example = "無法上架商品")
+        @NotBlank(groups = {
+                CreateProblemReport.class,
+                HandleProblemReport.class
+        }, message = "回報內容 - 未填寫")
+        private String reportContent;
     }
 
-    // |---------------------------------------------------------------------------------------------------------------------------------------------|
-    // |----------------------------------------------------------以下為Swagger所需使用的Schema---------------------------------------------------------|
-    // |---------------------------------------------------------------------------------------------------------------------------------------------|
-    @Schema(name = "問題類型", description = "問題類型")
+    @Schema(name = "問題回報處理結果", description = "問題回報處理結果")
     @Data
-    private static class ProblemReportTypeSchema {
-        @Schema(description = "編號", example = "0")
-        private String id;
-
-        @Schema(description = "顯示文字", example = "帳號相關")
-        private String display;
+    private static class HandleResultSchema {
+        @Schema(description = "處理結果", required = true, example = "已回報系統工程師，非常感謝您的回覆")
+        private String handleResult;
     }
 }

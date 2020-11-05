@@ -3,5 +3,12 @@ package tw.edu.ntub.imd.camping.databaseconfig.entity;
 import java.io.Serializable;
 
 public interface Persistable<ID extends Serializable> extends org.springframework.data.domain.Persistable<ID> {
-    void setSave(boolean isSave);
+    Boolean getSave();
+
+    void setSave(Boolean isSave);
+
+    @Override
+    default boolean isNew() {
+        return getSave() != null ? getSave() : getId() == null;
+    }
 }

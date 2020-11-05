@@ -5,6 +5,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
 @NoRepositoryBean
@@ -15,4 +16,16 @@ public interface BaseDAO<E, ID extends Serializable> extends BaseViewDAO<E, ID>,
 
     @Override
     boolean existsById(ID id);
+
+    default <S extends E> S update(S entity) {
+        return save(entity);
+    }
+
+    default <S extends E> List<S> updateAll(Iterable<S> entities) {
+        return saveAll(entities);
+    }
+
+    default <S extends E> S updateAndFlush(S entity) {
+        return saveAndFlush(entity);
+    }
 }

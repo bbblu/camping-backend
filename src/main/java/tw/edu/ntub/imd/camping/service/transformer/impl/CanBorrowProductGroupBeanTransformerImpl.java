@@ -20,7 +20,9 @@ public class CanBorrowProductGroupBeanTransformerImpl implements CanBorrowProduc
     @Override
     public CanBorrowProductGroupBean transferToBean(@Nonnull CanBorrowProductGroup canBorrowProductGroup) {
         CanBorrowProductGroupBean result = JavaBeanUtils.copy(canBorrowProductGroup, new CanBorrowProductGroupBean());
-        result.setProductTypeArray(canBorrowProductGroup.getProductType().split(","));
+        if (canBorrowProductGroup.getProductType() != null) {
+            result.setProductTypeArray(canBorrowProductGroup.getProductType().split(","));
+        }
         return result;
     }
 }
