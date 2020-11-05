@@ -15,6 +15,7 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.thymeleaf.extras.java8time.dialect.Java8TimeDialect;
 import tw.edu.ntub.imd.camping.config.properties.FileProperties;
 
 import java.net.URI;
@@ -55,6 +56,11 @@ public class Config implements WebMvcConfigurer {
                 }
             }
         };
+    }
+
+    @Bean
+    public Java8TimeDialect java8TimeDialect() {
+        return new Java8TimeDialect();
     }
 
     @Override
