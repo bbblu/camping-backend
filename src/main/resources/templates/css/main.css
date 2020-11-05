@@ -1,0 +1,30 @@
+* {
+    padding: 0;
+    margin: 0;
+    font-family: Arial, "Microsoft JhengHei", sans-serif;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+/* input */
+input:focus + label {
+    color: #c0dd6f !important;
+}
+
+input:focus {
+    border-bottom: 1px solid #c0dd6f !important;
+    box-shadow: 0 1px 0 0 #c0dd6f !important;
+}
+
+/* button */
+button.btn {
+    padding: 0 15%;
+    background-color: #c0dd6f;
+}
+
+button.btn:hover {
+    background-color: #c0dd6f;
+}

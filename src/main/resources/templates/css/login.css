@@ -1,0 +1,41 @@
+.row {
+    margin: 0;
+    height: 100%;
+}
+
+.left {
+    height: 100%;
+    background-image: url("../images/login-background.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    opacity: 70%;
+}
+
+.col.right {
+    padding: 7% 10%;
+}
+
+.logo {
+    padding: 15px;
+    border: 1px solid black;
+    border-radius: 20px;
+    width: 120px;
+}
+
+.title {
+    font-weight: bold;
+    letter-spacing: 1rem;
+}
+
+.sub-title {
+    color: lightgray;
+}
+
+form {
+    margin-top: 20%;
+}
+
+button.btn {
+    margin-top: 20%;
+}
