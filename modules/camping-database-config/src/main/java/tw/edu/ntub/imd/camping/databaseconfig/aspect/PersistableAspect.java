@@ -11,11 +11,11 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.Persistable;
 @Component
 public class PersistableAspect {
     @Pointcut("execution(" +
-            "public * *+.save(Object)" +
+            "public * *+.save(tw.edu.ntub.imd.camping.databaseconfig.entity.Persistable)" +
             ") || execution(" +
-            "public * *+.saveAndFlush(Object)" +
+            "public * *+.saveAndFlush(tw.edu.ntub.imd.camping.databaseconfig.entity.Persistable)" +
             ") || execution(" +
-            "public * *+.saveAll(Iterable<Object>)" +
+            "public * *+.saveAll(Iterable<tw.edu.ntub.imd.camping.databaseconfig.entity.Persistable>)" +
             ")")
     public void savePointcut() {
     }

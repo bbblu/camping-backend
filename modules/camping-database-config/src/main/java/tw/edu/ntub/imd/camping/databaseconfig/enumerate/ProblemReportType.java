@@ -6,5 +6,5 @@ package tw.edu.ntub.imd.camping.databaseconfig.enumerate;
  * @since 1.4.9
  */
 public enum ProblemReportType {
-    
+    SYSTEM_ERROR
 }

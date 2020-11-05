@@ -7,7 +7,11 @@ import tw.edu.ntub.birc.common.exception.ProjectException;
 @Getter
 public class InvalidFormException extends ProjectException {
     public InvalidFormException(FieldError error) {
-        super(error.getDefaultMessage());
+        this(error.getDefaultMessage());
+    }
+
+    public InvalidFormException(String message) {
+        super(message);
     }
 
     @Override

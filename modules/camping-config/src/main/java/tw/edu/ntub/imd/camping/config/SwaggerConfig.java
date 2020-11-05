@@ -156,4 +156,13 @@ public class SwaggerConfig {
                 .addOpenApiCustomiser(openApiCustomiser)
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi problemReportApi(@Qualifier("defaultOpenApiCustomiser") OpenApiCustomiser openApiCustomiser) {
+        return GroupedOpenApi.builder()
+                .setGroup("問題回報 - ProblemReport")
+                .pathsToMatch("/problem-report/**")
+                .addOpenApiCustomiser(openApiCustomiser)
+                .build();
+    }
 }

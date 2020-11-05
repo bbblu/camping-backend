@@ -82,12 +82,28 @@ public class ProblemReport {
     private String handler;
 
     /**
+     * 處理時間
+     *
+     * @since 1.5.4
+     */
+    @Column(name = "handle_date")
+    private LocalDateTime handleDate;
+
+    /**
      * 處理結果
      *
      * @since 1.4.0
      */
-    @Column(name = "handle_result", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "handle_result", columnDefinition = "TEXT")
     private String handleResult;
+
+    /**
+     * 處理完成時間
+     *
+     * @since 1.5.4
+     */
+    @Column(name = "complete_date")
+    private LocalDateTime completeDate;
 
     /**
      * 最後修改人帳號
@@ -102,8 +118,8 @@ public class ProblemReport {
      *
      * @since 1.4.0
      */
-    @Column(name = "modify_date", nullable = false)
-    private LocalDateTime modifyDate;
+    @Column(name = "last_modify_date", nullable = false)
+    private LocalDateTime lastModifyDate;
 
     /**
      * 處理人

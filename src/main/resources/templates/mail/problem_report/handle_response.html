@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="tw" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>問題回報 - 處理結果</title>
+</head>
+<body th:object="${problemReport}">
+
+<div>
+  <th:block th:text="*{reporterEmail}">a0909002250@gmail.com</th:block>
+  您好：
+</div>
+<div>
+  關於您先前回報的問題，我們的服務專員已於
+  <th:block th:text="*{#temporals.format(handleDate, 'yyyy/MM/dd HH:mm')}">2020/11/05 15:32</th:block>
+  處理完畢，以下為您回報的問題內容：
+  <p th:text="*{reportContent}">內容</p>
+  <div>以下為服務專員的回應：</div>
+  <p th:text="*{handleResult}">回應內容</p>
+</div>
+<div>
+  如有任何疑問，再請您通知，謝謝
+  <p>
+    <th:block th:text="|${handler.lastName}${handler.firstName}|">李恩瑋</th:block>
+    敬上
+  </p>
+</div>
+
+</body>
+</html>
