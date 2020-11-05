@@ -51,3 +51,31 @@ table {
     margin-top: 5%;
     text-align: center;
 }
+
+.pagination li.active {
+    background-color: #c0dd6f;
+}
+
+.modal-content .sub-title {
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    gap: 10px;
+    color: gray;
+}
+
+.modal-content form {
+    margin-top: 50px;
+}
+
+.modal button.btn-flat {
+    color: white;
+}
+
+.modal button.btn-flat.modal-close {
+    background-color: red;
+}
+
+.modal button.btn-flat.reply {
+    background-color: #c0dd6f;
+}

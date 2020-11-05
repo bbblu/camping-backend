@@ -79,7 +79,10 @@
             <td>2020/11/05</td>
             <td>test</td>
             <td>
-                <button class="waves-effect waves-light btn">詳細內容</button>
+                <button class="waves-effect waves-light btn modal-trigger"
+                        data-target="modal1">
+                    詳細內容
+                </button>
             </td>
         </tr>
         <tr>
@@ -87,7 +90,10 @@
             <td>2020/11/05</td>
             <td>test</td>
             <td>
-                <button class="waves-effect waves-light btn">詳細內容</button>
+                <button class="waves-effect waves-light btn modal-trigger"
+                        data-target="modal1">
+                    詳細內容
+                </button>
             </td>
         </tr>
         </tbody>
@@ -104,8 +110,32 @@
     </ul>
 </main>
 
+<div id="modal1" class="modal">
+    <div class="modal-content">
+        <h4>這是標題</h4>
+        <div class="sub-title">
+            <span>test</span>
+            <span>2020/11/05</span>
+        </div>
+        <p>這是問題</p>
+
+        <form>
+            <div class="input-field">
+                <textarea id="textarea1" class="materialize-textarea"></textarea>
+                <label for="textarea1">回覆內容</label>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button class="waves-effect waves-light btn-flat modal-close">關閉</button>
+        <button class="waves-effect waves-light btn-flat reply">回覆</button>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 <script src="js/sidenav.js"></script>
+<script src="js/modal.js"></script>
 </body>
 
 </html>
