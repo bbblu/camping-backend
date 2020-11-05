@@ -149,6 +149,15 @@ public class SwaggerConfig {
     }
 
     @Bean
+    public GroupedOpenApi problemReportApi(@Qualifier("defaultOpenApiCustomiser") OpenApiCustomiser openApiCustomiser) {
+        return GroupedOpenApi.builder()
+                .setGroup("問題回報 - Problem Report")
+                .pathsToMatch("/problem-report/**")
+                .addOpenApiCustomiser(openApiCustomiser)
+                .build();
+    }
+
+    @Bean
     public GroupedOpenApi bankApi(@Qualifier("defaultOpenApiCustomiser") OpenApiCustomiser openApiCustomiser) {
         return GroupedOpenApi.builder()
                 .setGroup("金融機構 - Bank")
