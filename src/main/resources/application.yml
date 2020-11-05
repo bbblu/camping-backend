@@ -23,6 +23,17 @@ spring:
     suffix: .html
     mode: HTML
     encoding: UTF-8
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: a0909002250@gmail.com
+    password: wokwvpvljrifdyiu
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   datasource:
     type: com.mchange.v2.c3p0.ComboPooledDataSource
     driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
