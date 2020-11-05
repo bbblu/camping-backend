@@ -22,7 +22,7 @@ public class ProblemReportBean {
     }, message = "id - 不得填寫")
     private Integer id;
 
-    @Schema(description = "問題類型", example = "1")
+    @Schema(description = "問題類型(0: 帳號相關/ 1: 租借相關/ 2: 款項相關/ 3: 其他)", example = "1")
     @NotNull(message = "問題類型 - 未填寫")
     @PositiveOrZero(message = "問題類型 - 應為大於等於0的正數")
     private ProblemReportType type;

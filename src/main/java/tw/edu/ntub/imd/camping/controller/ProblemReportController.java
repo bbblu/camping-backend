@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.ProblemReportBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
-import tw.edu.ntub.imd.camping.databaseconfig.enumerate.ProblemReportType;
 import tw.edu.ntub.imd.camping.exception.form.InvalidFormException;
 import tw.edu.ntub.imd.camping.service.ProblemReportService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
@@ -139,10 +138,10 @@ public class ProblemReportController {
     @Schema(name = "建立問題回報", description = "建立問題回報")
     @Data
     private static class CreateProblemReportSchema {
-        @Schema(description = "問題類型", example = "1")
+        @Schema(description = "問題類型(0: 帳號相關/ 1: 租借相關/ 2: 款項相關/ 3: 其他)", example = "1")
         @NotNull(message = "問題類型 - 未填寫")
         @PositiveOrZero(message = "問題類型 - 應為大於等於0的正數")
-        private ProblemReportType type;
+        private int type;
 
         @Schema(description = "回報者信箱", example = "10646007@ntub.edu.tw")
         @NotBlank(message = "回報者信箱 - 未填寫")
