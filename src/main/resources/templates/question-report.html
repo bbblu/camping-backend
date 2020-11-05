@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>借借露 - 管理者頁面</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/question-report.css">
+</head>
+
+<body>
+<nav>
+    <div class="nav-wrapper">
+        <a class="sidenav-trigger" href="#" data-target="slide-out">
+            <i class="material-icons">menu</i>
+        </a>
+
+        <a class="brand-logo right" href="#">
+            <i class="material-icons">account_circle</i>
+            <span class="account">admin</span>
+        </a>
+    </div>
+</nav>
+
+<ul id="slide-out" class="sidenav sidenav-fixed collection with-header">
+    <li class="collection-header">
+        <a class="home" href="#">
+            <img class="logo col" alt="logo" src="images/logo.png"/>
+            <span class="col">管理者頁面</span>
+        </a>
+    </li>
+
+    <li class="collection-item">
+        <a href="#">
+            <i class="material-icons">help</i>
+            <span>問題回報</span>
+        </a>
+    </li>
+    <li class="collection-item">
+        <a href="#">
+            <i class="material-icons">view_list</i>
+            <span>訂單管理</span>
+        </a>
+    </li>
+    <li class="collection-item">
+        <a href="#">
+            <i class="material-icons">gavel</i>
+            <span>交易糾紛</span>
+        </a>
+    </li>
+
+    <div class="divider"></div>
+
+    <li class="collection-item">
+        <a href="#">登出</a>
+    </li>
+</ul>
+
+<main class="container">
+    <table class="striped centered">
+        <thead>
+        <tr>
+            <th>標題</th>
+            <th>日期</th>
+            <th>帳號</th>
+            <th>詳細內容</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr>
+            <td>這是標題</td>
+            <td>2020/11/05</td>
+            <td>test</td>
+            <td>
+                <button class="waves-effect waves-light btn modal-trigger"
+                        data-target="modal1">
+                    詳細內容
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>這是標題</td>
+            <td>2020/11/05</td>
+            <td>test</td>
+            <td>
+                <button class="waves-effect waves-light btn modal-trigger"
+                        data-target="modal1">
+                    詳細內容
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <ul class="pagination">
+        <li class="disabled"><a href="#"><i class="material-icons">chevron_left</i></a></li>
+        <li class="active"><a href="#">1</a></li>
+        <li class="waves-effect"><a href="#">2</a></li>
+        <li class="waves-effect"><a href="#">3</a></li>
+        <li class="waves-effect"><a href="#">4</a></li>
+        <li class="waves-effect"><a href="#">5</a></li>
+        <li class="waves-effect"><a href="#"><i class="material-icons">chevron_right</i></a></li>
+    </ul>
+</main>
+
+<div id="modal1" class="modal">
+    <div class="modal-content">
+        <h4>這是標題</h4>
+        <div class="sub-title">
+            <span>test</span>
+            <span>2020/11/05</span>
+        </div>
+        <p>這是問題</p>
+
+        <form>
+            <div class="input-field">
+                <textarea id="textarea1" class="materialize-textarea"></textarea>
+                <label for="textarea1">回覆內容</label>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button class="waves-effect waves-light btn-flat modal-close">關閉</button>
+        <button class="waves-effect waves-light btn-flat reply">回覆</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="js/sidenav.js"></script>
+<script src="js/modal.js"></script>
+</body>
+
+</html>
