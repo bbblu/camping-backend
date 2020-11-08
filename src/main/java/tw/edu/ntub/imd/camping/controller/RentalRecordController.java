@@ -11,11 +11,13 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
 import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
+import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.service.RentalRecordService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
@@ -167,6 +169,24 @@ public class RentalRecordController {
 
     @Operation(
             tags = "Rental",
+            method = "PATCH",
+            summary = "出租方拒絕交易",
+            description = "出租方拒絕交易",
+            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
+    )
+    @PatchMapping(path = "/{id}/denied")
+    public ResponseEntity<String> deniedTransaction(
+            @PathVariable int id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(schema = @Schema(implementation = CancelDetail.class))
+            ) @RequestBody String requestBodyJsonString) {
+        ObjectData requestBody = new ObjectData(requestBodyJsonString);
+        rentalRecordService.deniedTransaction(id, requestBody.getString("cancelDetail"));
+        return ResponseEntityBuilder.buildSuccessMessage("拒絕交易成功");
+    }
+
+    @Operation(
+            tags = "Rental",
             method = "POST",
             summary = "取消租借紀錄",
             description = "請求對方取消租借",
@@ -213,6 +233,66 @@ public class RentalRecordController {
     public ResponseEntity<String> agreeCancel(@PathVariable @Positive(message = "id - 應大於0") int id) {
         rentalRecordService.agreeCancel(id);
         return ResponseEntityBuilder.buildSuccessMessage("已同意對方的取消請求");
+    }
+
+    @Operation(
+            tags = "Rental",
+            method = "PATCH",
+            summary = "申請退貨已取貨商品",
+            description = "申請退貨已取貨商品",
+            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
+    )
+    @PatchMapping(path = "/{id}/returned")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Manager')")
+    public ResponseEntity<String> beReturned(
+            @PathVariable @Positive(message = "id - 應大於0") int id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(schema = @Schema(implementation = BeReturnedDescription.class))
+            ) @RequestBody String requestBodyJsonString) {
+        ObjectData requestBody = new ObjectData(requestBodyJsonString);
+        rentalRecordService.unexpectedStatusChange(id, requestBody.getString("description"), RentalRecordStatus.BE_RETURNED);
+        return ResponseEntityBuilder.buildSuccessMessage("申請退貨完成");
+    }
+
+    @Operation(
+            tags = "Rental",
+            method = "PATCH",
+            summary = "申請求償",
+            description = "申請求償",
+            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
+    )
+    @PatchMapping(path = "/{id}/claim")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Manager')")
+    public ResponseEntity<String> beClaim(
+            @PathVariable @Positive(message = "id - 應大於0") int id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(schema = @Schema(implementation = BeClaimDescription.class))
+            ) @RequestBody String requestBodyJsonString) {
+        ObjectData requestBody = new ObjectData(requestBodyJsonString);
+        rentalRecordService.unexpectedStatusChange(id, requestBody.getString("description"), RentalRecordStatus.BE_CLAIM);
+        return ResponseEntityBuilder.buildSuccessMessage("申請求償完成");
+    }
+
+    @Operation(
+            tags = "Rental",
+            method = "GET",
+            summary = "查詢狀態變更的原因",
+            description = "查詢狀態變更的原因",
+            parameters = {
+                    @Parameter(name = "id", description = "紀錄編號", required = true, example = "1"),
+                    @Parameter(name = "status", description = "變更後的狀態", required = true, example = "1"),
+            }
+    )
+    @GetMapping(path = "/{id}/{status}/change-description")
+    public ResponseEntity<String> getStatusChangeLog(
+            @PathVariable @Positive(message = "id - 應大於0") int id,
+            @PathVariable int status
+    ) {
+        SingleValueObjectData data = SingleValueObjectData.create(
+                "description",
+                rentalRecordService.getChangeLogDescription(id, RentalRecordStatus.values()[status])
+        );
+        return ResponseEntityBuilder.success().message("查詢成功").data(data).build();
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
@@ -301,5 +381,19 @@ public class RentalRecordController {
     private static class DeniedCancelDetail {
         @Schema(description = "拒絕取消原因", example = "已出貨")
         private String deniedDetail;
+    }
+
+    @Schema(name = "申請退貨原因", description = "申請退貨時的傳遞資料")
+    @Data
+    private static class BeReturnedDescription {
+        @Schema(description = "申請退貨原因", example = "有瑕疵")
+        private String description;
+    }
+
+    @Schema(name = "申請求償原因", description = "申請求償時的傳遞資料")
+    @Data
+    private static class BeClaimDescription {
+        @Schema(description = "申請求償原因", example = "商品損壞")
+        private String description;
     }
 }

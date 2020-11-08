@@ -1,5 +1,6 @@
 package tw.edu.ntub.imd.camping.dto;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,6 +23,7 @@ public class CreditCard {
     @Pattern(regexp = "^[0-9]{3,4}$", message = "信用卡卡號 - 應為3到4位數字")
     private String safeCode;
 
+    @Hidden
     @Null(message = "expireDate - 不得填寫")
     private YearMonth expireDate;
 

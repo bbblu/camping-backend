@@ -12,7 +12,7 @@ public class RentalRecordCancelListener {
 
     @PrePersist
     public void preSave(RentalRecordCancel rentalRecordCancel) {
-        if (rentalRecordCancel.getProductOwnerAgreeDate() == null || rentalRecordCancel.getRenterAgreeDate() == null) {
+        if (rentalRecordCancel.getProductOwnerAgreeDate() == null && rentalRecordCancel.getRenterAgreeDate() == null) {
             throw new AgreeDateRequiredException();
         }
         if (rentalRecordCancel.getCreateAccount() == null) {

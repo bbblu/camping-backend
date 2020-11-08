@@ -104,6 +104,14 @@ public class RentalRecord {
     private LocalDateTime borrowEndDate;
 
     /**
+     * 寄放日期
+     *
+     * @since 1.6.0
+     */
+    @Column(name = "placed_date")
+    private LocalDateTime placedDate;
+
+    /**
      * 取貨時間
      *
      * @since 1.0.0
@@ -120,12 +128,12 @@ public class RentalRecord {
     private LocalDateTime returnDate;
 
     /**
-     * 檢查時間
+     * 取回時間
      *
-     * @since 1.0.0
+     * @since 1.6.0
      */
-    @Column(name = "check_date")
-    private LocalDateTime checkDate;
+    @Column(name = "back_date")
+    private LocalDateTime backDate;
 
     /**
      * 取消時間
@@ -134,14 +142,6 @@ public class RentalRecord {
      */
     @Column(name = "cancel_date")
     private LocalDateTime cancelDate;
-
-    /**
-     * 取消原因
-     *
-     * @since 1.4.7
-     */
-    @Column(name = "cancel_detail")
-    private String cancelDetail;
 
     /**
      * 最後修改人帳號
