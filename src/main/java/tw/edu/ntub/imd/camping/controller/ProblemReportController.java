@@ -75,7 +75,7 @@ public class ProblemReportController {
                     )
             )
     )
-    @PreAuthorize("hasAnyAuthority('administrator', 'manager')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Manager')")
     @PatchMapping(path = "/{id}/handle")
     public ResponseEntity<String> handle(@PathVariable @Positive(message = "id應為正數") int id) {
         problemReportService.updateHandler(id);
@@ -96,7 +96,7 @@ public class ProblemReportController {
                     )
             )
     )
-    @PreAuthorize("hasAnyAuthority('administrator', 'manager')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Manager')")
     @PatchMapping(path = "/{id}/handle/result")
     public ResponseEntity<String> handleResult(
             @PathVariable int id,

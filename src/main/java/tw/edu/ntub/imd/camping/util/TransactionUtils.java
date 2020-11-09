@@ -129,7 +129,7 @@ public class TransactionUtils {
             if (creditCard.getExpireDate() != null) {
                 expireDate = creditCard.getExpireDate().format(DateTimeFormatter.ofPattern("MM/yy"));
             } else {
-                expireDate = String.format("%02d/%02d", creditCard.getExpireYear(), creditCard.getExpireMonth());
+                expireDate = String.format("%02d/%02d", creditCard.getExpireMonth(), creditCard.getExpireYear());
             }
             body.add("expireDate", expireDate);
             body.add("payeeBankAccount", payeeBankAccount);

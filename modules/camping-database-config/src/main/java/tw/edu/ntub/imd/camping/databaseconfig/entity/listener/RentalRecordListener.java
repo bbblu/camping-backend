@@ -1,10 +1,8 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity.listener;
 
-import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
-import tw.edu.ntub.imd.camping.databaseconfig.exception.EmptyCancelDetailException;
 
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -18,7 +16,7 @@ public class RentalRecordListener {
             rentalRecord.setEnable(true);
         }
         if (rentalRecord.getStatus() == null) {
-            rentalRecord.setStatus(RentalRecordStatus.NOT_PICK_UP);
+            rentalRecord.setStatus(RentalRecordStatus.NOT_PLACED);
         }
         if (rentalRecord.getRenterAccount() == null) {
             rentalRecord.setRenterAccount(SecurityUtils.getLoginUserAccount());
@@ -40,21 +38,18 @@ public class RentalRecordListener {
         rentalRecord.setLastModifyDate(LocalDateTime.now());
         switch (rentalRecord.getStatus()) {
             case CANCEL:
-                if (StringUtils.isBlank(rentalRecord.getCancelDetail())) {
-                    throw new EmptyCancelDetailException();
-                }
                 rentalRecord.setCancelDate(LocalDateTime.now());
-                break;
             case NOT_PICK_UP:
+                rentalRecord.setPlacedDate(LocalDateTime.now());
                 break;
             case NOT_RETURN:
                 rentalRecord.setPickDate(LocalDateTime.now());
                 break;
-            case RETRIEVE:
+            case NOT_RETRIEVE:
                 rentalRecord.setReturnDate(LocalDateTime.now());
                 break;
-            case CHECKED:
-                rentalRecord.setCheckDate(LocalDateTime.now());
+            case NOT_COMMENT:
+                rentalRecord.setBackDate(LocalDateTime.now());
                 break;
         }
     }

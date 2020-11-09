@@ -8,6 +8,7 @@ import org.springframework.beans.InvalidPropertyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,6 +21,7 @@ import tw.edu.ntub.birc.common.util.ClassUtils;
 import tw.edu.ntub.imd.camping.exception.ConvertPropertyException;
 import tw.edu.ntub.imd.camping.exception.MethodNotSupportedException;
 import tw.edu.ntub.imd.camping.exception.NullRequestBodyException;
+import tw.edu.ntub.imd.camping.exception.PermissionDeniedException;
 import tw.edu.ntub.imd.camping.exception.file.FileNotExistException;
 import tw.edu.ntub.imd.camping.exception.file.UploadFileTooLargeException;
 import tw.edu.ntub.imd.camping.exception.form.InvalidFormDateFormatException;
@@ -83,11 +85,11 @@ public class ExceptionHandleController {
         }
     }
 
-//    @ExceptionHandler(AccessDeniedException.class)
-//    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException e) {
-//        log.error("沒有權限", e);
-//        return ResponseEntityBuilder.error(new PermissionDeniedException()).build();
-//    }
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException e) {
+        log.error("沒有權限", e);
+        return ResponseEntityBuilder.error(new PermissionDeniedException()).build();
+    }
 
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     @ExceptionHandler(FileNotExistException.class)

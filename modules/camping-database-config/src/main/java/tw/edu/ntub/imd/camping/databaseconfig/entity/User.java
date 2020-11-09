@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 @Table(name = "user", schema = Config.DATABASE_NAME)
 public class User implements Persistable<String> {
     @Transient
-    private boolean save;
+    private Boolean save;
     /**
      * 使用者帳號
      *
@@ -212,18 +212,12 @@ public class User implements Persistable<String> {
         return enable;
     }
 
+    public boolean isManager() {
+        return roleId == UserRoleEnum.ADMINISTRATOR || roleId == UserRoleEnum.MANAGER;
+    }
+
     @Override
     public String getId() {
         return account;
-    }
-
-    @Override
-    public Boolean getSave() {
-        return save;
-    }
-
-    @Override
-    public void setSave(Boolean isSave) {
-        this.save = isSave;
     }
 }

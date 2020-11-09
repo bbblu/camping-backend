@@ -11,6 +11,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Test
-@WithMockUser(username = "mock", password = "mock", authorities = "administrator")
+@WithMockUser(username = "mock", password = "mock", authorities = "Administrator")
 public @interface TestWithMockUser {
 }
