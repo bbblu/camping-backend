@@ -30,6 +30,8 @@ import tw.edu.ntub.imd.camping.exception.form.InvalidRequestFormatException;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -86,9 +88,17 @@ public class ExceptionHandleController {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException e) {
+    public void handleAccessDeniedException(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AccessDeniedException e) throws IOException {
         log.error("沒有權限", e);
-        return ResponseEntityBuilder.error(new PermissionDeniedException()).build();
+        String contentType = request.getContentType();
+        if (contentType != null && contentType.startsWith("application/json")) {
+            response.getWriter().println(ResponseEntityBuilder.error(new PermissionDeniedException()).buildJSONString());
+        } else {
+            response.sendRedirect(request.getContextPath() + "/error403");
+        }
     }
 
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
