@@ -1,46 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tw" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>借借露 - 管理者頁面</title>
-    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+  <title>借借露 - 管理者頁面</title>
+  <link rel="icon" type="image/x-icon" href="../static/images/favicon.ico" th:href="@{/static/images/favicon.ico}">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="../static/css/materialize.min.css" th:href="@{/static/css/materialize.min.css}">
+  <link rel="stylesheet" href="../static/css/main.css" th:href="@{/static/css/main.css}">
+  <link rel="stylesheet" href="../static/css/login.css" th:href="@{/static/css/login.css}">
 </head>
 
 <body>
 <div class="row">
-    <div class="col s6 left">
-    </div>
+  <div class="col s6 left">
+  </div>
 
-    <div class="col s6 center-align right">
-        <img class="logo" alt="logo" src="images/logo.png"/>
+  <div class="col s6 center-align right">
+    <img class="logo" alt="logo" src="../static/images/logo.png" th:src="@{/static/images/logo.png}"/>
 
-        <h4 class="title">管理者頁面</h4>
-        <span class="sub-title">歡迎回來! 請登入您的帳號.</span>
+    <h4 class="title">管理者頁面</h4>
+    <span class="sub-title">歡迎回來! 請登入您的帳號.</span>
 
-        <form>
-            <div class="input-field">
-                <input type="text" id="account" class="validate">
-                <label for="account">帳號</label>
-            </div>
+    <form>
+      <div class="input-field">
+        <input type="text" id="account" class="validate">
+        <label for="account">帳號</label>
+      </div>
 
-            <div class="input-field">
-                <input type="password" id="password" class="validate">
-                <label for="password">密碼</label>
-            </div>
+      <div class="input-field">
+        <input type="password" id="password" class="validate">
+        <label for="password">密碼</label>
+      </div>
 
-            <button class="waves-effect waves-light btn">登入</button>
-        </form>
-    </div>
+      <button class="waves-effect waves-light btn">登入</button>
+    </form>
+  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="../static/js/materialize.min.js" th:src="@{/static/js/materialize.min.js}"></script>
 </body>
 
 </html>
