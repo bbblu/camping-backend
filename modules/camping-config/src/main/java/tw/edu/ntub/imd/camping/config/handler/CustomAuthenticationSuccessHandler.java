@@ -11,6 +11,7 @@ import tw.edu.ntub.imd.camping.config.util.JwtUtils;
 import tw.edu.ntub.imd.camping.config.util.ResponseUtils;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -29,7 +30,9 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     @SuppressWarnings("unchecked")
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        response.setHeader("X-Auth-Token", jwtUtils.getToken(userDetails));
+        String token = jwtUtils.getToken(userDetails);
+        response.setHeader("X-Auth-Token", token);
+        response.addCookie(new Cookie("X-Auth-Token", token));
         ObjectMapper mapper = new ObjectMapper();
         List<? extends GrantedAuthority> authorities = (List<? extends GrantedAuthority>) authentication.getAuthorities();
         GrantedAuthority grantedAuthority = authorities.get(0);

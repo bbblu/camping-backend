@@ -13,13 +13,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.config.util.JwtUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -33,8 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain) throws IOException, ServletException {
-        if (isContainsToken(request)) {
-            String token = request.getHeader("Authorization").replaceFirst("Bearer ", "");
+        String token = getToken(request);
+        if (StringUtils.isNotBlank(token)) {
             try {
                 Authentication authentication = jwtUtils.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -53,7 +56,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private boolean isContainsToken(HttpServletRequest request) {
-        return request.getHeader("Authorization") != null && request.getHeader("Authorization").startsWith("Bearer ");
+    private String getToken(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        String headerToken = header != null ? header.replaceFirst("Bearer ", "") : null;
+        String cookieToken = Arrays.stream(request.getCookies() != null ? request.getCookies() : new Cookie[0])
+                .filter(cookie -> StringUtils.isEquals(cookie.getName(), "X-Auth-Token"))
+                .findAny()
+                .map(Cookie::getValue)
+                .orElse("");
+        return StringUtils.isNotBlank(headerToken) ? headerToken : cookieToken;
     }
 }
