@@ -8,7 +8,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping(path = "/problem-report/manager")
-public class ProblemReportRouteController {
+public class ProblemReportManagerRouteController {
 
     @GetMapping(path = "")
     @PreAuthorize("hasAnyAuthority('Administrator', 'Manager')")
