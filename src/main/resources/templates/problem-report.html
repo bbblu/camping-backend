@@ -182,7 +182,7 @@
             return `
             <tr>
                 <td>${problemReport.reportTitle}</td>
-                <td>${problemReport.reportDate}</td>
+                <td>${problemReport.reportDate.replace("T", " ")}</td>
                 <td>${problemReport.reporterEmail}</td>
                 <td>
                   <button class="waves-effect waves-light btn modal-trigger"
