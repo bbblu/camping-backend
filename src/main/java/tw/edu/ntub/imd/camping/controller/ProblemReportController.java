@@ -148,6 +148,11 @@ public class ProblemReportController {
         @Email(message = "回報者信箱 - 格式不符合信箱格式")
         private String reporterEmail;
 
+        @Schema(description = "回報主題", example = "上架商品")
+        @NotBlank(message = "回報主題 - 未填寫")
+        @Size(max = 50, message = "回報主題 - 輸入字數大於{max}個字")
+        private String reportTitle;
+
         @Schema(description = "回報內容", example = "無法上架商品")
         @NotBlank(groups = {
                 CreateProblemReport.class,

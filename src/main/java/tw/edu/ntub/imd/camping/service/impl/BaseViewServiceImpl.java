@@ -1,10 +1,12 @@
 package tw.edu.ntub.imd.camping.service.impl;
 
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.Assert;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.BaseViewDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.dto.Pager;
+import tw.edu.ntub.imd.camping.dto.PageInfo;
 import tw.edu.ntub.imd.camping.service.BaseViewService;
 import tw.edu.ntub.imd.camping.service.transformer.BeanEntityTransformer;
 
@@ -49,5 +51,15 @@ public abstract class BaseViewServiceImpl<B, E, ID extends Serializable> impleme
     public Optional<B> getByBean(B b) {
         Optional<E> optional = baseDAO.findOne(Example.of(transformer.transferToEntity(b)));
         return optional.map(transformer::transferToBean);
+    }
+
+    @Override
+    public PageInfo getPageInfo(int count) {
+        Page<?> page = baseDAO.findAll(PageRequest.of(0, count));
+        return PageInfo.builder()
+                .totalPage(page.getTotalPages())
+                .totalDataCount(page.getTotalElements())
+                .countPerPage(count)
+                .build();
     }
 }

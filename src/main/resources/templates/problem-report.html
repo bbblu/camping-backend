@@ -22,7 +22,7 @@
 
     <a class="brand-logo right" href="#">
       <i class="material-icons">account_circle</i>
-      <span class="account">admin</span>
+      <span class="account" th:text="${#authorization.authentication.principal}">帳號</span>
     </a>
   </div>
 </nav>
@@ -72,7 +72,51 @@
     </tr>
     </thead>
 
-    <tbody>
+    <tbody id="problemReportTable" th:remove="body">
+    <tr>
+      <td>這是標題</td>
+      <td>2020/11/05</td>
+      <td>test</td>
+      <td>
+        <button class="waves-effect waves-light btn modal-trigger"
+                data-target="modal1">
+          詳細內容
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td>這是標題</td>
+      <td>2020/11/05</td>
+      <td>test</td>
+      <td>
+        <button class="waves-effect waves-light btn modal-trigger"
+                data-target="modal1">
+          詳細內容
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td>這是標題</td>
+      <td>2020/11/05</td>
+      <td>test</td>
+      <td>
+        <button class="waves-effect waves-light btn modal-trigger"
+                data-target="modal1">
+          詳細內容
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td>這是標題</td>
+      <td>2020/11/05</td>
+      <td>test</td>
+      <td>
+        <button class="waves-effect waves-light btn modal-trigger"
+                data-target="modal1">
+          詳細內容
+        </button>
+      </td>
+    </tr>
     <tr>
       <td>這是標題</td>
       <td>2020/11/05</td>
@@ -98,13 +142,9 @@
     </tbody>
   </table>
 
-  <ul class="pagination">
+  <ul class="pagination" id="pagination">
     <li class="disabled"><a href="#"><i class="material-icons">chevron_left</i></a></li>
-    <li class="active"><a href="#">1</a></li>
-    <li class="waves-effect"><a href="#">2</a></li>
-    <li class="waves-effect"><a href="#">3</a></li>
-    <li class="waves-effect"><a href="#">4</a></li>
-    <li class="waves-effect"><a href="#">5</a></li>
+
     <li class="waves-effect"><a href="#"><i class="material-icons">chevron_right</i></a></li>
   </ul>
 </main>
@@ -135,6 +175,28 @@
 <script src="../static/js/materialize.min.js" th:src="@{/static/js/materialize.min.js}"></script>
 <script src="../static/js/sidenav.js" th:src="@{/static/js/sidenav.js}"></script>
 <script src="../static/js/modal.js" th:src="@{/static/js/modal.js}"></script>
+<script src="../static/js/pagination.js" th:src="@{/static/js/pagination.js}"></script>
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        const table = new Table("problemReportTable", /*[[${problemReportList}]]*/[], function (problemReport) {
+            return `
+            <tr>
+                <td>${problemReport.reportTitle}</td>
+                <td>${problemReport.reportDate}</td>
+                <td>${problemReport.reporterEmail}</td>
+                <td>
+                  <button class="waves-effect waves-light btn modal-trigger"
+                          data-target="modal1">
+                    詳細內容
+                  </button>
+                </td>
+            </tr>
+            `;
+        }, "pagination", 1);
+        table.reload();
+    });
+
+</script>
 </body>
 
 </html>

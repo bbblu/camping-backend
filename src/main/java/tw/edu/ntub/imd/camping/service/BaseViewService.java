@@ -1,6 +1,7 @@
 package tw.edu.ntub.imd.camping.service;
 
 import tw.edu.ntub.imd.camping.databaseconfig.dto.Pager;
+import tw.edu.ntub.imd.camping.dto.PageInfo;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,4 +16,6 @@ public interface BaseViewService<B, ID> {
     List<B> searchByBean(B b);
 
     Optional<B> getByBean(B b);
+
+    PageInfo getPageInfo(int count);
 }
