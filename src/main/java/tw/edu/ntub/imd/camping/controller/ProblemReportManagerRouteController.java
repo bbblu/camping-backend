@@ -18,7 +18,7 @@ public class ProblemReportManagerRouteController {
     @GetMapping(path = "")
     @PreAuthorize("hasAnyAuthority('Administrator', 'Manager')")
     public ModelAndView indexPage() {
-        ModelAndView modelAndView = new ModelAndView("/problem-report");
+        ModelAndView modelAndView = new ModelAndView("/problem-report/index");
         modelAndView.addObject(
                 "pageInfo",
                 problemReportService.getPageInfo(PROBLEM_REPORT_PER_PAGE)
