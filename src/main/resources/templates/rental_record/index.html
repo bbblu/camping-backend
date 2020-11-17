@@ -190,22 +190,22 @@
             switch (rentalRecord.status) {
                 case "未取貨":
                     return `
-                        <button class="btn waves-effect waves-light" type="submit" onclick="take(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                        <button class="btn waves-effect waves-light" type="button" onclick="take(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             取貨
                         </button>
                     `;
                 case "未歸還":
                     return `
-                        <button class="btn waves-effect waves-light" type="submit" onclick="beReturned(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                        <button class="btn waves-effect waves-light" type="button" onclick="beReturned(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             退貨
                         </button>
-                        <button class="btn waves-effect waves-light" type="submit" onclick="doReturn(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                        <button class="btn waves-effect waves-light" type="button" onclick="doReturn(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             歸還完成
                         </button>
                     `;
                 case "未取回":
                     return `
-                        <button class="btn waves-effect waves-light" type="submit" onclick="beClaim(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                        <button class="btn waves-effect waves-light" type="button" onclick="beClaim(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             求償
                         </button>
                     `;
