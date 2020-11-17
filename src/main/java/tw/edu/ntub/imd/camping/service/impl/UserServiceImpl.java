@@ -69,4 +69,11 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
             throw new InvalidOldPasswordException();
         }
     }
+
+    @Override
+    public void updateEnable(String account, boolean isEnable) {
+        User user = userDAO.findById(account).orElseThrow(() -> new NotFoundException("找不到此使用者：" + account));
+        user.setEnable(isEnable);
+        userDAO.update(user);
+    }
 }

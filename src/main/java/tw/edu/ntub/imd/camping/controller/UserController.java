@@ -186,6 +186,38 @@ public class UserController {
         data.add("display", experience.toString());
     }
 
+    @Operation(
+            tags = "User",
+            method = "PATCH",
+            summary = "啟用使用者",
+            description = "啟用使用者",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "啟用成功"
+            )
+    )
+    @PatchMapping(path = "/{account}/enable")
+    public ResponseEntity<String> enable(@PathVariable String account) {
+        userService.updateEnable(account, true);
+        return ResponseEntityBuilder.buildSuccessMessage("啟用成功");
+    }
+
+    @Operation(
+            tags = "User",
+            method = "PATCH",
+            summary = "禁用使用者",
+            description = "禁用使用者",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "禁用成功"
+            )
+    )
+    @PatchMapping(path = "/{account}/disable")
+    public ResponseEntity<String> disable(@PathVariable String account) {
+        userService.updateEnable(account, false);
+        return ResponseEntityBuilder.buildSuccessMessage("禁用成功");
+    }
+
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
     // |----------------------------------------------------------以下為Swagger所需使用的Schema---------------------------------------------------------|
     // |---------------------------------------------------------------------------------------------------------------------------------------------|

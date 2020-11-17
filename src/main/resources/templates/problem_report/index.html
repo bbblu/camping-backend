@@ -29,7 +29,7 @@
 
 <ul id="slide-out" class="sidenav sidenav-fixed collection with-header">
   <li class="collection-header">
-    <a class="home" href="#">
+    <a class="home" href="#" th:href="@{/rental/manager}">
       <img class="logo col" alt="logo" src="../../static/images/logo.png" th:src="@{/static/images/logo.png}"/>
       <span class="col">管理者頁面</span>
     </a>
@@ -45,6 +45,12 @@
     <a href="#" th:href="@{/rental/manager}">
       <i class="material-icons">view_list</i>
       <span>訂單管理</span>
+    </a>
+  </li>
+  <li class="collection-item">
+    <a href="#" th:href="@{/user/manager}">
+      <i class="material-icons">account_box</i>
+      <span>使用者管理</span>
     </a>
   </li>
 
