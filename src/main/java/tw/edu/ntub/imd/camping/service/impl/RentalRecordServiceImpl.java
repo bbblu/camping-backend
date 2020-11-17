@@ -13,6 +13,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.*;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordCancelStatus;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
+import tw.edu.ntub.imd.camping.dto.CreditCard;
 import tw.edu.ntub.imd.camping.exception.*;
 import tw.edu.ntub.imd.camping.service.RentalRecordService;
 import tw.edu.ntub.imd.camping.service.transformer.RentalDetailTransformer;
@@ -80,11 +81,6 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         }
 
         RentalRecord rentalRecord = transformer.transferToEntity(rentalRecordBean);
-        ProductGroup productGroup = productGroupDAO.findById(rentalRecordBean.getProductGroupId()).orElseThrow();
-        int transactionId = transactionUtils.createTransaction(rentalRecordBean.getRenterCreditCard(), productGroup.getBankAccount(), productGroup.getPrice());
-        rentalRecord.setTransactionId(transactionId);
-        String creditCardId = rentalRecord.getRenterCreditCardId();
-        rentalRecord.setRenterCreditCardId("*".repeat(12).concat(StringUtils.mid(creditCardId, -4)));
         RentalRecord saveResult = recordDAO.saveAndFlush(rentalRecord);
         saveDetail(saveResult.getId(), saveResult.getProductGroupId());
         return transformer.transferToBean(saveResult);
@@ -107,6 +103,22 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     @Override
     public List<RentalRecordBean> searchByProductGroupCreateAccount(String productGroupCreateAccount) {
         return transformer.transferToBeanList(recordDAO.findAllBorrowRecord(productGroupCreateAccount, Sort.by(Sort.Order.desc(RentalRecord_.RENTAL_DATE))));
+    }
+
+    @Override
+    public void payment(int id, CreditCard renterCreditCard) {
+        RentalRecord rentalRecord = recordDAO.findById(id).orElseThrow(() -> new NotFoundException("無此租借紀錄"));
+        if (StringUtils.isNotEquals(rentalRecord.getRenterAccount(), SecurityUtils.getLoginUserAccount())) {
+            throw new NotRentalRecordRenterException(id, SecurityUtils.getLoginUserAccount());
+        }
+        ProductGroup productGroup = rentalRecord.getProductGroupByProductGroupId();
+        int transactionId = transactionUtils.createTransaction(renterCreditCard, productGroup.getBankAccount(), productGroup.getPrice());
+        rentalRecord.setTransactionId(transactionId);
+        String creditCardId = rentalRecord.getRenterCreditCardId();
+        rentalRecord.setRenterCreditCardId("*".repeat(12).concat(StringUtils.mid(creditCardId, -4)));
+        saveStatusChangeLog(rentalRecord, RentalRecordStatus.NOT_PLACED, "已付款");
+        rentalRecord.setStatus(RentalRecordStatus.NOT_PLACED);
+        recordDAO.update(rentalRecord);
     }
 
     @Override

@@ -21,8 +21,6 @@ import java.time.LocalDateTime;
 @Table(name = "rental_record_status_change_log", schema = Config.DATABASE_NAME)
 @IdClass(RentalRecordStatusChangeLogId.class)
 public class RentalRecordStatusChangeLog implements Persistable<RentalRecordStatusChangeLogId> {
-    @Transient
-    private Boolean save;
     /**
      * 租借紀錄編號
      *
@@ -98,5 +96,15 @@ public class RentalRecordStatusChangeLog implements Persistable<RentalRecordStat
     @Override
     public RentalRecordStatusChangeLogId getId() {
         return new RentalRecordStatusChangeLogId(recordId, toStatus);
+    }
+
+    @Override
+    public Boolean getSave() {
+        return true;
+    }
+
+    @Override
+    public void setSave(Boolean isSave) {
+
     }
 }

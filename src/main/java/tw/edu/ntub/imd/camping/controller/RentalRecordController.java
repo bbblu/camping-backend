@@ -18,6 +18,7 @@ import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
 import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
+import tw.edu.ntub.imd.camping.dto.CreditCard;
 import tw.edu.ntub.imd.camping.service.RentalRecordService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
@@ -148,6 +149,23 @@ public class RentalRecordController {
                         this::addRentalRecordToData
                 )
                 .build();
+    }
+
+    @Operation(
+            tags = "Rental",
+            method = "PATCH",
+            summary = "付款",
+            description = "付款",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "付款成功"
+            )
+    )
+    @PatchMapping(path = "/{id}/payment")
+    public ResponseEntity<String> payment(@PathVariable int id, @RequestBody @Valid CreditCard renterCreditCard, BindingResult bindingResult) {
+        BindingResultUtils.validate(bindingResult);
+        rentalRecordService.payment(id, renterCreditCard);
+        return ResponseEntityBuilder.buildSuccessMessage("付款成功");
     }
 
     @Operation(

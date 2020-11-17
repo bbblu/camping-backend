@@ -5,6 +5,7 @@ import tw.edu.ntub.imd.camping.bean.RentalRecordBean;
 import tw.edu.ntub.imd.camping.bean.RentalRecordIndexBean;
 import tw.edu.ntub.imd.camping.bean.RentalRecordIndexFilterBean;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
+import tw.edu.ntub.imd.camping.dto.CreditCard;
 
 import java.util.List;
 
@@ -12,6 +13,8 @@ public interface RentalRecordService extends BaseService<RentalRecordBean, Integ
     List<RentalRecordBean> searchByRenterAccount(String renterAccount);
 
     List<RentalRecordBean> searchByProductGroupCreateAccount(String productGroupCreateAccount);
+
+    void payment(int id, CreditCard renterCreditCard);
 
     void createCheckLog(Integer id, String content);
 

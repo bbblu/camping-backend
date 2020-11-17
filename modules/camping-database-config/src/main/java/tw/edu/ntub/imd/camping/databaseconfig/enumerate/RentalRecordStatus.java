@@ -3,7 +3,7 @@ package tw.edu.ntub.imd.camping.databaseconfig.enumerate;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * 租借紀錄狀態(0: 申請取消/ 1: 已取消/ 2: 被退貨/ 3: 等待接受租借/ 4: 待付款/ 5: 被求償/ 6: 未寄放/ 7: 未取貨/ 8: 未歸還/ 9: 未取回/ 10: 未評價/ 11: 已評價)
+ * 租借紀錄狀態(0: 申請取消/ 1: 已取消/ 2: 被退貨/ 3: 被求償/ 4: 等待接受租借/ 5: 待付款/ 6: 未寄放/ 7: 未取貨/ 8: 未歸還/ 9: 未取回/ 10: 未評價/ 11: 已評價)
  *
  * @since 1.0.0
  */

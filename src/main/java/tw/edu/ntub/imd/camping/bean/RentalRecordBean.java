@@ -8,9 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
-import tw.edu.ntub.imd.camping.dto.CreditCard;
 
-import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,11 +38,6 @@ public class RentalRecordBean {
     @Hidden
     @Null(message = "renterAccount - 不得填寫")
     private String renterAccount;
-
-    @Schema(description = "租借者信用卡資料")
-    @NotNull(message = "租借者信用卡資料 - 未填寫")
-    @Valid
-    private CreditCard renterCreditCard;
 
     @Hidden
     @Null(message = "rentalDate - 不得填寫")
