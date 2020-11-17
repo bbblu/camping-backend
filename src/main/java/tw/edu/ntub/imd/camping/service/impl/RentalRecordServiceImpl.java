@@ -40,6 +40,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     private final RentalRecordStatusChangeLogDAO statusChangeLogDAO;
     private final UserDAO userDAO;
     private final RentalRecordIndexTransformer indexTransformer;
+    private final RentalRecordCheckLogDAO checkLogDAO;
 
     public RentalRecordServiceImpl(
             RentalRecordDAO recordDAO,
@@ -53,7 +54,8 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             RentalRecordCancelDAO cancelDAO,
             RentalRecordStatusChangeLogDAO statusChangeLogDAO,
             UserDAO userDAO,
-            RentalRecordIndexTransformer indexTransformer) {
+            RentalRecordIndexTransformer indexTransformer,
+            RentalRecordCheckLogDAO checkLogDAO) {
         super(recordDAO, transformer);
         this.recordDAO = recordDAO;
         this.transformer = transformer;
@@ -67,6 +69,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         this.statusChangeLogDAO = statusChangeLogDAO;
         this.userDAO = userDAO;
         this.indexTransformer = indexTransformer;
+        this.checkLogDAO = checkLogDAO;
     }
 
     @Override
@@ -104,6 +107,12 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     @Override
     public List<RentalRecordBean> searchByProductGroupCreateAccount(String productGroupCreateAccount) {
         return transformer.transferToBeanList(recordDAO.findAllBorrowRecord(productGroupCreateAccount, Sort.by(Sort.Order.desc(RentalRecord_.RENTAL_DATE))));
+    }
+
+    @Override
+    public void createCheckLog(Integer id, String content) {
+        RentalRecordCheckLog checkLog = new RentalRecordCheckLog(id, content);
+        checkLogDAO.save(checkLog);
     }
 
     @Override

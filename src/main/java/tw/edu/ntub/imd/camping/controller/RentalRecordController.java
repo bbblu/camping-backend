@@ -152,6 +152,29 @@ public class RentalRecordController {
 
     @Operation(
             tags = "Rental",
+            method = "POST",
+            summary = "建立檢查紀錄",
+            description = "建立檢查紀錄",
+            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1"),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "新增成功"
+            )
+    )
+    @PostMapping(path = "/{id}/check")
+    public ResponseEntity<String> createCheckLog(
+            @PathVariable int id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(schema = @Schema(implementation = CreateCheckLogSchema.class))
+            ) @RequestBody String requestBodyJsonString
+    ) {
+        ObjectData requestBody = new ObjectData(requestBodyJsonString);
+        rentalRecordService.createCheckLog(id, requestBody.getString("description"));
+        return ResponseEntityBuilder.buildSuccessMessage("新增成功");
+    }
+
+    @Operation(
+            tags = "Rental",
             method = "PATCH",
             summary = "更新租借紀錄狀態",
             description = "更新租借紀錄狀態至下一階段",
@@ -379,6 +402,13 @@ public class RentalRecordController {
             @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(example = "https://www.ntub.edu.tw"))
             private String[] relatedLinkArray;
         }
+    }
+
+    @Schema(name = "檢查紀錄", description = "新增檢查紀錄時的傳遞資料")
+    @Data
+    private static class CreateCheckLogSchema {
+        @Schema(description = "檢查紀錄", example = "缺少椅子、帳篷")
+        private String description;
     }
 
     @Schema(name = "取消原因", description = "取消租借時的傳遞資料")

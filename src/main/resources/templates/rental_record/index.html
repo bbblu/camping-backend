@@ -156,8 +156,10 @@
             }).then(response => response.json())
                 .then(response => {
                     if (response.result) {
-                        table.data[index].status = response.data.newStatus.name;
-                        table.reload();
+                        if (response.data.newStatus) {
+                            table.data[index].status = response.data.newStatus.name;
+                            table.reload();
+                        }
                         alert("更新成功");
                     } else {
                         alert(response.message);
@@ -188,6 +190,12 @@
     function rentalRecordToTrHtml(index, rentalRecord) {
         const getStatusOperationHtml = () => {
             switch (rentalRecord.status) {
+                case "未寄放":
+                    return `
+                        <button class="btn waves-effect waves-light" type="button" onclick="createCheckLog(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                            新增紀錄
+                        </button>
+                    `;
                 case "未取貨":
                     return `
                         <button class="btn waves-effect waves-light" type="button" onclick="take(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
@@ -259,6 +267,11 @@
                     alert(response.message);
                 }
             });
+    }
+
+    function createCheckLog(index, id) {
+        const url = /*[[@{/rental/#id#/check}]]*/"";
+        displayChangeStatusModal("檢查異常", "缺少、損壞項目", url.replace("#id#", id), "POST", index);
     }
 
     function displayChangeStatusModal(header, label, url, method, index) {

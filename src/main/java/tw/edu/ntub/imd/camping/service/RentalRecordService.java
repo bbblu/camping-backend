@@ -13,6 +13,8 @@ public interface RentalRecordService extends BaseService<RentalRecordBean, Integ
 
     List<RentalRecordBean> searchByProductGroupCreateAccount(String productGroupCreateAccount);
 
+    void createCheckLog(Integer id, String content);
+
     RentalRecordStatus updateStatusToNext(int id);
 
     void deniedTransaction(int id, String description);
