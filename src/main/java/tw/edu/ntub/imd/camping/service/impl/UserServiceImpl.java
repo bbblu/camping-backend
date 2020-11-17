@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
+import tw.edu.ntub.imd.camping.databaseconfig.dao.RentalRecordDAO;
+import tw.edu.ntub.imd.camping.databaseconfig.dao.RentalRecordStatusChangeLogDAO;
+import tw.edu.ntub.imd.camping.databaseconfig.dao.UserCommentDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.UserDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.User;
 import tw.edu.ntub.imd.camping.exception.DuplicateCreateException;
@@ -23,16 +26,25 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
     private final UserDAO userDAO;
     private final UserTransformer transformer;
     private final PasswordEncoder passwordEncoder;
+    private final UserCommentDAO commentDAO;
+    private final RentalRecordDAO rentalRecordDAO;
+    private final RentalRecordStatusChangeLogDAO rentalRecordStatusChangeLogDAO;
 
     @Autowired
     public UserServiceImpl(
             UserDAO userDAO,
             UserTransformer transformer,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            UserCommentDAO commentDAO,
+            RentalRecordDAO rentalRecordDAO,
+            RentalRecordStatusChangeLogDAO rentalRecordStatusChangeLogDAO) {
         super(userDAO, transformer);
         this.userDAO = userDAO;
         this.transformer = transformer;
         this.passwordEncoder = passwordEncoder;
+        this.commentDAO = commentDAO;
+        this.rentalRecordDAO = rentalRecordDAO;
+        this.rentalRecordStatusChangeLogDAO = rentalRecordStatusChangeLogDAO;
     }
 
     @Override

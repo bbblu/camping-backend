@@ -87,6 +87,7 @@ public class UserController {
             data.add("cellPhone", userBean.getCellPhone());
             data.add("email", userBean.getEmail());
             data.add("address", userBean.getAddress());
+            data.add("comment", userBean.getComment());
             return ResponseEntityBuilder.success("查詢成功")
                     .data(data)
                     .build();

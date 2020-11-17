@@ -364,6 +364,39 @@ public class RentalRecordController {
         return ResponseEntityBuilder.success().message("查詢成功").data(data).build();
     }
 
+    @Operation(
+            tags = "Rental",
+            method = "POST",
+            summary = "新增使用者評價",
+            description = "評價使用者，不得重複評價，評價分數介於1 <= comment <= 5",
+            parameters = @Parameter(name = "account", description = "使用者帳號", example = "test"),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "評價成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    )
+            )
+    )
+    @PostMapping(path = "/{id}/comment")
+    public ResponseEntity<String> createComment(
+            @PathVariable int id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(
+                                    implementation = UserCommentSchema.class
+                            )
+                    )
+            ) @RequestBody String requestBodyJsonString
+    ) {
+        ObjectData requestBody = new ObjectData(requestBodyJsonString);
+        Integer comment = requestBody.getInt("comment");
+        rentalRecordService.createComment(id, comment.byteValue());
+        return ResponseEntityBuilder.buildSuccessMessage("評價成功");
+    }
+
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
     // |---------------------------------------------------------以下為Swagger所需使用的Schema---------------------------------------------------------|
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
@@ -473,5 +506,12 @@ public class RentalRecordController {
     private static class BeClaimDescription {
         @Schema(description = "申請求償原因", example = "商品損壞")
         private String description;
+    }
+
+    @Schema(name = "使用者評價資料", description = "使用者評價資料")
+    @Data
+    private static class UserCommentSchema {
+        @Schema(description = "評價分數", minimum = "1", maximum = "5")
+        private Byte comment;
     }
 }

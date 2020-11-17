@@ -55,6 +55,9 @@ public class RentalRecordListener {
             case NOT_COMMENT:
                 rentalRecord.setBackDate(LocalDateTime.now());
                 break;
+            case COMMENTED:
+                rentalRecord.setCommentDate(LocalDateTime.now());
+                break;
         }
     }
 }

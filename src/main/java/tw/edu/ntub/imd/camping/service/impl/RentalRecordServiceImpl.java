@@ -4,6 +4,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tw.edu.ntub.birc.common.util.MathUtils;
 import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.RentalRecordBean;
 import tw.edu.ntub.imd.camping.bean.RentalRecordIndexBean;
@@ -40,6 +41,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     private final RentalRecordCancelDAO cancelDAO;
     private final RentalRecordStatusChangeLogDAO statusChangeLogDAO;
     private final UserDAO userDAO;
+    private final UserCommentDAO userCommentDAO;
     private final RentalRecordIndexTransformer indexTransformer;
     private final RentalRecordCheckLogDAO checkLogDAO;
 
@@ -55,6 +57,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             RentalRecordCancelDAO cancelDAO,
             RentalRecordStatusChangeLogDAO statusChangeLogDAO,
             UserDAO userDAO,
+            UserCommentDAO userCommentDAO,
             RentalRecordIndexTransformer indexTransformer,
             RentalRecordCheckLogDAO checkLogDAO) {
         super(recordDAO, transformer);
@@ -69,6 +72,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         this.cancelDAO = cancelDAO;
         this.statusChangeLogDAO = statusChangeLogDAO;
         this.userDAO = userDAO;
+        this.userCommentDAO = userCommentDAO;
         this.indexTransformer = indexTransformer;
         this.checkLogDAO = checkLogDAO;
     }
@@ -299,5 +303,26 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
                                 .orElse("無"))
                 )
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void createComment(int id, byte comment) {
+        if (MathUtils.isInRange(comment, 1, 5)) {
+            RentalRecord rentalRecord = recordDAO.findById(id).orElseThrow(() -> new NotFoundException("找不到此紀錄：" + id));
+            if (rentalRecord.getStatus().isCanChangeTo(RentalRecordStatus.COMMENTED)) {
+                saveStatusChangeLog(rentalRecord, RentalRecordStatus.COMMENTED, "評價完成");
+                rentalRecord.setStatus(RentalRecordStatus.COMMENTED);
+                recordDAO.update(rentalRecord);
+
+                UserComment productGroupComment = new UserComment();
+                productGroupComment.setUserAccount(rentalRecord.getProductGroupByProductGroupId().getCreateAccount());
+                productGroupComment.setComment(comment);
+                userCommentDAO.save(productGroupComment);
+            } else {
+                throw new ChangeRentalRecordStatusFailException(rentalRecord.getStatus(), RentalRecordStatus.COMMENTED);
+            }
+        } else {
+            throw new InvalidCommentRangeException(comment);
+        }
     }
 }

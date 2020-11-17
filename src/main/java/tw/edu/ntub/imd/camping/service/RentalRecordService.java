@@ -37,4 +37,6 @@ public interface RentalRecordService extends BaseService<RentalRecordBean, Integ
     }
 
     List<RentalRecordIndexBean> searchIndexBean(@NonNull RentalRecordIndexFilterBean filterBean);
+
+    void createComment(int id, byte comment);
 }

@@ -120,7 +120,7 @@ public class RentalRecord {
     private LocalDateTime paymentDate;
 
     /**
-     * 寄放日期
+     * 寄放時間
      *
      * @since 1.6.0
      */
@@ -150,6 +150,14 @@ public class RentalRecord {
      */
     @Column(name = "back_date")
     private LocalDateTime backDate;
+
+    /**
+     * 評價時間
+     *
+     * @since 1.6.1
+     */
+    @Column(name = "comment_date")
+    private LocalDateTime commentDate;
 
     /**
      * 取消時間
