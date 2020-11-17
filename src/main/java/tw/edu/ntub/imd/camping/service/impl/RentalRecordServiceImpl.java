@@ -72,6 +72,9 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     @Override
     public RentalRecordBean save(RentalRecordBean rentalRecordBean) {
         OwnerChecker.checkCanBorrowProductGroup(canBorrowProductGroupDAO, rentalRecordBean.getProductGroupId());
+        if (userDAO.isLocked(SecurityUtils.getLoginUserAccount())) {
+            throw new LockedUserException();
+        }
 
         RentalRecord rentalRecord = transformer.transferToEntity(rentalRecordBean);
         ProductGroup productGroup = productGroupDAO.findById(rentalRecordBean.getProductGroupId()).orElseThrow();
@@ -233,6 +236,11 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             saveStatusChangeLog(rentalRecord, newStatus, description);
             rentalRecord.setStatus(newStatus);
             recordDAO.update(rentalRecord);
+            if (newStatus == RentalRecordStatus.BE_CLAIM) {
+                User renter = rentalRecord.getUserByRenterAccount();
+                renter.setLocked(true);
+                userDAO.update(renter);
+            }
         } else {
             throw new ChangeRentalRecordStatusFailException(rentalRecord.getStatus(), newStatus);
         }

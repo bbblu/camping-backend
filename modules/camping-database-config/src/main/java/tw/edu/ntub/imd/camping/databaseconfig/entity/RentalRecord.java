@@ -104,6 +104,22 @@ public class RentalRecord {
     private LocalDateTime borrowEndDate;
 
     /**
+     * 同意時間
+     *
+     * @since 1.6.1
+     */
+    @Column(name = "agree_date")
+    private LocalDateTime agreeDate;
+
+    /**
+     * 付款時間
+     *
+     * @since 1.6.1
+     */
+    @Column(name = "payment_date")
+    private LocalDateTime paymentDate;
+
+    /**
      * 寄放日期
      *
      * @since 1.6.0

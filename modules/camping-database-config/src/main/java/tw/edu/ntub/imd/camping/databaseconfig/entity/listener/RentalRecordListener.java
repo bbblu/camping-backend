@@ -16,7 +16,7 @@ public class RentalRecordListener {
             rentalRecord.setEnable(true);
         }
         if (rentalRecord.getStatus() == null) {
-            rentalRecord.setStatus(RentalRecordStatus.NOT_PLACED);
+            rentalRecord.setStatus(RentalRecordStatus.WAITING_FOR_CONSENT);
         }
         if (rentalRecord.getRenterAccount() == null) {
             rentalRecord.setRenterAccount(SecurityUtils.getLoginUserAccount());
@@ -39,6 +39,10 @@ public class RentalRecordListener {
         switch (rentalRecord.getStatus()) {
             case CANCEL:
                 rentalRecord.setCancelDate(LocalDateTime.now());
+            case PENDING_PAYMENT:
+                rentalRecord.setAgreeDate(LocalDateTime.now());
+            case NOT_PLACED:
+                rentalRecord.setPaymentDate(LocalDateTime.now());
             case NOT_PICK_UP:
                 rentalRecord.setPlacedDate(LocalDateTime.now());
                 break;
