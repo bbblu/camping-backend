@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import tw.edu.ntub.birc.common.annotation.AliasName;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 
 import javax.validation.constraints.*;
@@ -38,6 +39,11 @@ public class RentalRecordBean {
     @Hidden
     @Null(message = "renterAccount - 不得填寫")
     private String renterAccount;
+
+    @Hidden
+    @Null(message = "renter - 不得填寫")
+    @AliasName("userByRenterAccount")
+    private UserBean renter;
 
     @Hidden
     @Null(message = "rentalDate - 不得填寫")

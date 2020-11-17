@@ -83,15 +83,26 @@ public class RentalRecordController {
         return ResponseEntityBuilder.success("查詢成功")
                 .data(
                         rentalRecordService.searchByRenterAccount(SecurityUtils.getLoginUserAccount()),
-                        this::addRentalRecordToData
+                        this::addRenterRentalRecordToData
                 )
                 .build();
+    }
+
+    private void addRenterRentalRecordToData(ObjectData rentalRecordData, RentalRecordBean rentalRecord) {
+        addRentalRecordToData(rentalRecordData, rentalRecord);
+        ProductGroupBean productGroup = rentalRecord.getProductGroup();
+        UserBean createUser = productGroup.getCreateUser();
+        ObjectData sellerData = rentalRecordData.addObject("user");
+        sellerData.add("nickName", createUser.getNickName());
+        sellerData.add("email", createUser.getEmail());
+        sellerData.add("cellPhone", createUser.getCellPhone());
     }
 
     private void addRentalRecordToData(ObjectData rentalRecordData, RentalRecordBean rentalRecord) {
         ProductGroupBean productGroup = rentalRecord.getProductGroup();
         rentalRecordData.add("id", rentalRecord.getId());
         rentalRecordData.add("status", rentalRecord.getStatus().ordinal());
+        rentalRecordData.add("productGroupId", rentalRecord.getProductGroupId());
         rentalRecordData.add("borrowStartDate", rentalRecord.getBorrowStartDate(), DateTimePattern.DEFAULT_DATE);
         rentalRecordData.add("borrowEndDate", rentalRecord.getBorrowEndDate(), DateTimePattern.DEFAULT_DATE);
         rentalRecordData.add("borrowRange", String.format(
@@ -103,10 +114,6 @@ public class RentalRecordController {
         rentalRecordData.add("coverImage", productGroup.getCoverImage());
         rentalRecordData.add("areaName", productGroup.getCityAreaName());
         rentalRecordData.add("price", PRICE_FORMATTER.format(productGroup.getPrice()));
-        UserBean createUser = productGroup.getCreateUser();
-        ObjectData sellerData = rentalRecordData.addObject("seller");
-        sellerData.add("nickName", createUser.getNickName());
-        sellerData.add("email", createUser.getEmail());
         rentalRecordData.add("rentalDate", rentalRecord.getRentalDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
 
         CollectionObjectData collectionObjectData = rentalRecordData.createCollectionData();
@@ -146,9 +153,18 @@ public class RentalRecordController {
         return ResponseEntityBuilder.success("查詢成功")
                 .data(
                         rentalRecordService.searchByProductGroupCreateAccount(SecurityUtils.getLoginUserAccount()),
-                        this::addRentalRecordToData
+                        this::addProductOwnerRentalRecordToData
                 )
                 .build();
+    }
+
+    private void addProductOwnerRentalRecordToData(ObjectData rentalRecordData, RentalRecordBean rentalRecord) {
+        addRentalRecordToData(rentalRecordData, rentalRecord);
+        UserBean renter = rentalRecord.getRenter();
+        ObjectData sellerData = rentalRecordData.addObject("user");
+        sellerData.add("nickName", renter.getNickName());
+        sellerData.add("email", renter.getEmail());
+        sellerData.add("cellPhone", renter.getCellPhone());
     }
 
     @Operation(
@@ -380,8 +396,8 @@ public class RentalRecordController {
         private String areaName;
         @Schema(description = "租借價格", example = "$ 3,990")
         private String price;
-        @Schema(description = "賣方")
-        private User seller;
+        @Schema(description = "賣方(若查詢租借紀錄)、買方(若查詢出租紀錄)")
+        private User user;
         @Schema(description = "賣方聯絡方式", example = "LineId : 1234")
         private String contact;
         @Schema(description = "租借日期", example = "2020/08/28 15:03")
@@ -389,13 +405,15 @@ public class RentalRecordController {
         @ArraySchema(minItems = 1, uniqueItems = true, schema = @Schema(implementation = Detail.class))
         private Detail[] detailArray;
 
-        @Schema(name = "查詢租借紀錄 - 賣方", description = "查詢租借紀錄的回傳資料中的seller")
+        @Schema(name = "查詢租借紀錄 - 賣方", description = "查詢租借紀錄的回傳資料中的user")
         @Data
         private static class User {
             @Schema(description = "暱稱", example = "煞氣a小明")
             private String nickName;
             @Schema(description = "信箱", example = "10646007@ntub.edu.tw")
             private String email;
+            @Schema(description = "手機", example = "0912345678")
+            private String cellPhone;
         }
 
         @Schema(name = "查詢租借紀錄 - 詳細內容", description = "查詢租借紀錄的回傳資料中的detailArray")
