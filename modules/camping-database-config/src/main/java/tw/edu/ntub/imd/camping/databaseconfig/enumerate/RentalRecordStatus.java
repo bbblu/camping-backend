@@ -3,7 +3,7 @@ package tw.edu.ntub.imd.camping.databaseconfig.enumerate;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * 租借紀錄狀態(0: 申請取消/ 1: 已取消/ 2: 被退貨/ 3: 被求償/ 4: 未寄放/ 5: 未取貨/ 6: 未歸還/ 7: 未取回/ 8: 未評價)
+ * 租借紀錄狀態(0: 申請取消/ 1: 已取消/ 2: 被退貨/ 3: 等待接受租借/ 4: 待付款/ 5: 被求償/ 6: 未寄放/ 7: 未取貨/ 8: 未歸還/ 9: 未取回/ 10: 未評價/ 11: 已評價)
  *
  * @since 1.0.0
  */
@@ -33,6 +33,18 @@ public enum RentalRecordStatus {
      */
     BE_CLAIM,
     /**
+     * 等待接受租借
+     *
+     * @since 1.6.1
+     */
+    WAITING_FOR_CONSENT,
+    /**
+     * 待付款
+     *
+     * @since 1.6.1
+     */
+    PENDING_PAYMENT,
+    /**
      * 未寄放
      *
      * @since 1.6.0
@@ -61,10 +73,20 @@ public enum RentalRecordStatus {
      *
      * @since 1.6.0
      */
-    NOT_COMMENT;
+    NOT_COMMENT,
+    /**
+     * 已評價
+     *
+     * @since 1.6.1
+     */
+    COMMENTED;
 
     public RentalRecordStatus next() {
         switch (this) {
+            case WAITING_FOR_CONSENT:
+                return PENDING_PAYMENT;
+            case PENDING_PAYMENT:
+                return NOT_PLACED;
             case NOT_PLACED:
                 return NOT_PICK_UP;
             case NOT_PICK_UP:
@@ -73,11 +95,13 @@ public enum RentalRecordStatus {
                 return NOT_RETRIEVE;
             case NOT_RETRIEVE:
                 return NOT_COMMENT;
+            case NOT_COMMENT:
+                return COMMENTED;
             case APPLY_CANCEL:
             case CANCEL:
             case BE_RETURNED:
             case BE_CLAIM:
-            case NOT_COMMENT:
+            case COMMENTED:
             default:
                 return null;
         }
@@ -85,6 +109,10 @@ public enum RentalRecordStatus {
 
     public boolean isCanChangeTo(RentalRecordStatus status) {
         switch (this) {
+            case WAITING_FOR_CONSENT:
+                return status == PENDING_PAYMENT || status == APPLY_CANCEL || status == CANCEL;
+            case PENDING_PAYMENT:
+                return status == NOT_PLACED || status == APPLY_CANCEL || status == CANCEL;
             case NOT_PLACED:
                 return status == NOT_PICK_UP || status == APPLY_CANCEL || status == CANCEL;
             case NOT_PICK_UP:
@@ -95,10 +123,12 @@ public enum RentalRecordStatus {
                 return status == NOT_COMMENT || status == BE_CLAIM;
             case APPLY_CANCEL:
                 return status == CANCEL;
+            case NOT_COMMENT:
+                return status == COMMENTED;
             case CANCEL:
             case BE_RETURNED:
             case BE_CLAIM:
-            case NOT_COMMENT:
+            case COMMENTED:
             default:
                 return false;
         }
@@ -117,6 +147,10 @@ public enum RentalRecordStatus {
                 return "被退貨";
             case BE_CLAIM:
                 return "被求償";
+            case WAITING_FOR_CONSENT:
+                return "等待接受租借";
+            case PENDING_PAYMENT:
+                return "待付款";
             case NOT_PLACED:
                 return "未寄放";
             case NOT_PICK_UP:
@@ -127,6 +161,8 @@ public enum RentalRecordStatus {
                 return "未取回";
             case NOT_COMMENT:
                 return "未評價";
+            case COMMENTED:
+                return "已平價";
             default:
                 return name();
         }
