@@ -14,7 +14,7 @@ class Table {
         const startIndex = this.pagination.getStartIndex();
         for (let i = startIndex; i < Math.min(this.data.length, startIndex + this.pagination.dataPerPage); i++) {
             const row = this.data[i];
-            table.insertAdjacentHTML("beforeend", this.getHtmlFromRow(row));
+            table.insertAdjacentHTML("beforeend", this.getHtmlFromRow(i, row));
         }
     }
 }

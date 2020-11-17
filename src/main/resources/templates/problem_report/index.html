@@ -145,24 +145,26 @@
 
 <div id="modal1" class="modal">
   <div class="modal-content">
-    <h4>這是標題</h4>
+    <h4 id="modalTitle">這是標題</h4>
     <div class="sub-title">
-      <span>test</span>
-      <span>2020/11/05</span>
+      <span id="modalEmail">test</span>
+      <span id="modalDate">2020/11/05</span>
     </div>
-    <p>這是問題</p>
+    <p id="modalContent">這是問題</p>
 
     <form>
       <div class="input-field">
-        <textarea id="textarea1" class="materialize-textarea"></textarea>
-        <label for="textarea1">回覆內容</label>
+        <textarea id="handleResult" class="materialize-textarea"></textarea>
+        <label for="handleResult">回覆內容</label>
       </div>
     </form>
   </div>
 
   <div class="modal-footer">
     <button class="waves-effect waves-light btn-flat modal-close">關閉</button>
-    <button class="waves-effect waves-light btn-flat reply">回覆</button>
+    <button class="waves-effect waves-light btn-flat reply" id="modalSubmit"
+            onclick="handle(dataset.index, dataset.id, document.querySelector('#handleResult').value)">回覆
+    </button>
   </div>
 </div>
 
@@ -171,18 +173,29 @@
 <script src="../../static/js/modal.js" th:src="@{/static/js/modal.js}"></script>
 <script src="../../static/js/pagination.js" th:src="@{/static/js/pagination.js}"></script>
 <script th:inline="javascript">
+    let table;
+
     document.addEventListener("DOMContentLoaded", function () {
-        const table = new Table("problemReportTable", /*[[${problemReportList}]]*/[], function (problemReport) {
+        M.Modal.init(document.querySelectorAll(".modal"));
+        M.textareaAutoResize(document.querySelector("#handleResult"));
+        table = new Table("problemReportTable", /*[[${problemReportList}]]*/[], function (index, problemReport) {
             return `
             <tr>
                 <td>${problemReport.reportTitle}</td>
                 <td>${problemReport.reportDate.replace("T", " ")}</td>
                 <td>${problemReport.reporterEmail}</td>
                 <td>
-                  <button class="waves-effect waves-light btn modal-trigger"
-                          data-target="modal1">
-                    詳細內容
-                  </button>
+                    <button class="waves-effect waves-light btn"
+                        data-index="${index}"
+                        data-id="${problemReport.id}"
+                        data-title="${problemReport.reportTitle}"
+                        data-date="${problemReport.reportDate.replace("T", " ")}"
+                        data-email="${problemReport.reporterEmail}"
+                        data-content="${problemReport.reportContent}"
+                        data-handle-result="${problemReport.handleResult}"
+                        onclick="openModal(this)">
+                      詳細內容
+                    </button>
                 </td>
             </tr>
             `;
@@ -190,6 +203,48 @@
         table.reload();
     });
 
+    function openModal(button) {
+        const dataset = button.dataset;
+        document.querySelector("#modalTitle").textContent = dataset.title;
+        document.querySelector("#modalEmail").textContent = dataset.email;
+        document.querySelector("#modalDate").textContent = dataset.date;
+        document.querySelector("#modalContent").textContent = dataset.content;
+        document.querySelector("#modalSubmit").setAttribute("data-index", dataset.index);
+        document.querySelector("#modalSubmit").setAttribute("data-id", dataset.id);
+        if (dataset.handleResult && dataset.handleResult !== "null") {
+            const handleResultDom = document.querySelector("#handleResult");
+            handleResultDom.disabled = true;
+            handleResultDom.readOnly = true;
+            handleResultDom.textContent = dataset.handleResult;
+            M.updateTextFields();
+            document.querySelector("#modalSubmit").disabled = true;
+        }
+        const modal = M.Modal.getInstance(document.querySelector("#modal1"));
+        modal.open();
+    }
+
+    function handle(index, id, handleResult) {
+        const url = /*[[@{/problem-report/#id#/handle/result}]]*/"";
+        fetch(url.replace("#id#", id), {
+            method: "PATCH",
+            body: JSON.stringify({
+                handleResult
+            }),
+            headers: {
+                "Content-Type": "application/json;charset=UTF-8"
+            }
+        }).then(response => response.json())
+            .then(response => {
+                if (response.result) {
+                    table.data[index].handleResult = handleResult;
+                    table.reload();
+                } else {
+                    alert(response.message);
+                }
+                const modal = M.Modal.getInstance(document.querySelector("#modal1"));
+                modal.close();
+            });
+    }
 </script>
 </body>
 

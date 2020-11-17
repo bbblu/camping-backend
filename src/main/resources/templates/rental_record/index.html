@@ -185,7 +185,7 @@
         M.Modal.init(document.querySelectorAll(".modal"));
     }
 
-    function rentalRecordToTrHtml(rentalRecord) {
+    function rentalRecordToTrHtml(index, rentalRecord) {
         const getStatusOperationHtml = () => {
             switch (rentalRecord.status) {
                 case "未取貨":
