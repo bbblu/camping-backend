@@ -163,8 +163,12 @@ public class RentalRecordController {
     )
     @PatchMapping(path = "/{id}/status/next")
     public ResponseEntity<String> updateStatusToNext(@PathVariable @Positive(message = "id - 應大於0") int id) {
-        rentalRecordService.updateStatusToNext(id);
-        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
+        RentalRecordStatus newStatus = rentalRecordService.updateStatusToNext(id);
+        ObjectData result = new ObjectData();
+        ObjectData newStatusData = result.addObject("newStatus");
+        newStatusData.add("ordinal", newStatus.ordinal());
+        newStatusData.add("name", newStatus.toString());
+        return ResponseEntityBuilder.success("更新成功").data(result).build();
     }
 
     @Operation(
@@ -251,7 +255,11 @@ public class RentalRecordController {
             ) @RequestBody String requestBodyJsonString) {
         ObjectData requestBody = new ObjectData(requestBodyJsonString);
         rentalRecordService.unexpectedStatusChange(id, requestBody.getString("description"), RentalRecordStatus.BE_RETURNED);
-        return ResponseEntityBuilder.buildSuccessMessage("申請退貨完成");
+        ObjectData result = new ObjectData();
+        ObjectData newStatusData = result.addObject("newStatus");
+        newStatusData.add("ordinal", RentalRecordStatus.BE_RETURNED.ordinal());
+        newStatusData.add("name", RentalRecordStatus.BE_RETURNED.toString());
+        return ResponseEntityBuilder.success("申請退貨完成").data(result).build();
     }
 
     @Operation(
@@ -270,7 +278,11 @@ public class RentalRecordController {
             ) @RequestBody String requestBodyJsonString) {
         ObjectData requestBody = new ObjectData(requestBodyJsonString);
         rentalRecordService.unexpectedStatusChange(id, requestBody.getString("description"), RentalRecordStatus.BE_CLAIM);
-        return ResponseEntityBuilder.buildSuccessMessage("申請求償完成");
+        ObjectData result = new ObjectData();
+        ObjectData newStatusData = result.addObject("newStatus");
+        newStatusData.add("ordinal", RentalRecordStatus.BE_CLAIM.ordinal());
+        newStatusData.add("name", RentalRecordStatus.BE_CLAIM.toString());
+        return ResponseEntityBuilder.success("申請求償完成").data(result).build();
     }
 
     @Operation(

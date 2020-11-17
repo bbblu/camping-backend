@@ -4,6 +4,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import tw.edu.ntub.birc.common.util.DateTimeUtils;
+import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimeDetail;
 
 import java.time.LocalDate;
@@ -15,6 +16,9 @@ public class LocalDateTimeConverter implements Converter<String, LocalDateTime> 
 
     @Override
     public LocalDateTime convert(@NonNull String source) {
+        if (StringUtils.isBlank(source)) {
+            return null;
+        }
         DateTimeDetail dateTimeDetail = DateTimeUtils.parseDateTime(source);
         return LocalDateTime.of(
                 LocalDate.of(dateTimeDetail.getYear(), dateTimeDetail.getMonthNo(), dateTimeDetail.getDay()),

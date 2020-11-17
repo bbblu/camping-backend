@@ -30,4 +30,6 @@ dependencies {
     annotationProcessor 'org.hibernate:hibernate-jpamodelgen:5.4.20.Final'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.11.3'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.11.3'
 }

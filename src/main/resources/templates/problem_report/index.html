@@ -36,13 +36,13 @@
   </li>
 
   <li class="collection-item">
-    <a href="#">
+    <a href="#" th:href="@{/problem-report/manager}">
       <i class="material-icons">help</i>
       <span>問題回報</span>
     </a>
   </li>
   <li class="collection-item">
-    <a href="#">
+    <a href="#" th:href="@{/rental/manager}">
       <i class="material-icons">view_list</i>
       <span>訂單管理</span>
     </a>
@@ -192,7 +192,7 @@
                 </td>
             </tr>
             `;
-        }, "pagination", 1);
+        }, "pagination", 10);
         table.reload();
     });
 

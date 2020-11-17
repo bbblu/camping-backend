@@ -1,5 +1,6 @@
 package tw.edu.ntub.imd.camping.config.util;
 
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import tw.edu.ntub.birc.common.util.StringUtils;
 
@@ -14,5 +15,18 @@ public final class SecurityUtils {
 
     public static boolean isLogin() {
         return StringUtils.isNotEquals(getLoginUserAccount(), "anonymousUser");
+    }
+
+    public static boolean isNotManager() {
+        return !isManager();
+    }
+
+    public static boolean isManager() {
+        return SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getAuthorities()
+                .parallelStream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(authority -> authority.equals("Administrator") || authority.equals("Manager"));
     }
 }

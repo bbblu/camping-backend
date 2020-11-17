@@ -1,10 +1,13 @@
 package tw.edu.ntub.imd.camping.service.impl;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.RentalRecordBean;
+import tw.edu.ntub.imd.camping.bean.RentalRecordIndexBean;
+import tw.edu.ntub.imd.camping.bean.RentalRecordIndexFilterBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.*;
@@ -13,6 +16,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.exception.*;
 import tw.edu.ntub.imd.camping.service.RentalRecordService;
 import tw.edu.ntub.imd.camping.service.transformer.RentalDetailTransformer;
+import tw.edu.ntub.imd.camping.service.transformer.RentalRecordIndexTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.RentalRecordTransformer;
 import tw.edu.ntub.imd.camping.util.OwnerChecker;
 import tw.edu.ntub.imd.camping.util.TransactionUtils;
@@ -35,6 +39,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     private final RentalRecordCancelDAO cancelDAO;
     private final RentalRecordStatusChangeLogDAO statusChangeLogDAO;
     private final UserDAO userDAO;
+    private final RentalRecordIndexTransformer indexTransformer;
 
     public RentalRecordServiceImpl(
             RentalRecordDAO recordDAO,
@@ -47,7 +52,8 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             TransactionUtils transactionUtils,
             RentalRecordCancelDAO cancelDAO,
             RentalRecordStatusChangeLogDAO statusChangeLogDAO,
-            UserDAO userDAO) {
+            UserDAO userDAO,
+            RentalRecordIndexTransformer indexTransformer) {
         super(recordDAO, transformer);
         this.recordDAO = recordDAO;
         this.transformer = transformer;
@@ -60,6 +66,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         this.cancelDAO = cancelDAO;
         this.statusChangeLogDAO = statusChangeLogDAO;
         this.userDAO = userDAO;
+        this.indexTransformer = indexTransformer;
     }
 
     @Override
@@ -97,12 +104,13 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     }
 
     @Override
-    public void updateStatusToNext(int id) {
+    public RentalRecordStatus updateStatusToNext(int id) {
         RentalRecord rentalRecord = getUpdateRentalRecord(id);
         RentalRecordStatus status = rentalRecord.getStatus();
         saveStatusChangeLog(rentalRecord, status.next(), "原先狀態已完成");
         rentalRecord.setStatus(status.next());
         recordDAO.save(rentalRecord);
+        return rentalRecord.getStatus();
     }
 
     @Override
@@ -135,7 +143,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     private RentalRecord getUpdateRentalRecord(int id) {
         Optional<RentalRecord> optionalRentalRecord = recordDAO.findById(id);
         RentalRecord rentalRecord = optionalRentalRecord.orElseThrow(() -> new NotFoundException("無此紀錄：" + id));
-        if (recordDAO.isNotRenterAndProductGroupCreator(id, SecurityUtils.getLoginUserAccount())) {
+        if (SecurityUtils.isNotManager() && recordDAO.isNotRenterAndProductGroupCreator(id, SecurityUtils.getLoginUserAccount())) {
             throw new NotRentalRecordOwnerException(id, SecurityUtils.getLoginUserAccount());
         }
         RentalRecordStatus status = rentalRecord.getStatus();
@@ -245,5 +253,22 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         } else {
             throw new NotRentalRecordOwnerException(id, loginUserAccount);
         }
+    }
+
+    @Override
+    public List<RentalRecordIndexBean> searchIndexBean(@NonNull RentalRecordIndexFilterBean filterBean) {
+        return recordDAO.findAll()
+                .stream()
+                .filter(rentalRecord -> filterBean.getStatus() == null || rentalRecord.getStatus() == filterBean.getStatus())
+                .filter(rentalRecord -> filterBean.getRentalStartDate() == null || filterBean.isAfterOrEqualsStartDate(rentalRecord.getRentalDate().toLocalDate()))
+                .filter(rentalRecord -> filterBean.getRentalEndDate() == null || filterBean.isBeforeOrEqualsStartDate(rentalRecord.getRentalDate().toLocalDate()))
+                .filter(rentalRecord -> (filterBean.getRentalStartDate() == null && filterBean.getRentalEndDate() == null) || filterBean.isBetweenStartDateAndEndDate(rentalRecord.getRentalDate().toLocalDate()))
+                .map(indexTransformer::transferToBean)
+                .peek(indexBean -> indexBean.setLastChangeStatusDescription(
+                        statusChangeLogDAO.findByRecordIdAndToStatus(indexBean.getId(), indexBean.getStatus())
+                                .map(RentalRecordStatusChangeLog::getDescription)
+                                .orElse("無"))
+                )
+                .collect(Collectors.toList());
     }
 }

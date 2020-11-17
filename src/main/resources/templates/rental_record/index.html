@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="tw" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>借借露 - 管理者頁面</title>
+
+  <link rel="stylesheet" href="../../static/css/materialize.min.css" th:href="@{/static/css/materialize.min.css}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../../static/css/main.css" th:href="@{/static/css/main.css}">
+  <link rel="stylesheet" href="../../static/css/question-report.css" th:href="@{/static/css/question-report.css}">
+  <link rel="stylesheet" href="../../static/css/question-report.css" th:href="@{/static/css/rental-record.css}">
+</head>
+
+<body>
+<nav>
+  <div class="nav-wrapper">
+    <a class="sidenav-trigger" href="#" data-target="slide-out">
+      <i class="material-icons">menu</i>
+    </a>
+
+    <a class="brand-logo right" href="#">
+      <i class="material-icons">account_circle</i>
+      <span class="account" th:text="${#authorization.authentication.principal}">帳號</span>
+    </a>
+  </div>
+</nav>
+
+<ul id="slide-out" class="sidenav sidenav-fixed collection with-header">
+  <li class="collection-header">
+    <a class="home" href="#">
+      <img class="logo col" alt="logo" src="../../static/images/logo.png" th:src="@{/static/images/logo.png}"/>
+      <span class="col">管理者頁面</span>
+    </a>
+  </li>
+
+  <li class="collection-item">
+    <a href="#" th:href="@{/problem-report/manager}">
+      <i class="material-icons">help</i>
+      <span>問題回報</span>
+    </a>
+  </li>
+  <li class="collection-item">
+    <a href="#" th:href="@{/rental/manager}">
+      <i class="material-icons">view_list</i>
+      <span>訂單管理</span>
+    </a>
+  </li>
+  <li class="collection-item">
+    <a href="#">
+      <i class="material-icons">gavel</i>
+      <span>交易糾紛</span>
+    </a>
+  </li>
+
+  <div class="divider"></div>
+
+  <li class="collection-item">
+    <a href="#">登出</a>
+  </li>
+</ul>
+
+<main class="container">
+  <div class="row">
+    <div class="input-field col s3">
+      <i class="material-icons prefix">date_range</i>
+      <input type="text" class="datepicker" id="startDate"><label for="startDate">起始日期</label>
+    </div>
+    <div class="input-field col s3">
+      <i class="material-icons prefix">date_range</i>
+      <input type="text" class="datepicker" id="endDate"><label for="endDate">結束日期</label>
+    </div>
+    <div class="input-field col s4">
+      <select name="status" id="status">
+        <option value="" disabled selected>請選擇狀態</option>
+        <option value="1" th:each="status, state : ${statusList}" th:text="${status.toString()}"
+                th:value="${status.name()}">未取貨
+        </option>
+      </select>
+      <label for="status">狀態</label>
+    </div>
+    <div class="input-field col s2">
+      <button class="btn waves-effect waves-light" type="submit" onclick="searchFilter()">
+        搜尋
+        <i class="material-icons right">search</i>
+      </button>
+    </div>
+  </div>
+
+  <table class="striped centered">
+    <thead>
+    <tr>
+      <th>訂單編號</th>
+      <th>狀態</th>
+      <th>日期</th>
+      <th>動作</th>
+    </tr>
+    </thead>
+
+    <tbody id="rentalRecordTable" th:remove="body">
+    <tr>
+      <td>0 0 0 1 2 3</td>
+      <td>處理中</td>
+      <td>09/11</td>
+      <td>陳先生帳篷髒污問題</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <ul class="pagination" id="pagination">
+    <li class="disabled"><a href="#"><i class="material-icons">chevron_left</i></a></li>
+
+    <li class="waves-effect"><a href="#"><i class="material-icons">chevron_right</i></a></li>
+  </ul>
+</main>
+
+<div id="changeStatusModal" class="modal">
+  <div class="modal-content">
+    <h4 id="modalHeader">Modal Header</h4>
+    <div class="row">
+      <div class="col s12">
+        <div class="input-field">
+          <textarea class="materialize-textarea" name="description" id="description" rows="4"></textarea>
+          <label for="description" id="descriptionLabel"></label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="modal-close waves-effect waves-green btn-flat" id="modalSubmit">確定</a>
+  </div>
+</div>
+
+<script src="../../static/js/materialize.min.js" th:src="@{/static/js/materialize.min.js}"></script>
+<script src="../../static/js/sidenav.js" th:src="@{/static/js/sidenav.js}"></script>
+<script src="../../static/js/modal.js" th:src="@{/static/js/modal.js}"></script>
+<script src="../../static/js/pagination.js" th:src="@{/static/js/pagination.js}"></script>
+<script th:inline="javascript">
+    let table;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        table = new Table("rentalRecordTable", /*[[${rentalRecordList}]]*/[], rentalRecordToTrHtml, "pagination", 1);
+        table.reload();
+        initMaterializeInstances();
+        document.querySelector("#modalSubmit").onclick = function (e) {
+            const button = e.target;
+            const dataset = button.dataset;
+            const url = dataset.url;
+            const method = dataset.method;
+            const description = document.querySelector("#description").value;
+            const index = dataset.index;
+            fetch(url, {
+                method,
+                body: JSON.stringify({
+                    description
+                }),
+                headers: {
+                    "Content-Type": "application/json;charset=UTF-8"
+                }
+            }).then(response => response.json())
+                .then(response => {
+                    if (response.result) {
+                        table.data[index].status = response.data.newStatus.name;
+                        table.reload();
+                        alert("更新成功");
+                    } else {
+                        alert(response.message);
+                    }
+                })
+        };
+    });
+
+    function initMaterializeInstances() {
+        M.Datepicker.init(document.querySelectorAll(".datepicker"), {
+            format: "yyyy/mm/dd",
+            showClearBtn: true,
+            i18n: {
+                cancel: "取消",
+                clear: "清除",
+                done: "確定",
+                months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+                monthsShort: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+                weekdays: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
+                weekdaysShort: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
+                weekdaysAbbrev: ["日", "一", "二", "三", "四", "五", "六"]
+            },
+        });
+        M.FormSelect.init(document.querySelectorAll("select"));
+        M.Modal.init(document.querySelectorAll(".modal"));
+    }
+
+    function rentalRecordToTrHtml(rentalRecord) {
+        const getStatusOperationHtml = () => {
+            switch (rentalRecord.status) {
+                case "未取貨":
+                    return `
+                        <button class="btn waves-effect waves-light" type="submit" onclick="take(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                            取貨
+                        </button>
+                    `;
+                case "未歸還":
+                    return `
+                        <button class="btn waves-effect waves-light" type="submit" onclick="beReturned(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                            退貨
+                        </button>
+                        <button class="btn waves-effect waves-light" type="submit" onclick="doReturn(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                            歸還完成
+                        </button>
+                    `;
+                case "未取回":
+                    return `
+                        <button class="btn waves-effect waves-light" type="submit" onclick="beClaim(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                            求償
+                        </button>
+                    `;
+                default:
+                    return "";
+            }
+        };
+        return `
+            <tr>
+                <td>${rentalRecord.idString}</td>
+                <td>${rentalRecord.status}</td>
+                <td>${rentalRecord.rentalDate.replace("T", " ")}</td>
+                <td>
+                    ${getStatusOperationHtml()}
+                </td>
+            </tr>
+            `;
+    }
+
+    function searchFilter() {
+        let url = /*[[@{/rental/manager/filter}]]*/"";
+        const params = {
+            status: document.querySelector("#status").value,
+            rentalStartDate: document.querySelector("#startDate").value,
+            rentalEndDate: document.querySelector("#endDate").value
+        };
+        url = `${url}?${new URLSearchParams(params).toString()}`;
+        fetch(url)
+            .then(response => response.json())
+            .then(response => {
+                if (response.result) {
+                    const table = new Table("rentalRecordTable", response.data, rentalRecordToTrHtml, "pagination", 1);
+                    table.reload();
+                } else {
+                    alert(response.message);
+                }
+            });
+    }
+
+    function take(index, id) {
+        const url = /*[[@{/rental/#id#/status/next}]]*/"";
+        fetch(url.replace("#id#", id), {
+            method: "PATCH"
+        }).then(response => response.json())
+            .then(response => {
+                if (response.result) {
+                    table.data[index].status = response.data.newStatus.name;
+                    table.reload();
+                    alert(`${document.querySelector("#modalHeader").textContent}完成`);
+                } else {
+                    alert(response.message);
+                }
+            });
+    }
+
+    function displayChangeStatusModal(header, label, url, method, index) {
+        document.querySelector("#modalHeader").textContent = header;
+        document.querySelector("#descriptionLabel").textContent = label;
+        const modalSubmitButton = document.querySelector("#modalSubmit");
+        modalSubmitButton.setAttribute("data-url", url);
+        modalSubmitButton.setAttribute("data-method", method);
+        modalSubmitButton.setAttribute("data-index", index);
+        const modal = M.Modal.getInstance(document.querySelector("#changeStatusModal"));
+        modal.open();
+    }
+
+    function beReturned(index, id) {
+        const url = /*[[@{/rental/#id#/returned}]]*/"";
+        displayChangeStatusModal("退貨", "退貨原因", url.replace("#id#", id), "PATCH", index);
+    }
+
+    function doReturn(index, id) {
+        const url = /*[[@{/rental/#id#/status/next}]]*/"";
+        fetch(url.replace("#id#", id), {
+            method: "PATCH"
+        }).then(response => response.json())
+            .then(response => {
+                if (response.result) {
+                    table.data[index].status = response.data.newStatus.name;
+                    table.reload();
+                    alert(`${document.querySelector("#modalHeader").textContent}完成`);
+                } else {
+                    alert(response.message);
+                }
+            });
+    }
+
+    function beClaim(index, id) {
+        const url = /*[[@{/rental/#id#/claim}]]*/"";
+        displayChangeStatusModal("請求賠償", "賠償原因", url.replace("#id#", id), "PATCH", index);
+    }
+
+</script>
+</body>
+
+</html>

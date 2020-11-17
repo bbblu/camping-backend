@@ -1,5 +1,7 @@
 package tw.edu.ntub.imd.camping.databaseconfig.enumerate;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * 租借紀錄狀態(0: 申請取消/ 1: 已取消/ 2: 被退貨/ 3: 被求償/ 4: 未寄放/ 5: 未取貨/ 6: 未歸還/ 7: 未取回/ 8: 未評價)
  *
@@ -104,6 +106,7 @@ public enum RentalRecordStatus {
 
 
     @Override
+    @JsonValue
     public String toString() {
         switch (this) {
             case APPLY_CANCEL:
