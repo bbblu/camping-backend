@@ -23,7 +23,6 @@ import tw.edu.ntub.imd.camping.service.CityService;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
-import tw.edu.ntub.imd.camping.util.json.array.ArrayData;
 import tw.edu.ntub.imd.camping.util.json.object.CollectionObjectData;
 import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 import tw.edu.ntub.imd.camping.validation.CreateProductGroup;
@@ -37,7 +36,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -133,13 +131,12 @@ public class ProductGroupController {
                 .build();
     }
 
-    private void addCityToObjectData(Map<String, List<String>> cityMap, ObjectData data) {
-        ObjectData cityData = data.addObject("city");
-        ArrayData cityNameArray = cityData.addArray("nameArray");
-        ArrayData cityAreaNameArray = cityData.addArray("areaNameArray");
-        cityMap.forEach((name, areaNameList) -> {
-            cityNameArray.add(name);
-            cityAreaNameArray.addStringArray(areaNameList);
+    private void addCityToObjectData(List<CityBean> cityList, ObjectData data) {
+        CollectionObjectData collectionObjectData = data.createCollectionData();
+        collectionObjectData.add("cityArray", cityList, (cityData, cityBean) -> {
+            cityData.add("id", cityBean.getId());
+            cityData.add("name", cityBean.getName());
+            cityData.add("areaName", cityBean.getAreaName());
         });
     }
 
@@ -537,7 +534,7 @@ public class ProductGroupController {
         @ArraySchema(minItems = 1, maxItems = 10, uniqueItems = true, schema = @Schema(description = "商品類型"))
         private ProductTypeBean[] type;
         @Schema(description = "地點")
-        private CityController.SearchCitySchema city;
+        private CityBean city;
     }
 
     @Schema(name = "商品群組內容", description = "商品群組內容")

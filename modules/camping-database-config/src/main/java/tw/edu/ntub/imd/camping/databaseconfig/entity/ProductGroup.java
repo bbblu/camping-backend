@@ -1,9 +1,6 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ProductGroupListener;
 
@@ -16,10 +13,6 @@ import java.time.LocalDateTime;
  * @since 1.0.0
  */
 @Data
-@EqualsAndHashCode(exclude = {
-        "userByCreateAccount",
-        "userByLastModifyAccount"
-})
 @Entity
 @EntityListeners(ProductGroupListener.class)
 @Table(name = "product_group", schema = Config.DATABASE_NAME)
@@ -68,22 +61,12 @@ public class ProductGroup {
     private String coverImage;
 
     /**
-     * 城市名稱，如臺北市、宜蘭縣
+     * 城市編號
      *
-     * @see City#name
-     * @since 1.3.2
+     * @since 1.6.2
      */
-    @Column(name = "city_name", length = 20, nullable = false)
-    private String cityName;
-
-    /**
-     * 區名稱，如中正區、宜蘭市
-     *
-     * @see City#areaName
-     * @since 1.3.2
-     */
-    @Column(name = "city_area_name", length = 20, nullable = false)
-    private String cityAreaName;
+    @Column(name = "city_id", nullable = false)
+    private Integer cityId;
 
     /**
      * 租借價格
@@ -147,11 +130,10 @@ public class ProductGroup {
      * @see City
      * @since 1.3.2
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "city_name", referencedColumnName = "name", nullable = false, insertable = false, updatable = false),
-            @JoinColumn(name = "city_area_name", referencedColumnName = "area_name", nullable = false, insertable = false, updatable = false)
-    })
+    @JoinColumn(name = "city_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
     private City city;
 
     /**
@@ -160,6 +142,8 @@ public class ProductGroup {
      * @see User
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "create_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User userByCreateAccount;
@@ -170,6 +154,8 @@ public class ProductGroup {
      * @see User
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_modify_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User userByLastModifyAccount;
