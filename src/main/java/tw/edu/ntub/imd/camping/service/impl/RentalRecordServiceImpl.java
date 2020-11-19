@@ -12,6 +12,7 @@ import tw.edu.ntub.imd.camping.bean.RentalRecordIndexFilterBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.*;
+import tw.edu.ntub.imd.camping.databaseconfig.enumerate.NotificationType;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordCancelStatus;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.dto.CreditCard;
@@ -20,10 +21,12 @@ import tw.edu.ntub.imd.camping.service.RentalRecordService;
 import tw.edu.ntub.imd.camping.service.transformer.RentalDetailTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.RentalRecordIndexTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.RentalRecordTransformer;
+import tw.edu.ntub.imd.camping.util.DateUtils;
 import tw.edu.ntub.imd.camping.util.OwnerChecker;
 import tw.edu.ntub.imd.camping.util.TransactionUtils;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,6 +47,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     private final UserCommentDAO userCommentDAO;
     private final RentalRecordIndexTransformer indexTransformer;
     private final RentalRecordCheckLogDAO checkLogDAO;
+    private final NotificationDAO notificationDAO;
 
     public RentalRecordServiceImpl(
             RentalRecordDAO recordDAO,
@@ -59,7 +63,8 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             UserDAO userDAO,
             UserCommentDAO userCommentDAO,
             RentalRecordIndexTransformer indexTransformer,
-            RentalRecordCheckLogDAO checkLogDAO) {
+            RentalRecordCheckLogDAO checkLogDAO,
+            NotificationDAO notificationDAO) {
         super(recordDAO, transformer);
         this.recordDAO = recordDAO;
         this.transformer = transformer;
@@ -75,6 +80,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         this.userCommentDAO = userCommentDAO;
         this.indexTransformer = indexTransformer;
         this.checkLogDAO = checkLogDAO;
+        this.notificationDAO = notificationDAO;
     }
 
     @Override
@@ -87,6 +93,8 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         RentalRecord rentalRecord = transformer.transferToEntity(rentalRecordBean);
         RentalRecord saveResult = recordDAO.saveAndFlush(rentalRecord);
         saveDetail(saveResult.getId(), saveResult.getProductGroupId());
+        ProductGroup productGroup = productGroupDAO.findById(rentalRecord.getProductGroupId()).orElseThrow();
+        saveNotification(saveResult.getId(), productGroup.getCreateAccount(), NotificationType.RENTAL);
         return transformer.transferToBean(saveResult);
     }
 
@@ -97,6 +105,15 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
                 .peek(rentalDetail -> rentalDetail.setRecordId(recordId))
                 .collect(Collectors.toList())
         );
+    }
+
+    private void saveNotification(Integer recordId, String notifyAccount, NotificationType notificationType, Object... messageArgs) {
+        Notification notification = new Notification();
+        notification.setRentalRecordId(recordId);
+        notification.setType(notificationType);
+        notification.setUserAccount(notifyAccount);
+        notification.setContent(notificationType.getMessage(messageArgs));
+        notificationDAO.save(notification);
     }
 
     @Override
@@ -115,14 +132,20 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         if (StringUtils.isNotEquals(rentalRecord.getRenterAccount(), SecurityUtils.getLoginUserAccount())) {
             throw new NotRentalRecordRenterException(id, SecurityUtils.getLoginUserAccount());
         }
-        ProductGroup productGroup = rentalRecord.getProductGroupByProductGroupId();
-        int transactionId = transactionUtils.createTransaction(renterCreditCard, productGroup.getBankAccount(), productGroup.getPrice());
-        rentalRecord.setTransactionId(transactionId);
-        String creditCardId = rentalRecord.getRenterCreditCardId();
-        rentalRecord.setRenterCreditCardId("*".repeat(12).concat(StringUtils.mid(creditCardId, -4)));
-        saveStatusChangeLog(rentalRecord, RentalRecordStatus.NOT_PLACED, "已付款");
-        rentalRecord.setStatus(RentalRecordStatus.NOT_PLACED);
-        recordDAO.update(rentalRecord);
+        try {
+            ProductGroup productGroup = rentalRecord.getProductGroupByProductGroupId();
+            int transactionId = transactionUtils.createTransaction(renterCreditCard, productGroup.getBankAccount(), productGroup.getPrice());
+            rentalRecord.setTransactionId(transactionId);
+            String creditCardId = renterCreditCard.getCardId();
+            rentalRecord.setRenterCreditCardId("*".repeat(12).concat(StringUtils.mid(creditCardId, -4)));
+            saveStatusChangeLog(rentalRecord, RentalRecordStatus.NOT_PLACED, "已付款");
+            rentalRecord.setStatus(RentalRecordStatus.NOT_PLACED);
+            recordDAO.update(rentalRecord);
+            saveNotification(rentalRecord.getId(), rentalRecord.getRenterAccount(), NotificationType.PAYMENT_SUCCESS, rentalRecord.getId());
+        } catch (RuntimeException e) {
+            saveNotification(rentalRecord.getId(), rentalRecord.getRenterAccount(), NotificationType.PAYMENT_FAIL, rentalRecord.getId());
+            throw e;
+        }
     }
 
     @Override
@@ -137,7 +160,34 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         RentalRecordStatus status = rentalRecord.getStatus();
         saveStatusChangeLog(rentalRecord, status.next(), "原先狀態已完成");
         rentalRecord.setStatus(status.next());
-        recordDAO.save(rentalRecord);
+        recordDAO.saveAndFlush(rentalRecord);
+        switch (rentalRecord.getStatus()) {
+            case NOT_PICK_UP:
+                Date borrowEndDate = DateUtils.convertLocalDateTimeToDate(rentalRecord.getBorrowEndDate());
+                saveNotification(
+                        rentalRecord.getId(),
+                        rentalRecord.getRenterAccount(),
+                        NotificationType.PRODUCT_SERVICE,
+                        rentalRecord.getId(),
+                        borrowEndDate,
+                        borrowEndDate,
+                        borrowEndDate
+                );
+                break;
+            case NOT_RETRIEVE:
+                ProductGroup productGroup = rentalRecord.getProductGroupByProductGroupId();
+                Date returnDate = DateUtils.convertLocalDateTimeToDate(rentalRecord.getReturnDate().plusDays(7));
+                saveNotification(
+                        rentalRecord.getId(),
+                        productGroup.getCreateAccount(),
+                        NotificationType.PRODUCT_RETURNED,
+                        rentalRecord.getId(),
+                        returnDate,
+                        returnDate,
+                        returnDate
+                );
+                break;
+        }
         return rentalRecord.getStatus();
     }
 
@@ -225,6 +275,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             saveStatusChangeLog(rentalRecord, RentalRecordStatus.CANCEL, rentalRecordCancel.getCancelDetail());
             rentalRecord.setStatus(RentalRecordStatus.CANCEL);
             recordDAO.save(rentalRecord);
+            saveNotification(rentalRecordCancel.getRecordId(), rentalRecordCancel.getCreateAccount(), NotificationType.CANCEL_SUCCESS, rentalRecord.getId());
         });
     }
 
@@ -249,6 +300,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             saveStatusChangeLog(rentalRecord, RentalRecordStatus.NOT_PLACED, deniedDetail);
             rentalRecord.setStatus(RentalRecordStatus.NOT_PLACED);
             recordDAO.update(rentalRecord);
+            saveNotification(rentalRecordCancel.getRecordId(), rentalRecordCancel.getCreateAccount(), NotificationType.CANCEL_FAIL, rentalRecord.getId());
         });
     }
 
