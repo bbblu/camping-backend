@@ -2,29 +2,27 @@ package tw.edu.ntub.imd.camping.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Example;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import tw.edu.ntub.birc.common.util.StringUtils;
+import tw.edu.ntub.imd.camping.bean.ForgotPasswordBean;
 import tw.edu.ntub.imd.camping.bean.UserBadRecordBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.UserBadRecordDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.UserCommentDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.UserCompensateRecordDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.UserDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.User;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.UserCompensateRecord;
+import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.*;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.UserBadRecordType;
 import tw.edu.ntub.imd.camping.dto.BankAccount;
 import tw.edu.ntub.imd.camping.dto.CreditCard;
+import tw.edu.ntub.imd.camping.dto.Mail;
 import tw.edu.ntub.imd.camping.exception.DuplicateCreateException;
 import tw.edu.ntub.imd.camping.exception.InvalidOldPasswordException;
 import tw.edu.ntub.imd.camping.exception.NotAccountOwnerException;
 import tw.edu.ntub.imd.camping.exception.NotFoundException;
 import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.service.transformer.UserTransformer;
+import tw.edu.ntub.imd.camping.util.MailSender;
 import tw.edu.ntub.imd.camping.util.TransactionUtils;
 
 import java.time.LocalDateTime;
@@ -41,6 +39,8 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
     private final UserBadRecordDAO badRecordDAO;
     private final UserCommentDAO commentDAO;
     private final UserCompensateRecordDAO compensateRecordDAO;
+    private final MailSender mailSender;
+    private final ForgotPasswordTokenDAO forgotPasswordTokenDAO;
 
     @Autowired
     public UserServiceImpl(
@@ -50,7 +50,9 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
             TransactionUtils transactionUtils,
             UserBadRecordDAO badRecordDAO,
             UserCommentDAO commentDAO,
-            UserCompensateRecordDAO compensateRecordDAO) {
+            UserCompensateRecordDAO compensateRecordDAO,
+            MailSender mailSender,
+            ForgotPasswordTokenDAO forgotPasswordTokenDAO) {
         super(userDAO, transformer);
         this.userDAO = userDAO;
         this.transformer = transformer;
@@ -59,6 +61,8 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
         this.badRecordDAO = badRecordDAO;
         this.commentDAO = commentDAO;
         this.compensateRecordDAO = compensateRecordDAO;
+        this.mailSender = mailSender;
+        this.forgotPasswordTokenDAO = forgotPasswordTokenDAO;
     }
 
     @Override
@@ -138,5 +142,34 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
         compensateRecord.setTransactionId(transactionId);
         compensateRecord.setCompensateDate(LocalDateTime.now());
         compensateRecordDAO.update(compensateRecord);
+    }
+
+    @Override
+    public void forgotPassword(ForgotPasswordBean forgotPasswordBean) {
+        User user = transformer.transferForgotPasswordBeanToEntity(forgotPasswordBean);
+        if (userDAO.exists(Example.of(user))) {
+            ForgotPasswordToken token = new ForgotPasswordToken();
+            token.setUserAccount(user.getAccount());
+            ForgotPasswordToken saveResult = forgotPasswordTokenDAO.saveAndFlush(token);
+
+            Mail mail = new Mail("/mail/forgot_password");
+            mail.addSendTo(user.getEmail());
+            mail.setSubject("借借露 - 忘記密碼");
+            mail.addAttribute("token", saveResult);
+            mailSender.sendMail(mail);
+        } else {
+            throw new NotFoundException("無此使用者");
+        }
+    }
+
+    @Override
+    public void updatePasswordForForgotPassword(String token, String newPassword) {
+        ForgotPasswordToken forgotPasswordToken = forgotPasswordTokenDAO.findValidToken(token)
+                .orElseThrow(() -> new NotFoundException("沒有此驗證碼或驗證碼已過期"));
+        User user = forgotPasswordToken.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userDAO.updateAndFlush(user);
+        forgotPasswordToken.setEnable(false);
+        forgotPasswordTokenDAO.update(forgotPasswordToken);
     }
 }
