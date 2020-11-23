@@ -1,5 +1,6 @@
 package tw.edu.ntub.imd.camping.service;
 
+import tw.edu.ntub.imd.camping.bean.ForgotPasswordBean;
 import tw.edu.ntub.imd.camping.bean.UserBadRecordBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.dto.CreditCard;
@@ -16,4 +17,8 @@ public interface UserService extends BaseService<UserBean, String> {
     int getComment(String account);
 
     void compensate(String account, CreditCard creditCard);
+
+    void forgotPassword(ForgotPasswordBean forgotPasswordBean);
+
+    void updatePasswordForForgotPassword(String token, String newPassword);
 }

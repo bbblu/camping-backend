@@ -14,6 +14,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import tw.edu.ntub.birc.common.util.StringUtils;
+import tw.edu.ntub.imd.camping.bean.ForgotPasswordBean;
 import tw.edu.ntub.imd.camping.bean.UpdatePasswordBean;
 import tw.edu.ntub.imd.camping.bean.UserBadRecordBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
@@ -21,6 +23,7 @@ import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.UserBadRecordType;
 import tw.edu.ntub.imd.camping.dto.CreditCard;
+import tw.edu.ntub.imd.camping.exception.form.InvalidFormException;
 import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
@@ -252,6 +255,29 @@ public class UserController {
     public ResponseEntity<String> compensate(@Valid @RequestBody CreditCard creditCard) {
         userService.compensate(SecurityUtils.getLoginUserAccount(), creditCard);
         return ResponseEntityBuilder.buildSuccessMessage("已賠償成功");
+    }
+
+    @PostMapping(path = "/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordBean forgotPasswordBean, BindingResult bindingResult) {
+        BindingResultUtils.validate(bindingResult);
+        userService.forgotPassword(forgotPasswordBean);
+        return ResponseEntityBuilder.buildSuccessMessage("已寄送驗證信至您的信箱中，請前往信箱收信");
+    }
+
+    @PatchMapping(path = "/forgot-password/change")
+    public ResponseEntity<String> forgotPassword(
+            @RequestBody String requestBodyJsonString
+    ) {
+        ObjectData requestBody = new ObjectData(requestBodyJsonString);
+        String token = requestBody.getString("token");
+        String newPassword = requestBody.getString("newPassword");
+        if (StringUtils.isBlank(token)) {
+            throw new InvalidFormException("未填寫驗證碼");
+        } else if (StringUtils.isBlank(newPassword)) {
+            throw new InvalidFormException("未填寫新密碼");
+        }
+        userService.updatePasswordForForgotPassword(token, newPassword);
+        return ResponseEntityBuilder.buildSuccessMessage("密碼已修改完成");
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
