@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="tw" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>借借露 - 找不到頁面</title>
+
+  <link rel="stylesheet" href="../static/css/materialize.min.css" th:href="@{/static/css/materialize.min.css}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../static/css/main.css" th:href="@{/static/css/main.css}">
+  <link rel="stylesheet" href="../static/css/question-report.css" th:href="@{/static/css/question-report.css}">
+</head>
+
+<body>
+<nav>
+  <div class="nav-wrapper">
+    <a class="sidenav-trigger" href="#" data-target="slide-out">
+      <i class="material-icons">menu</i>
+    </a>
+
+    <a class="brand-logo right" href="#">
+      <i class="material-icons">account_circle</i>
+      <span class="account">admin</span>
+    </a>
+  </div>
+</nav>
+
+<ul id="slide-out" class="sidenav sidenav-fixed collection with-header">
+  <li class="collection-header">
+    <a class="home" href="#" th:href="@{/rental/manager}">
+      <img class="logo col" alt="logo" src="../static/images/logo.png" th:src="@{/static/images/logo.png}"/>
+      <span class="col">管理者頁面</span>
+    </a>
+  </li>
+
+  <li class="collection-item">
+    <a href="#" th:href="@{/problem-report/manager}">
+      <i class="material-icons">help</i>
+      <span>問題回報</span>
+    </a>
+  </li>
+  <li class="collection-item">
+    <a href="#" th:href="@{/rental/manager}">
+      <i class="material-icons">view_list</i>
+      <span>訂單管理</span>
+    </a>
+  </li>
+  <li class="collection-item">
+    <a href="#" th:href="@{/user/manager}">
+      <i class="material-icons">account_box</i>
+      <span>使用者管理</span>
+    </a>
+  </li>
+
+  <div class="divider"></div>
+
+  <li class="collection-item">
+    <a href="#">登出</a>
+  </li>
+</ul>
+
+<main class="container">
+  <h3 class="center">找不到此頁面</h3>
+</main>
+
+<script src="../static/js/materialize.min.js" th:src="@{/static/js/materialize.min.js}"></script>
+<script src="../static/js/sidenav.js" th:src="@{/static/js/sidenav.js}"></script>
+<script src="../static/js/modal.js" th:src="@{/static/js/modal.js}"></script>
+</body>
+
+</html>

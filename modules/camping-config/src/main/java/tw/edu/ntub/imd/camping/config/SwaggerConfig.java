@@ -165,4 +165,13 @@ public class SwaggerConfig {
                 .addOpenApiCustomiser(openApiCustomiser)
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi notificationApi(@Qualifier("defaultOpenApiCustomiser") OpenApiCustomiser openApiCustomiser) {
+        return GroupedOpenApi.builder()
+                .setGroup("通知 - Notification")
+                .pathsToMatch("/notification/**")
+                .addOpenApiCustomiser(openApiCustomiser)
+                .build();
+    }
 }

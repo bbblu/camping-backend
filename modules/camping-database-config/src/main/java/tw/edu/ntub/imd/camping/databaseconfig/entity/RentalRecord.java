@@ -46,13 +46,28 @@ public class RentalRecord {
     private Boolean enable;
 
     /**
-     * 狀態(0:取消/ 1: 未取貨/ 2:未歸還/ 3:已歸還/ 4: 已檢查)
+     * 狀態
+     *
+     * <ul>
+     *     <li>00 已取消</li>
+     *     <li>01 被退貨</li>
+     *     <li>02 已終止待領回</li>
+     *     <li>03 已終止且已領回</li>
+     *     <li>04 未同意</li>
+     *     <li>05 已同意待付款</li>
+     *     <li>06 已付款未寄放</li>
+     *     <li>07 已寄放未取貨</li>
+     *     <li>08 已取貨未歸還</li>
+     *     <li>01 已歸還未取回</li>
+     *     <li>10 已取回未評價</li>
+     *     <li>11 已評價</li>
+     * </ul>
      *
      * @see RentalRecordStatus
      * @since 1.0.0
      */
     @Enumerated
-    @Column(name = "status", length = 1, nullable = false)
+    @Column(name = "status", length = 2, nullable = false)
     private RentalRecordStatus status;
 
     /**
@@ -104,7 +119,23 @@ public class RentalRecord {
     private LocalDateTime borrowEndDate;
 
     /**
-     * 寄放日期
+     * 同意時間
+     *
+     * @since 1.6.1
+     */
+    @Column(name = "agree_date")
+    private LocalDateTime agreeDate;
+
+    /**
+     * 付款時間
+     *
+     * @since 1.6.1
+     */
+    @Column(name = "payment_date")
+    private LocalDateTime paymentDate;
+
+    /**
+     * 寄放時間
      *
      * @since 1.6.0
      */

@@ -8,6 +8,8 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode
 public class CityBean {
+    @Schema(description = "編號", example = "1")
+    private Integer id;
     @Schema(description = "城市名稱", example = "台北市")
     private String name;
     @Schema(description = "區域名稱", example = "中正區")

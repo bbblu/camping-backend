@@ -23,7 +23,6 @@ import tw.edu.ntub.imd.camping.service.CityService;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
-import tw.edu.ntub.imd.camping.util.json.array.ArrayData;
 import tw.edu.ntub.imd.camping.util.json.object.CollectionObjectData;
 import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 import tw.edu.ntub.imd.camping.validation.CreateProductGroup;
@@ -32,12 +31,10 @@ import tw.edu.ntub.imd.camping.validation.UpdateProductGroup;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -47,7 +44,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "/product-group")
 public class ProductGroupController {
-    private final DecimalFormat priceFormat = new DecimalFormat("$ #,###");
     private final ProductGroupService productGroupService;
     private final CityService cityService;
 
@@ -133,13 +129,12 @@ public class ProductGroupController {
                 .build();
     }
 
-    private void addCityToObjectData(Map<String, List<String>> cityMap, ObjectData data) {
-        ObjectData cityData = data.addObject("city");
-        ArrayData cityNameArray = cityData.addArray("nameArray");
-        ArrayData cityAreaNameArray = cityData.addArray("areaNameArray");
-        cityMap.forEach((name, areaNameList) -> {
-            cityNameArray.add(name);
-            cityAreaNameArray.addStringArray(areaNameList);
+    private void addCityToObjectData(List<CityBean> cityList, ObjectData data) {
+        CollectionObjectData collectionObjectData = data.createCollectionData();
+        collectionObjectData.add("cityArray", cityList, (cityData, cityBean) -> {
+            cityData.add("id", cityBean.getId());
+            cityData.add("name", cityBean.getName());
+            cityData.add("areaName", cityBean.getAreaName());
         });
     }
 
@@ -180,7 +175,7 @@ public class ProductGroupController {
             data.add("id", canBorrowProductGroup.getId());
             data.add("name", canBorrowProductGroup.getName());
             data.add("coverImage", canBorrowProductGroup.getCoverImage());
-            data.add("price", priceFormat.format(canBorrowProductGroup.getPrice()));
+            data.add("price", canBorrowProductGroup.getPrice());
             data.add("borrowStartDate", canBorrowProductGroup.getBorrowStartDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
             data.add("borrowEndDate", canBorrowProductGroup.getBorrowEndDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
             data.add("city", canBorrowProductGroup.getCity());
@@ -238,20 +233,7 @@ public class ProductGroupController {
         Optional<ProductGroupBean> optionalGroup = productGroupService.getById(id);
         if (optionalGroup.isPresent()) {
             ProductGroupBean productGroupBean = optionalGroup.get();
-            ObjectData data = new ObjectData();
-            data.add("name", productGroupBean.getName());
-            data.add("coverImage", productGroupBean.getCoverImage());
-            data.add("city", String.format("%s %s", productGroupBean.getCityName(), productGroupBean.getCityAreaName()));
-            data.add("price", priceFormat.format(productGroupBean.getPrice()));
-            data.add("borrowStartDate", productGroupBean.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
-            data.add("borrowEndDate", productGroupBean.getBorrowEndDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
-            UserBean createUser = productGroupBean.getCreateUser();
-            data.add("productOwnerName", createUser.getFullName());
-            data.add("contact", createUser.getEmail());
-            data.add("comment", productGroupBean.getComment());
-
-            CollectionObjectData collectionData = data.createCollectionData();
-            collectionData.add("productArray", productGroupBean.getProductArray(), this::addProductData);
+            ObjectData data = getGroupContentData(productGroupBean);
             return ResponseEntityBuilder.success()
                     .message("查詢成功")
                     .data(data)
@@ -259,6 +241,29 @@ public class ProductGroupController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    private ObjectData getGroupContentData(ProductGroupBean productGroupBean) {
+        ObjectData data = new ObjectData();
+        data.add("name", productGroupBean.getName());
+        data.add("coverImage", productGroupBean.getCoverImage());
+        CityBean city = productGroupBean.getCity();
+        ObjectData cityData = data.addObject("city");
+        cityData.add("id", city.getId());
+        cityData.add("name", city.getName());
+        cityData.add("areaName", city.getAreaName());
+        data.add("price", productGroupBean.getPrice());
+        data.add("borrowStartDate", productGroupBean.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
+        data.add("borrowEndDate", productGroupBean.getBorrowEndDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
+        UserBean createUser = productGroupBean.getCreateUser();
+        data.add("productOwnerAccount", createUser.getAccount());
+        data.add("productOwnerName", createUser.getFullName());
+        data.add("contact", createUser.getEmail());
+        data.add("comment", productGroupBean.getComment());
+
+        CollectionObjectData collectionData = data.createCollectionData();
+        collectionData.add("productArray", productGroupBean.getProductArray(), this::addProductData);
+        return data;
     }
 
     private void addProductData(ObjectData productData, ProductBean product) {
@@ -283,6 +288,42 @@ public class ProductGroupController {
     private void addProductImageData(ObjectData productImageData, ProductImageBean productImage) {
         productImageData.add("id", productImage.getId());
         productImageData.add("url", productImage.getUrl());
+    }
+
+    @Operation(
+            tags = "Product",
+            method = "GET",
+            summary = "查詢商品群組(編輯)",
+            description = "查詢商品群組(編輯)",
+            parameters = @Parameter(name = "id", description = "商品群組編號", example = "1"),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "查詢成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UpdateProductGroupContentSchema.class)
+                    )
+            )
+    )
+    @GetMapping(path = "/update/{id}")
+    public ResponseEntity<String> getUpdateGroupContent(
+            @PathVariable(name = "id")
+            @Positive(message = "群組編號不能為負數")
+                    int id
+    ) {
+        Optional<ProductGroupBean> optionalGroup = productGroupService.getById(id);
+        if (optionalGroup.isPresent()) {
+            ProductGroupBean productGroupBean = optionalGroup.get();
+            ObjectData data = getGroupContentData(productGroupBean);
+            data.add("price", productGroupBean.getPrice());
+            data.add("bankAccount", productGroupBean.getCreateUser().getBankAccount());
+            return ResponseEntityBuilder.success()
+                    .message("查詢成功")
+                    .data(data)
+                    .build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @Operation(
@@ -495,7 +536,7 @@ public class ProductGroupController {
         @ArraySchema(minItems = 1, maxItems = 10, uniqueItems = true, schema = @Schema(description = "商品類型"))
         private ProductTypeBean[] type;
         @Schema(description = "地點")
-        private CityController.SearchCitySchema city;
+        private CityBean city;
     }
 
     @Schema(name = "商品群組內容", description = "商品群組內容")
@@ -515,6 +556,70 @@ public class ProductGroupController {
         private String borrowEndDate;
         @Schema(description = "出租者帳號(暱稱)", example = "admin(管理員)")
         private String productOwnerName;
+        @Schema(description = "聯絡方式", example = "10646007@ntub.edu.tw")
+        private String contact;
+        @Schema(description = "評價", example = "2.5")
+        private Double comment;
+        @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(description = "商品陣列"))
+        private ProductContentSchema productArray;
+
+        @Hidden
+        @Data
+        private static class ProductContentSchema {
+            @Schema(description = "商品編號", minimum = "1", example = "6")
+            private Integer id;
+            @Schema(description = "商品類型", example = "睡帳")
+            private String type;
+            @Schema(description = "商品名稱", example = "OO牌睡帳")
+            private String name;
+            @Schema(description = "商品數量", example = "2")
+            private Integer count;
+            @Schema(description = "商品品牌", example = "OO")
+            private String brand;
+            @Schema(description = "商品外觀狀況", example = "300cm*300cm*250cm(高)")
+            private String appearance;
+            @Schema(description = "使用說明", example = "內附搭帳棚說明書")
+            private String useInformation;
+            @Schema(description = "損壞賠償", example = "缺少零件：1/$200、布劃破：$1000")
+            private String brokenCompensation;
+            @Schema(description = "備註", nullable = true, example = "附有教學影片，若在搭設過程有疑問，都可以聯絡我")
+            private String memo;
+            @ArraySchema(minItems = 0, schema = @Schema(description = "商品圖片陣列", implementation = ProductImageContentSchema.class))
+            private ProductImageContentSchema[] imageArray;
+
+            @Schema(name = "商品圖片", description = "商品圖片")
+            @Hidden
+            @Data
+            private static class ProductImageContentSchema {
+                @Schema(description = "商品圖片編號", example = "1")
+                private Integer id;
+                @Schema(description = "商品圖片網址", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
+                private String url;
+            }
+        }
+    }
+
+    @Schema(name = "商品群組內容(編輯)", description = "商品群組內容(編輯)")
+    @Data
+    private static class UpdateProductGroupContentSchema {
+        @Schema(description = "商品群組名稱", example = "便宜帳篷、桌椅三件套，限時特價$3990")
+        private String name;
+        @Schema(description = "城市", example = "台北市 中正區")
+        private String city;
+        @Schema(description = "封面圖", example = "https://www.ntub.edu.tw/var/file/0/1000/img/1595/logo.png")
+        private String coverImage;
+        @Schema(description = "租借價格", minimum = "0", example = "3990")
+        private int price;
+        @Schema(description = "可租借起始時間", example = "2020/08/14 15:00")
+        private String borrowStartDate;
+        @Schema(description = "可租借結束時間", example = "2020/08/20 00:00")
+        private String borrowEndDate;
+        @Schema(description = "出租者帳號", example = "admin")
+        private String productOwnerAccount;
+        @Schema(description = "出租者帳號(暱稱)", example = "admin(管理員)")
+        private String productOwnerName;
+        @Schema(description = "出租者銀行帳戶", example = "123456")
+        private String bankAccount;
         @Schema(description = "聯絡方式", example = "10646007@ntub.edu.tw")
         private String contact;
         @Schema(description = "評價", example = "2.5")

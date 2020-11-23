@@ -11,7 +11,6 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroupComment;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.view.CanBorrowProductGroup;
-import tw.edu.ntub.imd.camping.dto.BankAccount;
 import tw.edu.ntub.imd.camping.exception.DuplicateCommentException;
 import tw.edu.ntub.imd.camping.exception.InvalidCommentRangeException;
 import tw.edu.ntub.imd.camping.exception.NotFoundException;
@@ -22,6 +21,7 @@ import tw.edu.ntub.imd.camping.util.TransactionUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -71,7 +71,6 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     @Override
     public ProductGroupBean save(ProductGroupBean productGroupBean) {
         ProductGroup productGroup = transformer.transferToEntity(productGroupBean);
-        transactionUtils.createBankAccount(new BankAccount(productGroup.getBankAccount()));
         ProductGroup saveResult = groupDAO.saveAndFlush(productGroup);
         if (CollectionUtils.isNotEmpty(productGroupBean.getProductArray())) {
             saveProduct(saveResult.getId(), productGroupBean.getProductArray());
@@ -88,7 +87,11 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             ProductBean saveResult = saveResultList.get(i);
             ProductBean productBean = productBeanList.get(i);
             if (CollectionUtils.isNotEmpty(productBean.getImageArray())) {
-                saveImage(saveResult.getId(), productBean.getImageArray());
+                saveImage(saveResult.getId(), productBean.getImageArray()
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())
+                );
             }
         }
     }
@@ -125,13 +128,21 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             List<Product> productList = productDAO.findAllById(idList);
             List<Product> newProductList = JavaBeanUtils.copy(productBeanList, productList);
             productDAO.saveAll(newProductList);
+
+            Product firstProduct = productList.get(0);
+            Integer groupId = firstProduct.getGroupId();
+            productDAO.updateAll(productDAO.findByGroupIdAndIdNotIn(groupId, idList)
+                    .stream()
+                    .peek(product -> product.setEnable(false))
+                    .collect(Collectors.toList())
+            );
         }
     }
 
     @Override
     public void delete(Integer id) {
         OwnerChecker.checkIsProductGroupOwner(groupDAO, id);
-        List<Product> productList = productDAO.findByGroupId(id);
+        List<Product> productList = productDAO.findByGroupIdAndEnableIsTrue(id);
         List<Integer> productIdList = productList.stream().map(Product::getId).collect(Collectors.toList());
         imageDAO.updateEnableByProductIdList(productIdList, false);
         productDAO.updateEnableByGroupId(id, false);
@@ -157,7 +168,7 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         return canBorrowProductGroup ->
                 filterData.isBorrowStartDateNullOrBefore(canBorrowProductGroup.getBorrowStartDate().toLocalDate()) &&
                         filterData.isBorrowEndDateNullOrAfter(canBorrowProductGroup.getBorrowEndDate().toLocalDate()) &&
-                        filterData.isCityAreaNameNullOrEquals(canBorrowProductGroup.getCityAreaName()) &&
+                        filterData.isCityAreaNameNullOrEquals(canBorrowProductGroup.getCity().getAreaName()) &&
                         filterData.isTypeArrayNullOrAllMatchContains(canBorrowProductGroup.getProductType()) &&
                         filterData.isPriceNullOrBetween(canBorrowProductGroup.getPrice());
     }

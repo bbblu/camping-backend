@@ -11,13 +11,14 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import tw.edu.ntub.birc.common.util.MathUtils;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
 import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
+import tw.edu.ntub.imd.camping.exception.form.InvalidFormException;
 import tw.edu.ntub.imd.camping.service.RentalRecordService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
@@ -27,9 +28,8 @@ import tw.edu.ntub.imd.camping.util.json.object.SingleValueObjectData;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.text.DecimalFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -37,8 +37,17 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "/rental")
 public class RentalRecordController {
-    private static final DecimalFormat PRICE_FORMATTER = new DecimalFormat("$ #,###");
     private final RentalRecordService rentalRecordService;
+
+    @GetMapping(path = "/status")
+    public ResponseEntity<String> searchStatus() {
+        return ResponseEntityBuilder.success("查詢成功")
+                .data(List.of(RentalRecordStatus.values()), (data, status) -> {
+                    data.add("id", status.ordinal());
+                    data.add("name", status.toString());
+                })
+                .build();
+    }
 
     @Operation(
             tags = "Rental",
@@ -82,30 +91,33 @@ public class RentalRecordController {
         return ResponseEntityBuilder.success("查詢成功")
                 .data(
                         rentalRecordService.searchByRenterAccount(SecurityUtils.getLoginUserAccount()),
-                        this::addRentalRecordToData
+                        this::addRenterRentalRecordToData
                 )
                 .build();
+    }
+
+    private void addRenterRentalRecordToData(ObjectData rentalRecordData, RentalRecordBean rentalRecord) {
+        addRentalRecordToData(rentalRecordData, rentalRecord);
+        ProductGroupBean productGroup = rentalRecord.getProductGroup();
+        UserBean createUser = productGroup.getCreateUser();
+        ObjectData sellerData = rentalRecordData.addObject("user");
+        sellerData.add("nickName", createUser.getNickName());
+        sellerData.add("email", createUser.getEmail());
+        sellerData.add("cellPhone", createUser.getCellPhone());
     }
 
     private void addRentalRecordToData(ObjectData rentalRecordData, RentalRecordBean rentalRecord) {
         ProductGroupBean productGroup = rentalRecord.getProductGroup();
         rentalRecordData.add("id", rentalRecord.getId());
         rentalRecordData.add("status", rentalRecord.getStatus().ordinal());
+        rentalRecordData.add("productGroupId", rentalRecord.getProductGroupId());
         rentalRecordData.add("borrowStartDate", rentalRecord.getBorrowStartDate(), DateTimePattern.DEFAULT_DATE);
         rentalRecordData.add("borrowEndDate", rentalRecord.getBorrowEndDate(), DateTimePattern.DEFAULT_DATE);
-        rentalRecordData.add("borrowRange", String.format(
-                "%s-%s",
-                rentalRecord.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")),
-                rentalRecord.getBorrowEndDate().format(DateTimeFormatter.ofPattern("MM/dd"))
-        ));
         rentalRecordData.add("name", productGroup.getName());
         rentalRecordData.add("coverImage", productGroup.getCoverImage());
-        rentalRecordData.add("areaName", productGroup.getCityAreaName());
-        rentalRecordData.add("price", PRICE_FORMATTER.format(productGroup.getPrice()));
-        UserBean createUser = productGroup.getCreateUser();
-        ObjectData sellerData = rentalRecordData.addObject("seller");
-        sellerData.add("nickName", createUser.getNickName());
-        sellerData.add("email", createUser.getEmail());
+        CityBean city = productGroup.getCity();
+        rentalRecordData.add("areaName", city.getAreaName());
+        rentalRecordData.add("price", productGroup.getPrice());
         rentalRecordData.add("rentalDate", rentalRecord.getRentalDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
 
         CollectionObjectData collectionObjectData = rentalRecordData.createCollectionData();
@@ -145,132 +157,18 @@ public class RentalRecordController {
         return ResponseEntityBuilder.success("查詢成功")
                 .data(
                         rentalRecordService.searchByProductGroupCreateAccount(SecurityUtils.getLoginUserAccount()),
-                        this::addRentalRecordToData
+                        this::addProductOwnerRentalRecordToData
                 )
                 .build();
     }
 
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "更新租借紀錄狀態",
-            description = "更新租借紀錄狀態至下一階段",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1"),
-            responses = @ApiResponse(
-                    responseCode = "200",
-                    description = "更新成功"
-            )
-    )
-    @PatchMapping(path = "/{id}/status/next")
-    public ResponseEntity<String> updateStatusToNext(@PathVariable @Positive(message = "id - 應大於0") int id) {
-        rentalRecordService.updateStatusToNext(id);
-        return ResponseEntityBuilder.buildSuccessMessage("更新成功");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "出租方拒絕交易",
-            description = "出租方拒絕交易",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
-    )
-    @PatchMapping(path = "/{id}/denied")
-    public ResponseEntity<String> deniedTransaction(
-            @PathVariable int id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(schema = @Schema(implementation = CancelDetail.class))
-            ) @RequestBody String requestBodyJsonString) {
-        ObjectData requestBody = new ObjectData(requestBodyJsonString);
-        rentalRecordService.deniedTransaction(id, requestBody.getString("cancelDetail"));
-        return ResponseEntityBuilder.buildSuccessMessage("拒絕交易成功");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "POST",
-            summary = "取消租借紀錄",
-            description = "請求對方取消租借",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
-    )
-    @PostMapping(path = "/{id}/cancel")
-    public ResponseEntity<String> requestCancelRecord(
-            @PathVariable @Positive(message = "id - 應大於0") int id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(schema = @Schema(implementation = CancelDetail.class))
-            ) @RequestBody String requestBodyJsonString
-    ) {
-        ObjectData requestBody = new ObjectData(requestBodyJsonString);
-        rentalRecordService.requestCancelRecord(id, requestBody.getString("cancelDetail"));
-        return ResponseEntityBuilder.buildSuccessMessage("請求取消成功，等待對方回應");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "拒絕取消租借紀錄",
-            description = "拒絕取消租借",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
-    )
-    @PatchMapping(path = "/{id}/cancel/denied")
-    public ResponseEntity<String> deniedCancel(
-            @PathVariable @Positive(message = "id - 應大於0") int id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(schema = @Schema(implementation = DeniedCancelDetail.class))
-            ) @RequestBody String requestBodyJsonString) {
-        ObjectData requestBody = new ObjectData(requestBodyJsonString);
-        rentalRecordService.deniedCancel(id, requestBody.getString("deniedDetail"));
-        return ResponseEntityBuilder.buildSuccessMessage("成功拒絕");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "同意取消租借紀錄",
-            description = "同意取消租借",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
-    )
-    @PatchMapping(path = "/{id}/cancel/agree")
-    public ResponseEntity<String> agreeCancel(@PathVariable @Positive(message = "id - 應大於0") int id) {
-        rentalRecordService.agreeCancel(id);
-        return ResponseEntityBuilder.buildSuccessMessage("已同意對方的取消請求");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "申請退貨已取貨商品",
-            description = "申請退貨已取貨商品",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
-    )
-    @PatchMapping(path = "/{id}/returned")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Manager')")
-    public ResponseEntity<String> beReturned(
-            @PathVariable @Positive(message = "id - 應大於0") int id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(schema = @Schema(implementation = BeReturnedDescription.class))
-            ) @RequestBody String requestBodyJsonString) {
-        ObjectData requestBody = new ObjectData(requestBodyJsonString);
-        rentalRecordService.unexpectedStatusChange(id, requestBody.getString("description"), RentalRecordStatus.BE_RETURNED);
-        return ResponseEntityBuilder.buildSuccessMessage("申請退貨完成");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "申請求償",
-            description = "申請求償",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
-    )
-    @PatchMapping(path = "/{id}/claim")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Manager')")
-    public ResponseEntity<String> beClaim(
-            @PathVariable @Positive(message = "id - 應大於0") int id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(schema = @Schema(implementation = BeClaimDescription.class))
-            ) @RequestBody String requestBodyJsonString) {
-        ObjectData requestBody = new ObjectData(requestBodyJsonString);
-        rentalRecordService.unexpectedStatusChange(id, requestBody.getString("description"), RentalRecordStatus.BE_CLAIM);
-        return ResponseEntityBuilder.buildSuccessMessage("申請求償完成");
+    private void addProductOwnerRentalRecordToData(ObjectData rentalRecordData, RentalRecordBean rentalRecord) {
+        addRentalRecordToData(rentalRecordData, rentalRecord);
+        UserBean renter = rentalRecord.getRenter();
+        ObjectData sellerData = rentalRecordData.addObject("user");
+        sellerData.add("nickName", renter.getNickName());
+        sellerData.add("email", renter.getEmail());
+        sellerData.add("cellPhone", renter.getCellPhone());
     }
 
     @Operation(
@@ -293,6 +191,35 @@ public class RentalRecordController {
                 rentalRecordService.getChangeLogDescription(id, RentalRecordStatus.values()[status])
         );
         return ResponseEntityBuilder.success().message("查詢成功").data(data).build();
+    }
+
+    @Operation(
+            tags = "Rental",
+            method = "POST",
+            summary = "評價交易",
+            description = "評價交易，若登入者為此交易的買方，則會評價借方，反之亦然，若雙方都評價完成，會修改租借紀錄狀態至未評價",
+            parameters = @Parameter(name = "id", description = "交易編號", example = "1")
+    )
+    @PostMapping(path = "/{id}/comment")
+    public ResponseEntity<String> comment(
+            @PathVariable @Positive(message = "id - 應大於0") int id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserCommentSchema.class)
+                    )
+            ) @RequestBody String requestBodyJsonString
+    ) {
+        ObjectData requestBody = new ObjectData(requestBodyJsonString);
+        Integer comment = requestBody.getInt("comment");
+        if (comment == null) {
+            throw new InvalidFormException("評價分數 - 未填寫");
+        } else if (MathUtils.isNotInRange(comment, 0, 5)) {
+            throw new InvalidFormException("評價分數 - 應介於0 ~ 5之間");
+        } else {
+            rentalRecordService.saveComment(id, comment);
+            return ResponseEntityBuilder.buildSuccessMessage("評價成功");
+        }
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
@@ -327,8 +254,8 @@ public class RentalRecordController {
         private String areaName;
         @Schema(description = "租借價格", example = "$ 3,990")
         private String price;
-        @Schema(description = "賣方")
-        private User seller;
+        @Schema(description = "賣方(若查詢租借紀錄)、買方(若查詢出租紀錄)")
+        private User user;
         @Schema(description = "賣方聯絡方式", example = "LineId : 1234")
         private String contact;
         @Schema(description = "租借日期", example = "2020/08/28 15:03")
@@ -336,13 +263,15 @@ public class RentalRecordController {
         @ArraySchema(minItems = 1, uniqueItems = true, schema = @Schema(implementation = Detail.class))
         private Detail[] detailArray;
 
-        @Schema(name = "查詢租借紀錄 - 賣方", description = "查詢租借紀錄的回傳資料中的seller")
+        @Schema(name = "查詢租借紀錄 - 賣方", description = "查詢租借紀錄的回傳資料中的user")
         @Data
         private static class User {
             @Schema(description = "暱稱", example = "煞氣a小明")
             private String nickName;
             @Schema(description = "信箱", example = "10646007@ntub.edu.tw")
             private String email;
+            @Schema(description = "手機", example = "0912345678")
+            private String cellPhone;
         }
 
         @Schema(name = "查詢租借紀錄 - 詳細內容", description = "查詢租借紀錄的回傳資料中的detailArray")
@@ -369,31 +298,10 @@ public class RentalRecordController {
         }
     }
 
-    @Schema(name = "取消原因", description = "取消租借時的傳遞資料")
+    @Schema(name = "使用者評價資料", description = "使用者評價資料")
     @Data
-    private static class CancelDetail {
-        @Schema(description = "取消原因", example = "那天沒空")
-        private String cancelDetail;
-    }
-
-    @Schema(name = "拒絕取消原因", description = "拒絕取消租借時的傳遞資料")
-    @Data
-    private static class DeniedCancelDetail {
-        @Schema(description = "拒絕取消原因", example = "已出貨")
-        private String deniedDetail;
-    }
-
-    @Schema(name = "申請退貨原因", description = "申請退貨時的傳遞資料")
-    @Data
-    private static class BeReturnedDescription {
-        @Schema(description = "申請退貨原因", example = "有瑕疵")
-        private String description;
-    }
-
-    @Schema(name = "申請求償原因", description = "申請求償時的傳遞資料")
-    @Data
-    private static class BeClaimDescription {
-        @Schema(description = "申請求償原因", example = "商品損壞")
-        private String description;
+    private static class UserCommentSchema {
+        @Schema(description = "評價分數", minimum = "1", maximum = "5")
+        private Byte comment;
     }
 }

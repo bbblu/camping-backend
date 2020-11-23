@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="tw" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>借借露 - 管理者頁面</title>
+
+  <link rel="stylesheet" href="../../static/css/materialize.min.css" th:href="@{/static/css/materialize.min.css}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../../static/css/main.css" th:href="@{/static/css/main.css}">
+  <link rel="stylesheet" href="../../static/css/question-report.css" th:href="@{/static/css/question-report.css}">
+</head>
+
+<body>
+<nav>
+  <div class="nav-wrapper">
+    <a class="sidenav-trigger" href="#" data-target="slide-out">
+      <i class="material-icons">menu</i>
+    </a>
+
+    <a class="brand-logo right" href="#">
+      <i class="material-icons">account_circle</i>
+      <span class="account" th:text="${#authorization.authentication.principal}">帳號</span>
+    </a>
+  </div>
+</nav>
+
+<ul id="slide-out" class="sidenav sidenav-fixed collection with-header">
+  <li class="collection-header">
+    <a class="home" href="#" th:href="@{/rental/manager}">
+      <img class="logo col" alt="logo" src="../../static/images/logo.png" th:src="@{/static/images/logo.png}"/>
+      <span class="col">管理者頁面</span>
+    </a>
+  </li>
+
+  <li class="collection-item">
+    <a href="#" th:href="@{/problem-report/manager}">
+      <i class="material-icons">help</i>
+      <span>問題回報</span>
+    </a>
+  </li>
+  <li class="collection-item">
+    <a href="#" th:href="@{/rental/manager}">
+      <i class="material-icons">view_list</i>
+      <span>訂單管理</span>
+    </a>
+  </li>
+  <li class="collection-item">
+    <a href="#" th:href="@{/user/manager}">
+      <i class="material-icons">account_box</i>
+      <span>使用者管理</span>
+    </a>
+  </li>
+
+  <div class="divider"></div>
+
+  <li class="collection-item">
+    <a href="#">登出</a>
+  </li>
+</ul>
+
+<main class="container">
+  <table class="striped centered">
+    <thead>
+    <tr>
+      <th>標題</th>
+      <th>日期</th>
+      <th>帳號</th>
+      <th>詳細內容</th>
+    </tr>
+    </thead>
+
+    <tbody id="problemReportTable" th:remove="body">
+    <tr>
+      <td>這是標題</td>
+      <td>2020/11/05</td>
+      <td>test</td>
+      <td>
+        <button class="waves-effect waves-light btn modal-trigger"
+                data-target="modal1">
+          詳細內容
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td>這是標題</td>
+      <td>2020/11/05</td>
+      <td>test</td>
+      <td>
+        <button class="waves-effect waves-light btn modal-trigger"
+                data-target="modal1">
+          詳細內容
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td>這是標題</td>
+      <td>2020/11/05</td>
+      <td>test</td>
+      <td>
+        <button class="waves-effect waves-light btn modal-trigger"
+                data-target="modal1">
+          詳細內容
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td>這是標題</td>
+      <td>2020/11/05</td>
+      <td>test</td>
+      <td>
+        <button class="waves-effect waves-light btn modal-trigger"
+                data-target="modal1">
+          詳細內容
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td>這是標題</td>
+      <td>2020/11/05</td>
+      <td>test</td>
+      <td>
+        <button class="waves-effect waves-light btn modal-trigger"
+                data-target="modal1">
+          詳細內容
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td>這是標題</td>
+      <td>2020/11/05</td>
+      <td>test</td>
+      <td>
+        <button class="waves-effect waves-light btn modal-trigger"
+                data-target="modal1">
+          詳細內容
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <ul class="pagination" id="pagination">
+    <li class="disabled"><a href="#"><i class="material-icons">chevron_left</i></a></li>
+
+    <li class="waves-effect"><a href="#"><i class="material-icons">chevron_right</i></a></li>
+  </ul>
+</main>
+
+<div id="modal1" class="modal">
+  <div class="modal-content">
+    <h4 id="modalTitle">這是標題</h4>
+    <div class="sub-title">
+      <span id="modalEmail">test</span>
+      <span id="modalDate">2020/11/05</span>
+    </div>
+    <p id="modalContent">這是問題</p>
+
+    <form>
+      <div class="input-field">
+        <textarea id="handleResult" class="materialize-textarea"></textarea>
+        <label for="handleResult">回覆內容</label>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <button class="waves-effect waves-light btn-flat modal-close">關閉</button>
+    <button class="waves-effect waves-light btn-flat reply" id="modalSubmit"
+            onclick="handle(dataset.index, dataset.id, document.querySelector('#handleResult').value)">回覆
+    </button>
+  </div>
+</div>
+
+<script src="../../static/js/materialize.min.js" th:src="@{/static/js/materialize.min.js}"></script>
+<script src="../../static/js/sidenav.js" th:src="@{/static/js/sidenav.js}"></script>
+<script src="../../static/js/modal.js" th:src="@{/static/js/modal.js}"></script>
+<script src="../../static/js/pagination.js" th:src="@{/static/js/pagination.js}"></script>
+<script th:inline="javascript">
+    let table;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        M.Modal.init(document.querySelectorAll(".modal"));
+        M.textareaAutoResize(document.querySelector("#handleResult"));
+        table = new Table("problemReportTable", /*[[${problemReportList}]]*/[], function (index, problemReport) {
+            return `
+            <tr>
+                <td>${problemReport.reportTitle}</td>
+                <td>${problemReport.reportDate.replace("T", " ")}</td>
+                <td>${problemReport.reporterEmail}</td>
+                <td>
+                    <button class="waves-effect waves-light btn"
+                        data-index="${index}"
+                        data-id="${problemReport.id}"
+                        data-title="${problemReport.reportTitle}"
+                        data-date="${problemReport.reportDate.replace("T", " ")}"
+                        data-email="${problemReport.reporterEmail}"
+                        data-content="${problemReport.reportContent}"
+                        data-handle-result="${problemReport.handleResult}"
+                        onclick="openModal(this)">
+                      詳細內容
+                    </button>
+                </td>
+            </tr>
+            `;
+        }, "pagination", 10);
+        table.reload();
+    });
+
+    function openModal(button) {
+        const dataset = button.dataset;
+        document.querySelector("#modalTitle").textContent = dataset.title;
+        document.querySelector("#modalEmail").textContent = dataset.email;
+        document.querySelector("#modalDate").textContent = dataset.date;
+        document.querySelector("#modalContent").textContent = dataset.content;
+        document.querySelector("#modalSubmit").setAttribute("data-index", dataset.index);
+        document.querySelector("#modalSubmit").setAttribute("data-id", dataset.id);
+        if (dataset.handleResult && dataset.handleResult !== "null") {
+            const handleResultDom = document.querySelector("#handleResult");
+            handleResultDom.disabled = true;
+            handleResultDom.readOnly = true;
+            handleResultDom.textContent = dataset.handleResult;
+            M.updateTextFields();
+            document.querySelector("#modalSubmit").disabled = true;
+        }
+        const modal = M.Modal.getInstance(document.querySelector("#modal1"));
+        modal.open();
+    }
+
+    function handle(index, id, handleResult) {
+        const url = /*[[@{/problem-report/#id#/handle/result}]]*/"";
+        fetch(url.replace("#id#", id), {
+            method: "PATCH",
+            body: JSON.stringify({
+                handleResult
+            }),
+            headers: {
+                "Content-Type": "application/json;charset=UTF-8"
+            }
+        }).then(response => response.json())
+            .then(response => {
+                if (response.result) {
+                    table.data[index].handleResult = handleResult;
+                    table.reload();
+                } else {
+                    alert(response.message);
+                }
+                const modal = M.Modal.getInstance(document.querySelector("#modal1"));
+                modal.close();
+            });
+    }
+</script>
+</body>
+
+</html>

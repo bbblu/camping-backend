@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tw" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>借借露 - 管理者頁面</title>
+
+  <link rel="stylesheet" href="../../static/css/materialize.min.css" th:href="@{/static/css/materialize.min.css}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../../static/css/main.css" th:href="@{/static/css/main.css}">
+  <link rel="stylesheet" href="../../static/css/question-report.css" th:href="@{/static/css/question-report.css}">
+</head>
+
+<body>
+<nav>
+  <div class="nav-wrapper">
+    <a class="sidenav-trigger" href="#" data-target="slide-out">
+      <i class="material-icons">menu</i>
+    </a>
+
+    <a class="brand-logo right" href="#">
+      <i class="material-icons">account_circle</i>
+      <span class="account" th:text="${#authorization.authentication.principal}">帳號</span>
+    </a>
+  </div>
+</nav>
+
+<ul id="slide-out" class="sidenav sidenav-fixed collection with-header">
+  <li class="collection-header">
+    <a class="home" href="#" th:href="@{/rental/manager}">
+      <img class="logo col" alt="logo" src="../../static/images/logo.png" th:src="@{/static/images/logo.png}"/>
+      <span class="col">管理者頁面</span>
+    </a>
+  </li>
+
+  <li class="collection-item">
+    <a href="#" th:href="@{/problem-report/manager}">
+      <i class="material-icons">help</i>
+      <span>問題回報</span>
+    </a>
+  </li>
+  <li class="collection-item">
+    <a href="#" th:href="@{/rental/manager}">
+      <i class="material-icons">view_list</i>
+      <span>訂單管理</span>
+    </a>
+  </li>
+  <li class="collection-item">
+    <a href="#" th:href="@{/user/manager}">
+      <i class="material-icons">account_box</i>
+      <span>使用者管理</span>
+    </a>
+  </li>
+
+  <div class="divider"></div>
+
+  <li class="collection-item">
+    <a href="#">登出</a>
+  </li>
+</ul>
+
+<main class="container">
+  <table class="striped centered">
+    <thead>
+    <tr>
+      <th>帳號</th>
+      <th>暱稱</th>
+      <th>性別</th>
+      <th>動作</th>
+    </tr>
+    </thead>
+
+    <tbody id="userTable" th:remove="body">
+    <tr>
+      <td>admin</td>
+      <td>系統管理員</td>
+      <td>男</td>
+      <td>
+        <button class="waves-effect waves-light btn modal-trigger"
+                data-target="modal1">
+          禁用
+        </button>
+        <button class="waves-effect waves-light btn modal-trigger"
+                data-target="modal1">
+          啟用
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <ul class="pagination" id="pagination">
+    <li class="disabled"><a href="#"><i class="material-icons">chevron_left</i></a></li>
+
+    <li class="waves-effect"><a href="#"><i class="material-icons">chevron_right</i></a></li>
+  </ul>
+</main>
+
+<script src="../../static/js/materialize.min.js" th:src="@{/static/js/materialize.min.js}"></script>
+<script src="../../static/js/sidenav.js" th:src="@{/static/js/sidenav.js}"></script>
+<script src="../../static/js/modal.js" th:src="@{/static/js/modal.js}"></script>
+<script src="../../static/js/pagination.js" th:src="@{/static/js/pagination.js}"></script>
+<script th:inline="javascript">
+    let table;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        table = new Table("userTable", /*[[${userList}]]*/[], function (index, user) {
+            const getOperationHtml = user => {
+                if (user.enable) {
+                    return `
+                        <button class="waves-effect waves-light btn" onclick="disable(${table.data.indexOf(user)}, '${user.account}')">
+                          禁用
+                        </button>
+                    `;
+                } else {
+                    return `
+                        <button class="waves-effect waves-light btn" onclick="enable(${table.data.indexOf(user)}, '${user.account}')">
+                          啟用
+                        </button>
+                    `;
+                }
+            };
+            return `
+            <tr>
+              <td>${user.account}</td>
+              <td>${user.nickName}</td>
+              <td>${user.gender}</td>
+              <td>${getOperationHtml(user)}</td>
+            </tr>
+            `;
+        }, "pagination", 10);
+        table.reload();
+    });
+
+    function enable(index, account) {
+        send(index, /*[[@{/user/#account#/enable}]]*/"", account);
+    }
+
+    function send(index, url, account) {
+        fetch(url.replace("#account#", account), {
+            method: "PATCH"
+        }).then(response => response.json())
+            .then(response => {
+                table.data[index].enable = !table.data[index].enable;
+                table.reload();
+                alert(response.message);
+            })
+    }
+
+    function disable(index, account) {
+        send(index, /*[[@{/user/#account#/disable}]]*/"", account);
+    }
+</script>
+</body>
+
+</html>

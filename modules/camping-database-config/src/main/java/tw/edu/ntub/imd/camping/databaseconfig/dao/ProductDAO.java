@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface ProductDAO extends BaseDAO<Product, Integer> {
-    List<Product> findByGroupId(Integer groupId);
+    List<Product> findByGroupIdAndEnableIsTrue(Integer groupId);
 
     @Modifying
     @Query("UPDATE Product p SET p.enable = :enable WHERE p.groupId = :groupId")
@@ -21,4 +21,6 @@ public interface ProductDAO extends BaseDAO<Product, Integer> {
     void updateEnableById(@Param("id") Integer id, @Param("enable") boolean enable);
 
     boolean existsByIdInAndProductGroupByGroupId_CreateAccount(List<Integer> idList, String groupCreateAccount);
+
+    List<Product> findByGroupIdAndIdNotIn(Integer groupId, List<Integer> idList);
 }

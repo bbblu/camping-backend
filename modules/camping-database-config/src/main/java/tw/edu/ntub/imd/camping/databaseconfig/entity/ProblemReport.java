@@ -66,6 +66,14 @@ public class ProblemReport {
     private LocalDateTime reportDate;
 
     /**
+     * 回報主題
+     *
+     * @since 1.6.1
+     */
+    @Column(name = "report_title", length = 50, nullable = false)
+    private String reportTitle;
+
+    /**
      * 回報內容
      *
      * @since 1.4.0

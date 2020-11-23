@@ -7,11 +7,11 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import tw.edu.ntub.birc.common.annotation.AliasName;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
-import tw.edu.ntub.imd.camping.dto.CreditCard;
 
-import javax.validation.Valid;
 import javax.validation.constraints.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,10 +41,10 @@ public class RentalRecordBean {
     @Null(message = "renterAccount - 不得填寫")
     private String renterAccount;
 
-    @Schema(description = "租借者信用卡資料")
-    @NotNull(message = "租借者信用卡資料 - 未填寫")
-    @Valid
-    private CreditCard renterCreditCard;
+    @Hidden
+    @Null(message = "renter - 不得填寫")
+    @AliasName("userByRenterAccount")
+    private UserBean renter;
 
     @Hidden
     @Null(message = "rentalDate - 不得填寫")
@@ -62,6 +62,21 @@ public class RentalRecordBean {
 
     @Hidden
     @JsonIgnore
+    @Null(message = "agreeDate - 不得填寫")
+    private LocalDateTime agreeDate;
+
+    @Hidden
+    @JsonIgnore
+    @Null(message = "paymentDate - 不得填寫")
+    private LocalDateTime paymentDate;
+
+    @Hidden
+    @JsonIgnore
+    @Null(message = "placedDate - 不得填寫")
+    private LocalDateTime placedDate;
+
+    @Hidden
+    @JsonIgnore
     @Null(message = "pickDate - 不得填寫")
     private LocalDateTime pickDate;
 
@@ -72,12 +87,8 @@ public class RentalRecordBean {
 
     @Hidden
     @JsonIgnore
-    @Null(message = "checkDate - 不得填寫")
-    private LocalDateTime checkDate;
-
-    @Hidden
-    @Null(message = "checkResult - 不得填寫")
-    private String checkResult;
+    @Null(message = "backDate - 不得填寫")
+    private LocalDateTime backDate;
 
     @Hidden
     @JsonIgnore
@@ -104,6 +115,16 @@ public class RentalRecordBean {
     private boolean isBorrowStartDateAfterOrEqualEndDate() {
         if (borrowStartDate != null && borrowEndDate != null) {
             return borrowStartDate.isEqual(borrowEndDate) || borrowStartDate.isBefore(borrowEndDate);
+        } else {
+            return true;
+        }
+    }
+
+    @Hidden
+    @AssertTrue(message = "預計租借起始日期應選擇七天以後的日期")
+    private boolean isBorrowStartDateAfterCurrentDateSixDay() {
+        if (borrowStartDate != null) {
+            return borrowStartDate.toLocalDate().isAfter(LocalDate.now().plusDays(6));
         } else {
             return true;
         }

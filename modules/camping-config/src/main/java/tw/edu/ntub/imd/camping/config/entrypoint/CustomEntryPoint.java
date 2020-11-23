@@ -15,14 +15,19 @@ public class CustomEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         authException.printStackTrace();
-        ObjectMapper mapper = new ObjectMapper();
-        ResponseUtils.response(
-                response,
-                401,
-                false,
-                "User - NotLogin",
-                "您尚未登入，請登入後再試一次。",
-                request.getRequestURI().endsWith("search") ? mapper.createArrayNode() : mapper.createObjectNode()
-        );
+        String contentType = request.getContentType();
+        if (contentType != null && contentType.startsWith("application/json")) {
+            ObjectMapper mapper = new ObjectMapper();
+            ResponseUtils.response(
+                    response,
+                    401,
+                    false,
+                    "User - NotLogin",
+                    "您尚未登入，請登入後再試一次。",
+                    request.getRequestURI().endsWith("search") ? mapper.createArrayNode() : mapper.createObjectNode()
+            );
+        } else {
+            response.sendRedirect(request.getContextPath() + "/");
+        }
     }
 }

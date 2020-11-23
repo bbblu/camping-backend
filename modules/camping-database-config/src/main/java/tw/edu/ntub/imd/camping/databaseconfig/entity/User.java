@@ -63,6 +63,15 @@ public class User implements Persistable<String> {
     private Boolean enable;
 
     /**
+     * 是否鎖定(0: 未鎖定/ 1: 已鎖定)
+     *
+     * @since 1.6.1
+     */
+    @Getter(AccessLevel.NONE)
+    @Column(name = "locked", nullable = false)
+    private Boolean locked;
+
+    /**
      * 露營經驗(0: 新手/ 1: 有過幾次經驗)
      *
      * @see Experience
@@ -139,6 +148,14 @@ public class User implements Persistable<String> {
     private LocalDate birthday;
 
     /**
+     * 匯款帳戶
+     *
+     * @since 1.7.0
+     */
+    @Column(name = "bank_account", length = 16, nullable = false)
+    private String bankAccount;
+
+    /**
      * 建立時間
      *
      * @since 1.0.0
@@ -210,6 +227,15 @@ public class User implements Persistable<String> {
      */
     public Boolean isEnable() {
         return enable;
+    }
+
+    /**
+     * 是否鎖定(0: 未鎖定/ 1: 已鎖定)
+     *
+     * @since 1.6.1
+     */
+    public Boolean isLocked() {
+        return locked;
     }
 
     public boolean isManager() {

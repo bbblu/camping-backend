@@ -46,6 +46,14 @@ public class ProblemReportBean {
     }, message = "reportDate - 不得填寫")
     private LocalDateTime reportDate;
 
+    @Schema(description = "回報主題", example = "上架商品")
+    @NotBlank(groups = CreateProblemReport.class, message = "回報主題 - 未填寫")
+    @Size(groups = {
+            CreateProblemReport.class,
+            HandleProblemReport.class
+    }, max = 50, message = "回報主題 - 輸入字數大於{max}個字")
+    private String reportTitle;
+
     @Schema(description = "回報內容", example = "無法上架商品")
     @NotBlank(groups = {
             CreateProblemReport.class,

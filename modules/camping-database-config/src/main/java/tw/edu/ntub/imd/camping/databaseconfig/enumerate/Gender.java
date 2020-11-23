@@ -1,5 +1,7 @@
 package tw.edu.ntub.imd.camping.databaseconfig.enumerate;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * 使用者性別(0: 男/ 1: 女/ 2: 未提供)
  *
@@ -37,6 +39,7 @@ public enum Gender {
      *
      * @since 1.0.0
      */
+    @JsonValue
     public final String name;
 
     Gender(String id, String name) {

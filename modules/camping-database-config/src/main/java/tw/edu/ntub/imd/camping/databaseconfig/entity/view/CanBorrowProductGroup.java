@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Immutable;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.City;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 
 import javax.persistence.*;
@@ -72,30 +73,18 @@ public class CanBorrowProductGroup {
     /**
      * 城市名稱 + ' ' + 區域名稱
      *
-     * @see tw.edu.ntub.imd.camping.databaseconfig.entity.City#name
-     * @see tw.edu.ntub.imd.camping.databaseconfig.entity.City#areaName
      * @since 1.3.3
      */
     @Column(name = "city", length = 41, nullable = false)
-    private String city;
-
-    /**
-     * 城市名稱，如臺北市、宜蘭縣
-     *
-     * @see tw.edu.ntub.imd.camping.databaseconfig.entity.City#name
-     * @since 1.3.3
-     */
-    @Column(name = "city_name", length = 20, nullable = false)
     private String cityName;
 
     /**
-     * 區名稱，如中正區、宜蘭市
+     * 城市編號
      *
-     * @see tw.edu.ntub.imd.camping.databaseconfig.entity.City#areaName
-     * @since 1.3.3
+     * @since 1.6.3
      */
-    @Column(name = "city_area_name", length = 20, nullable = false)
-    private String cityAreaName;
+    @Column(name = "city_id", length = 20, nullable = false)
+    private Integer cityId;
 
     /**
      * 使用者名稱，格式為：暱稱(帳號)
@@ -138,4 +127,14 @@ public class CanBorrowProductGroup {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
     private ProductGroup productGroupById;
+
+    /**
+     * 城市
+     *
+     * @see City
+     * @since 1.6.3
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "city_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    private City city;
 }

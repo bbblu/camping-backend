@@ -37,7 +37,7 @@ public class ProductGroupTransformerImpl implements ProductGroupTransformer {
         }
         if (productGroup.getId() != null && CollectionUtils.isEmpty(result.getProductArray())) {
             result.setProductArray(productTransformer.transferToBeanList(
-                    productDAO.findByGroupId(productGroup.getId())
+                    productDAO.findByGroupIdAndEnableIsTrue(productGroup.getId())
             ));
             result.setComment((Double) commentDAO.getAverageCommentByGroupId(productGroup.getId()));
         }

@@ -19,6 +19,9 @@ public class UserListener {
         if (user.isEnable() == null) {
             user.setEnable(true);
         }
+        if (user.isLocked() == null) {
+            user.setLocked(false);
+        }
         if (user.getCreateDate() == null) {
             user.setCreateDate(LocalDateTime.now());
         }

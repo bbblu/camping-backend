@@ -65,8 +65,14 @@ server:
     context-path: /
     encoding:
       charset: UTF-8
+    session:
+      tracking-modes: cookie
   file:
     url: 'http://${server.ip}:${server.delegate-port}${server.servlet.context-path}${server.file.name}'
+  error:
+    path: /error
+    whitelabel:
+      enabled: false
 logging:
   config: classpath:log4j2.yml
   level:

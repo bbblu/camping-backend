@@ -1,21 +1,18 @@
 package tw.edu.ntub.imd.camping.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.Data;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tw.edu.ntub.imd.camping.bean.CityBean;
 import tw.edu.ntub.imd.camping.service.CityService;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
-import tw.edu.ntub.imd.camping.util.json.array.ArrayData;
-import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 
 @Tag(name = "City", description = "城市區域")
 @RestController
@@ -37,30 +34,18 @@ public class CityController {
                     description = "查詢成功",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = SearchCitySchema.class)
+                            schema = @Schema(implementation = CityBean.class)
                     )
             )
     )
     @GetMapping(path = "")
     public ResponseEntity<String> searchAll() {
-        ObjectData data = new ObjectData();
-        ArrayData nameArray = data.addArray("nameArray");
-        ArrayData areaNameArray = data.addArray("areaNameArray");
-        cityService.searchAllEnableCity().forEach((name, areaNameList) -> {
-            nameArray.add(name);
-            areaNameArray.addStringArray(areaNameList);
-        });
         return ResponseEntityBuilder.success("查詢成功")
-                .data(data)
+                .data(cityService.searchAllEnableCity(), (data, cityBean) -> {
+                    data.add("id", cityBean.getId());
+                    data.add("name", cityBean.getName());
+                    data.add("areaName", cityBean.getAreaName());
+                })
                 .build();
-    }
-
-    @Schema(name = "城市及區域", description = "城市代表台北市、新北市，區域代表中正區、板橋區")
-    @Data
-    public static class SearchCitySchema {
-        @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(description = "城市名稱陣列", example = "新北市"))
-        private String[] nameArray;
-        @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(description = "區域名稱陣列", type = "array", example = "三峽區(這是二維陣列)"))
-        private String[][] areaNameArray;
     }
 }

@@ -17,14 +17,21 @@ import javax.persistence.*;
 @EqualsAndHashCode
 @Entity
 @Table(name = "city", schema = Config.DATABASE_NAME)
-@IdClass(CityId.class)
 public class City {
     /**
-     * 城市名稱，如臺北市、宜蘭縣
+     * 流水編號
+     *
+     * @since 1.6.2
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Integer id;
+    /**
+     * 城市名稱，如台北市、宜蘭縣
      *
      * @since 1.0.0
      */
-    @Id
     @Column(name = "name", length = 20, nullable = false)
     private String name;
 
@@ -33,7 +40,6 @@ public class City {
      *
      * @since 1.0.0
      */
-    @Id
     @Column(name = "area_name", length = 20, nullable = false)
     private String areaName;
 
