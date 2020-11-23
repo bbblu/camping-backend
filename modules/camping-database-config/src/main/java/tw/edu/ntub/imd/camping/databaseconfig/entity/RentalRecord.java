@@ -167,14 +167,6 @@ public class RentalRecord {
     private LocalDateTime backDate;
 
     /**
-     * 評價時間
-     *
-     * @since 1.6.1
-     */
-    @Column(name = "comment_date")
-    private LocalDateTime commentDate;
-
-    /**
      * 取消時間
      *
      * @since 1.0.0
