@@ -31,6 +31,7 @@ import javax.validation.constraints.Positive;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -40,6 +41,16 @@ import java.util.stream.Collectors;
 public class RentalRecordController {
     private static final DecimalFormat PRICE_FORMATTER = new DecimalFormat("$ #,###");
     private final RentalRecordService rentalRecordService;
+
+    @GetMapping(path = "/status")
+    public ResponseEntity<String> searchStatus() {
+        return ResponseEntityBuilder.success("查詢成功")
+                .data(List.of(RentalRecordStatus.values()), (data, status) -> {
+                    data.add("id", status.ordinal());
+                    data.add("name", status.toString());
+                })
+                .build();
+    }
 
     @Operation(
             tags = "Rental",
