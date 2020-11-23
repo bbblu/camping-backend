@@ -17,6 +17,7 @@ import tw.edu.ntub.imd.camping.bean.UpdatePasswordBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
+import tw.edu.ntub.imd.camping.databaseconfig.enumerate.UserBadRecordType;
 import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
@@ -217,6 +218,18 @@ public class UserController {
     public ResponseEntity<String> disable(@PathVariable String account) {
         userService.updateEnable(account, false);
         return ResponseEntityBuilder.buildSuccessMessage("禁用成功");
+    }
+
+    @GetMapping(path = "/{account}/bad-record")
+    public ResponseEntity<String> searchBadRecord(@PathVariable String account) {
+        return ResponseEntityBuilder.success("查詢成功")
+                .data(userService.getBadRecord(account), (data, userBadRecord) -> {
+                    UserBadRecordType type = userBadRecord.getType();
+                    data.add("type", type.ordinal());
+                    data.add("typeName", type.toString());
+                    data.add("count", userBadRecord.getCount());
+                })
+                .build();
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|

@@ -29,5 +29,22 @@ public enum UserBadRecordType {
      *
      * @since 1.7.0
      */
-    BROKEN_PRODUCT
+    BROKEN_PRODUCT;
+
+
+    @Override
+    public String toString() {
+        switch (this) {
+            case CANCEL_RECORD:
+                return "取消交易";
+            case BE_RETURN:
+                return "退貨";
+            case TERMINATE_RECORD:
+                return "終止交易";
+            case BROKEN_PRODUCT:
+                return "毀損商品";
+            default:
+                return name();
+        }
+    }
 }
