@@ -189,6 +189,13 @@ public class RentalRecordController {
         return ResponseEntityBuilder.success().message("查詢成功").data(data).build();
     }
 
+    @Operation(
+            tags = "Rental",
+            method = "POST",
+            summary = "評價交易",
+            description = "評價交易，若登入者為此交易的買方，則會評價借方，反之亦然，若雙方都評價完成，會修改租借紀錄狀態至未評價",
+            parameters = @Parameter(name = "id", description = "交易編號", example = "1")
+    )
     @PostMapping(path = "/{id}/comment")
     public ResponseEntity<String> comment(
             @PathVariable @Positive(message = "id - 應大於0") int id,
