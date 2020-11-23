@@ -6,12 +6,13 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.RentalRecordCheckLogListener;
+import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * 租借紀錄出租方商品檢查紀錄
+ * 租借紀錄商品檢查紀錄
  *
  * @since 1.6.1
  */
@@ -38,6 +39,14 @@ public class RentalRecordCheckLog {
      */
     @Column(name = "record_id", nullable = false, columnDefinition = "UNSIGNED")
     private Integer recordId;
+
+    /**
+     * 租借紀錄檢查時的狀態
+     *
+     * @since 1.7.0
+     */
+    @Column(name = "record_status", length = 2, nullable = false)
+    private RentalRecordStatus recordStatus;
 
     /**
      * 檢查紀錄
@@ -87,8 +96,9 @@ public class RentalRecordCheckLog {
     @JoinColumn(name = "checker_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User checker;
 
-    public RentalRecordCheckLog(Integer recordId, String content) {
+    public RentalRecordCheckLog(Integer recordId, RentalRecordStatus recordStatus, String content) {
         this.recordId = recordId;
+        this.recordStatus = recordStatus;
         this.content = content;
     }
 }

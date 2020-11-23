@@ -10,5 +10,5 @@ public interface UserCommentDAO extends BaseDAO<UserComment, Integer> {
     @Query("SELECT NULLIF(AVG(c.comment), 0) FROM UserComment c WHERE c.userAccount = :userAccount GROUP BY c.userAccount")
     Object getAverageCommentByUserAccount(@Param("userAccount") String userAccount);
 
-    boolean existsByUserAccountAndCommentAccount(String account, String commentAccount);
+    boolean existsByRentalRecordIdAndUserAccountAndCommentAccount(int rentalRecordId, String account, String commentAccount);
 }

@@ -11,14 +11,14 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import tw.edu.ntub.birc.common.util.MathUtils;
 import tw.edu.ntub.birc.common.wrapper.date.DateTimePattern;
 import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
-import tw.edu.ntub.imd.camping.dto.CreditCard;
+import tw.edu.ntub.imd.camping.exception.form.InvalidFormException;
 import tw.edu.ntub.imd.camping.service.RentalRecordService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
@@ -169,181 +169,6 @@ public class RentalRecordController {
 
     @Operation(
             tags = "Rental",
-            method = "PATCH",
-            summary = "付款",
-            description = "付款",
-            responses = @ApiResponse(
-                    responseCode = "200",
-                    description = "付款成功"
-            )
-    )
-    @PatchMapping(path = "/{id}/payment")
-    public ResponseEntity<String> payment(@PathVariable int id, @RequestBody @Valid CreditCard renterCreditCard, BindingResult bindingResult) {
-        BindingResultUtils.validate(bindingResult);
-        rentalRecordService.payment(id, renterCreditCard);
-        return ResponseEntityBuilder.buildSuccessMessage("付款成功");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "POST",
-            summary = "建立檢查紀錄",
-            description = "建立檢查紀錄",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1"),
-            responses = @ApiResponse(
-                    responseCode = "200",
-                    description = "新增成功"
-            )
-    )
-    @PostMapping(path = "/{id}/check")
-    public ResponseEntity<String> createCheckLog(
-            @PathVariable int id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(schema = @Schema(implementation = CreateCheckLogSchema.class))
-            ) @RequestBody String requestBodyJsonString
-    ) {
-        ObjectData requestBody = new ObjectData(requestBodyJsonString);
-        rentalRecordService.createCheckLog(id, requestBody.getString("description"));
-        return ResponseEntityBuilder.buildSuccessMessage("新增成功");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "更新租借紀錄狀態",
-            description = "更新租借紀錄狀態至下一階段",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1"),
-            responses = @ApiResponse(
-                    responseCode = "200",
-                    description = "更新成功"
-            )
-    )
-    @PatchMapping(path = "/{id}/status/next")
-    public ResponseEntity<String> updateStatusToNext(@PathVariable @Positive(message = "id - 應大於0") int id) {
-        RentalRecordStatus newStatus = rentalRecordService.updateStatusToNext(id);
-        ObjectData result = new ObjectData();
-        ObjectData newStatusData = result.addObject("newStatus");
-        newStatusData.add("ordinal", newStatus.ordinal());
-        newStatusData.add("name", newStatus.toString());
-        return ResponseEntityBuilder.success("更新成功").data(result).build();
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "出租方拒絕交易",
-            description = "出租方拒絕交易",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
-    )
-    @PatchMapping(path = "/{id}/denied")
-    public ResponseEntity<String> deniedTransaction(
-            @PathVariable int id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(schema = @Schema(implementation = CancelDetail.class))
-            ) @RequestBody String requestBodyJsonString) {
-        ObjectData requestBody = new ObjectData(requestBodyJsonString);
-        rentalRecordService.deniedTransaction(id, requestBody.getString("cancelDetail"));
-        return ResponseEntityBuilder.buildSuccessMessage("拒絕交易成功");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "POST",
-            summary = "取消租借紀錄",
-            description = "請求對方取消租借",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
-    )
-    @PostMapping(path = "/{id}/cancel")
-    public ResponseEntity<String> requestCancelRecord(
-            @PathVariable @Positive(message = "id - 應大於0") int id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(schema = @Schema(implementation = CancelDetail.class))
-            ) @RequestBody String requestBodyJsonString
-    ) {
-        ObjectData requestBody = new ObjectData(requestBodyJsonString);
-        rentalRecordService.requestCancelRecord(id, requestBody.getString("cancelDetail"));
-        return ResponseEntityBuilder.buildSuccessMessage("請求取消成功，等待對方回應");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "拒絕取消租借紀錄",
-            description = "拒絕取消租借",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
-    )
-    @PatchMapping(path = "/{id}/cancel/denied")
-    public ResponseEntity<String> deniedCancel(
-            @PathVariable @Positive(message = "id - 應大於0") int id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(schema = @Schema(implementation = DeniedCancelDetail.class))
-            ) @RequestBody String requestBodyJsonString) {
-        ObjectData requestBody = new ObjectData(requestBodyJsonString);
-        rentalRecordService.deniedCancel(id, requestBody.getString("deniedDetail"));
-        return ResponseEntityBuilder.buildSuccessMessage("成功拒絕");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "同意取消租借紀錄",
-            description = "同意取消租借",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
-    )
-    @PatchMapping(path = "/{id}/cancel/agree")
-    public ResponseEntity<String> agreeCancel(@PathVariable @Positive(message = "id - 應大於0") int id) {
-        rentalRecordService.agreeCancel(id);
-        return ResponseEntityBuilder.buildSuccessMessage("已同意對方的取消請求");
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "申請退貨已取貨商品",
-            description = "申請退貨已取貨商品",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
-    )
-    @PatchMapping(path = "/{id}/returned")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Manager')")
-    public ResponseEntity<String> beReturned(
-            @PathVariable @Positive(message = "id - 應大於0") int id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(schema = @Schema(implementation = BeReturnedDescription.class))
-            ) @RequestBody String requestBodyJsonString) {
-        ObjectData requestBody = new ObjectData(requestBodyJsonString);
-        rentalRecordService.unexpectedStatusChange(id, requestBody.getString("description"), RentalRecordStatus.BE_RETURNED);
-        ObjectData result = new ObjectData();
-        ObjectData newStatusData = result.addObject("newStatus");
-        newStatusData.add("ordinal", RentalRecordStatus.BE_RETURNED.ordinal());
-        newStatusData.add("name", RentalRecordStatus.BE_RETURNED.toString());
-        return ResponseEntityBuilder.success("申請退貨完成").data(result).build();
-    }
-
-    @Operation(
-            tags = "Rental",
-            method = "PATCH",
-            summary = "申請求償",
-            description = "申請求償",
-            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1")
-    )
-    @PatchMapping(path = "/{id}/claim")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Manager')")
-    public ResponseEntity<String> beClaim(
-            @PathVariable @Positive(message = "id - 應大於0") int id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(schema = @Schema(implementation = BeClaimDescription.class))
-            ) @RequestBody String requestBodyJsonString) {
-        ObjectData requestBody = new ObjectData(requestBodyJsonString);
-        rentalRecordService.unexpectedStatusChange(id, requestBody.getString("description"), RentalRecordStatus.BE_CLAIM);
-        ObjectData result = new ObjectData();
-        ObjectData newStatusData = result.addObject("newStatus");
-        newStatusData.add("ordinal", RentalRecordStatus.BE_CLAIM.ordinal());
-        newStatusData.add("name", RentalRecordStatus.BE_CLAIM.toString());
-        return ResponseEntityBuilder.success("申請求償完成").data(result).build();
-    }
-
-    @Operation(
-            tags = "Rental",
             method = "GET",
             summary = "查詢狀態變更的原因",
             description = "查詢狀態變更的原因",
@@ -364,37 +189,26 @@ public class RentalRecordController {
         return ResponseEntityBuilder.success().message("查詢成功").data(data).build();
     }
 
-    @Operation(
-            tags = "Rental",
-            method = "POST",
-            summary = "新增使用者評價",
-            description = "評價使用者，不得重複評價，評價分數介於1 <= comment <= 5",
-            parameters = @Parameter(name = "account", description = "使用者帳號", example = "test"),
-            responses = @ApiResponse(
-                    responseCode = "200",
-                    description = "評價成功",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
-                    )
-            )
-    )
     @PostMapping(path = "/{id}/comment")
-    public ResponseEntity<String> createComment(
-            @PathVariable int id,
+    public ResponseEntity<String> comment(
+            @PathVariable @Positive(message = "id - 應大於0") int id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(
-                                    implementation = UserCommentSchema.class
-                            )
+                            schema = @Schema(implementation = UserCommentSchema.class)
                     )
             ) @RequestBody String requestBodyJsonString
     ) {
         ObjectData requestBody = new ObjectData(requestBodyJsonString);
         Integer comment = requestBody.getInt("comment");
-        rentalRecordService.createComment(id, comment.byteValue());
-        return ResponseEntityBuilder.buildSuccessMessage("評價成功");
+        if (comment == null) {
+            throw new InvalidFormException("評價分數 - 未填寫");
+        } else if (MathUtils.isNotInRange(comment, 0, 5)) {
+            throw new InvalidFormException("評價分數 - 應介於0 ~ 5之間");
+        } else {
+            rentalRecordService.saveComment(id, comment);
+            return ResponseEntityBuilder.buildSuccessMessage("評價成功");
+        }
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
@@ -471,41 +285,6 @@ public class RentalRecordController {
             @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(example = "https://www.ntub.edu.tw"))
             private String[] relatedLinkArray;
         }
-    }
-
-    @Schema(name = "檢查紀錄", description = "新增檢查紀錄時的傳遞資料")
-    @Data
-    private static class CreateCheckLogSchema {
-        @Schema(description = "檢查紀錄", example = "缺少椅子、帳篷")
-        private String description;
-    }
-
-    @Schema(name = "取消原因", description = "取消租借時的傳遞資料")
-    @Data
-    private static class CancelDetail {
-        @Schema(description = "取消原因", example = "那天沒空")
-        private String cancelDetail;
-    }
-
-    @Schema(name = "拒絕取消原因", description = "拒絕取消租借時的傳遞資料")
-    @Data
-    private static class DeniedCancelDetail {
-        @Schema(description = "拒絕取消原因", example = "已出貨")
-        private String deniedDetail;
-    }
-
-    @Schema(name = "申請退貨原因", description = "申請退貨時的傳遞資料")
-    @Data
-    private static class BeReturnedDescription {
-        @Schema(description = "申請退貨原因", example = "有瑕疵")
-        private String description;
-    }
-
-    @Schema(name = "申請求償原因", description = "申請求償時的傳遞資料")
-    @Data
-    private static class BeClaimDescription {
-        @Schema(description = "申請求償原因", example = "商品損壞")
-        private String description;
     }
 
     @Schema(name = "使用者評價資料", description = "使用者評價資料")

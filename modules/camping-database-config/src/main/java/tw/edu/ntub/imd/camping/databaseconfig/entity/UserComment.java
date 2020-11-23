@@ -30,6 +30,14 @@ public class UserComment {
     private Integer id;
 
     /**
+     * 評價的租借紀錄編號
+     *
+     * @since 1.7.0
+     */
+    @Column(name = "rental_record_id", nullable = false)
+    private Integer rentalRecordId;
+
+    /**
      * 被評價的使用者帳號
      *
      * @since 1.0.0
@@ -60,6 +68,18 @@ public class UserComment {
      */
     @Column(name = "comment_date", nullable = false)
     private LocalDateTime commentDate;
+
+    /**
+     * 評價的租借紀錄
+     *
+     * @see RentalRecord
+     * @since 1.7.0
+     */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rental_record_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    private RentalRecord rentalRecord;
 
     /**
      * 被評價的使用者

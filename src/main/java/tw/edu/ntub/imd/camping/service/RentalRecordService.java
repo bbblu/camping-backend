@@ -4,8 +4,8 @@ import org.springframework.lang.NonNull;
 import tw.edu.ntub.imd.camping.bean.RentalRecordBean;
 import tw.edu.ntub.imd.camping.bean.RentalRecordIndexBean;
 import tw.edu.ntub.imd.camping.bean.RentalRecordIndexFilterBean;
+import tw.edu.ntub.imd.camping.bean.RentalRecordStatusChangeBean;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
-import tw.edu.ntub.imd.camping.dto.CreditCard;
 
 import java.util.List;
 
@@ -13,22 +13,6 @@ public interface RentalRecordService extends BaseService<RentalRecordBean, Integ
     List<RentalRecordBean> searchByRenterAccount(String renterAccount);
 
     List<RentalRecordBean> searchByProductGroupCreateAccount(String productGroupCreateAccount);
-
-    void payment(int id, CreditCard renterCreditCard);
-
-    void createCheckLog(Integer id, String content);
-
-    RentalRecordStatus updateStatusToNext(int id);
-
-    void deniedTransaction(int id, String description);
-
-    Integer requestCancelRecord(int id, String cancelDetail);
-
-    void agreeCancel(int id);
-
-    void deniedCancel(int id, String deniedDetail);
-
-    void unexpectedStatusChange(int id, String description, RentalRecordStatus newStatus);
 
     String getChangeLogDescription(int id, RentalRecordStatus status);
 
@@ -38,5 +22,7 @@ public interface RentalRecordService extends BaseService<RentalRecordBean, Integ
 
     List<RentalRecordIndexBean> searchIndexBean(@NonNull RentalRecordIndexFilterBean filterBean);
 
-    void createComment(int id, byte comment);
+    void updateStatus(RentalRecordStatusChangeBean statusChangeBean);
+
+    void saveComment(int id, int comment);
 }

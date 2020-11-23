@@ -1,5 +1,6 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity.listener;
 
+import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.UserComment;
 
 import javax.persistence.PrePersist;
@@ -11,6 +12,9 @@ public class UserCommentListener {
     private void preSave(UserComment userComment) {
         if (userComment.getCommentDate() == null) {
             userComment.setCommentDate(LocalDateTime.now());
+        }
+        if (userComment.getCommentAccount() == null) {
+            userComment.setCommentAccount(SecurityUtils.getLoginUserAccount());
         }
     }
 }

@@ -95,6 +95,8 @@ public class ExceptionHandleController {
         log.error("沒有權限", e);
         String contentType = request.getContentType();
         if (contentType != null && contentType.startsWith("application/json")) {
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
             response.getWriter().println(ResponseEntityBuilder.error(new PermissionDeniedException()).buildJSONString());
         } else {
             response.sendRedirect(request.getContextPath() + "/error403");

@@ -35,7 +35,7 @@ public class RentalRecordStatusChangeLog implements Persistable<RentalRecordStat
      *
      * @since 1.6.0
      */
-    @Column(name = "from_status", length = 1, nullable = false)
+    @Column(name = "from_status", length = 2, nullable = false)
     private RentalRecordStatus fromStatus;
 
     /**
@@ -44,7 +44,7 @@ public class RentalRecordStatusChangeLog implements Persistable<RentalRecordStat
      * @since 1.6.0
      */
     @Id
-    @Column(name = "to_status", length = 1, nullable = false)
+    @Column(name = "to_status", length = 2, nullable = false)
     private RentalRecordStatus toStatus;
 
     /**
