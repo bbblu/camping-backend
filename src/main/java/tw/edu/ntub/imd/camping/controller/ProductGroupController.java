@@ -315,7 +315,7 @@ public class ProductGroupController {
             ProductGroupBean productGroupBean = optionalGroup.get();
             ObjectData data = getGroupContentData(productGroupBean);
             data.add("price", productGroupBean.getPrice());
-            data.add("bankAccount", productGroupBean.getBankAccount());
+            data.add("bankAccount", productGroupBean.getCreateUser().getBankAccount());
             return ResponseEntityBuilder.success()
                     .message("查詢成功")
                     .data(data)

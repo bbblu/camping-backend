@@ -11,7 +11,6 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroupComment;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.view.CanBorrowProductGroup;
-import tw.edu.ntub.imd.camping.dto.BankAccount;
 import tw.edu.ntub.imd.camping.exception.DuplicateCommentException;
 import tw.edu.ntub.imd.camping.exception.InvalidCommentRangeException;
 import tw.edu.ntub.imd.camping.exception.NotFoundException;
@@ -71,7 +70,6 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     @Override
     public ProductGroupBean save(ProductGroupBean productGroupBean) {
         ProductGroup productGroup = transformer.transferToEntity(productGroupBean);
-        transactionUtils.createBankAccount(new BankAccount(productGroup.getBankAccount()));
         ProductGroup saveResult = groupDAO.saveAndFlush(productGroup);
         if (CollectionUtils.isNotEmpty(productGroupBean.getProductArray())) {
             saveProduct(saveResult.getId(), productGroupBean.getProductArray());

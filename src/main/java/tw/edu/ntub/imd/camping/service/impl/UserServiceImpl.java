@@ -7,17 +7,16 @@ import org.springframework.stereotype.Service;
 import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.RentalRecordDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.RentalRecordStatusChangeLogDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.UserCommentDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.UserDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.User;
+import tw.edu.ntub.imd.camping.dto.BankAccount;
 import tw.edu.ntub.imd.camping.exception.DuplicateCreateException;
 import tw.edu.ntub.imd.camping.exception.InvalidOldPasswordException;
 import tw.edu.ntub.imd.camping.exception.NotAccountOwnerException;
 import tw.edu.ntub.imd.camping.exception.NotFoundException;
 import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.service.transformer.UserTransformer;
+import tw.edu.ntub.imd.camping.util.TransactionUtils;
 
 import java.util.Optional;
 
@@ -26,25 +25,18 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
     private final UserDAO userDAO;
     private final UserTransformer transformer;
     private final PasswordEncoder passwordEncoder;
-    private final UserCommentDAO commentDAO;
-    private final RentalRecordDAO rentalRecordDAO;
-    private final RentalRecordStatusChangeLogDAO rentalRecordStatusChangeLogDAO;
+    private final TransactionUtils transactionUtils;
 
     @Autowired
     public UserServiceImpl(
             UserDAO userDAO,
             UserTransformer transformer,
-            PasswordEncoder passwordEncoder,
-            UserCommentDAO commentDAO,
-            RentalRecordDAO rentalRecordDAO,
-            RentalRecordStatusChangeLogDAO rentalRecordStatusChangeLogDAO) {
+            PasswordEncoder passwordEncoder, TransactionUtils transactionUtils) {
         super(userDAO, transformer);
         this.userDAO = userDAO;
         this.transformer = transformer;
         this.passwordEncoder = passwordEncoder;
-        this.commentDAO = commentDAO;
-        this.rentalRecordDAO = rentalRecordDAO;
-        this.rentalRecordStatusChangeLogDAO = rentalRecordStatusChangeLogDAO;
+        this.transactionUtils = transactionUtils;
     }
 
     @Override
@@ -54,6 +46,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
             user.setPassword(passwordEncoder.encode(userBean.getPassword()));
             user.setLastModifyAccount(user.getAccount());
             User saveResult = userDAO.saveAndFlush(user);
+            transactionUtils.createBankAccount(new BankAccount(user.getBankAccount()));
             return transformer.transferToBean(saveResult);
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateCreateException(userBean.getAccount() + "帳號已有人註冊");

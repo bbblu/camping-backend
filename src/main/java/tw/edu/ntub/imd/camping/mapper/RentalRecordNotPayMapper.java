@@ -8,6 +8,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.dao.NotificationDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.Notification;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.User;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.NotificationType;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.dto.CreditCard;
@@ -51,7 +52,8 @@ public class RentalRecordNotPayMapper implements RentalRecordStatusMapper {
             try {
                 CreditCard creditCard = (CreditCard) payload;
                 ProductGroup productGroup = record.getProductGroupByProductGroupId();
-                transactionUtils.createTransaction(creditCard, productGroup.getBankAccount(), productGroup.getPrice());
+                User creator = productGroup.getUserByCreateAccount();
+                transactionUtils.createTransaction(creditCard, creator.getBankAccount(), productGroup.getPrice());
             } catch (RuntimeException e) {
                 Notification notification = new Notification();
                 notification.setRentalRecordId(record.getId());

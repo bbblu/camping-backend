@@ -37,14 +37,6 @@ public class ProductGroup {
     private Boolean enable;
 
     /**
-     * 匯款帳戶
-     *
-     * @since 1.4.0
-     */
-    @Column(name = "bank_account", length = 16, nullable = false)
-    private String bankAccount;
-
-    /**
      * 商品群組名稱
      *
      * @since 1.0.0

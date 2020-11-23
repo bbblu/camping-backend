@@ -88,6 +88,11 @@ public class UserBean {
     @Past(message = "生日 - 應為過去日期")
     private LocalDate birthday;
 
+    @Schema(description = "匯款帳戶", minLength = 10, maxLength = 16, example = "12345671234567")
+    @NotBlank(groups = CreateUser.class, message = "匯款帳戶 - 未填寫")
+    @Pattern(groups = CreateUser.class, regexp = "^[0-9]{10,16}$", message = "匯款帳戶 - 應為10到16個字")
+    private String bankAccount;
+
     @Hidden
     @Null(groups = {CreateUser.class, UpdateUser.class}, message = "createDate - 不得填寫")
     private LocalDateTime createDate;

@@ -148,6 +148,14 @@ public class User implements Persistable<String> {
     private LocalDate birthday;
 
     /**
+     * 匯款帳戶
+     *
+     * @since 1.7.0
+     */
+    @Column(name = "bank_account", length = 16, nullable = false)
+    private String bankAccount;
+
+    /**
      * 建立時間
      *
      * @since 1.0.0

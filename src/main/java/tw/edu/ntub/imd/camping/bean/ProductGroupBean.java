@@ -20,11 +20,6 @@ public class ProductGroupBean {
     @Null(groups = {CreateProductGroup.class, UpdateProductGroup.class}, message = "編號 - 不得填寫")
     private Integer id;
 
-    @Schema(description = "匯款帳戶", minLength = 10, maxLength = 16, example = "12345671234567")
-    @NotBlank(groups = CreateProductGroup.class, message = "匯款帳戶 - 未填寫")
-    @Pattern(groups = {CreateProductGroup.class, UpdateProductGroup.class}, regexp = "^[0-9]{10,16}$", message = "匯款帳戶 - 應為10到16個字")
-    private String bankAccount;
-
     @Schema(description = "商品群組名稱", example = "便宜帳篷、桌椅三件套，限時特價$3990")
     @NotBlank(groups = CreateProductGroup.class, message = "商品群組名稱 - 未填寫")
     @Size(groups = {CreateProductGroup.class, UpdateProductGroup.class}, max = 300, message = "商品群組名稱 - 輸入字數大於{max}個字")
