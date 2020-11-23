@@ -249,7 +249,8 @@ public class ProductGroupController {
         ObjectData data = new ObjectData();
         data.add("name", productGroupBean.getName());
         data.add("coverImage", productGroupBean.getCoverImage());
-        data.add("city", String.format("%s %s", productGroupBean.getCityName(), productGroupBean.getCityAreaName()));
+        CityBean city = productGroupBean.getCity();
+        data.add("city", String.format("%s %s", city.getName(), city.getAreaName()));
         data.add("price", priceFormat.format(productGroupBean.getPrice()));
         data.add("borrowStartDate", productGroupBean.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
         data.add("borrowEndDate", productGroupBean.getBorrowEndDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
