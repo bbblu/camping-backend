@@ -29,7 +29,7 @@ public class ProductGroupBean {
     private String coverImage;
 
     @Schema(description = "城市編號", example = "1")
-    @NotBlank(groups = CreateProductGroup.class, message = "城市編號 - 未填寫")
+    @NotNull(groups = CreateProductGroup.class, message = "城市編號 - 未填寫")
     private Integer cityId;
 
     @Schema(description = "價格", example = "3990")
