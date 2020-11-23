@@ -11,6 +11,7 @@ import tw.edu.ntub.birc.common.annotation.AliasName;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 
 import javax.validation.constraints.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -103,6 +104,16 @@ public class RentalRecordBean {
     private boolean isBorrowStartDateAfterOrEqualEndDate() {
         if (borrowStartDate != null && borrowEndDate != null) {
             return borrowStartDate.isEqual(borrowEndDate) || borrowStartDate.isBefore(borrowEndDate);
+        } else {
+            return true;
+        }
+    }
+
+    @Hidden
+    @AssertTrue(message = "預計租借起始日期應選擇七天以後的日期")
+    private boolean isBorrowStartDateAfterCurrentDateSixDay() {
+        if (borrowStartDate != null) {
+            return borrowStartDate.toLocalDate().isAfter(LocalDate.now().plusDays(6));
         } else {
             return true;
         }
