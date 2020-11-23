@@ -21,6 +21,7 @@ import tw.edu.ntub.imd.camping.util.TransactionUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -86,7 +87,11 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             ProductBean saveResult = saveResultList.get(i);
             ProductBean productBean = productBeanList.get(i);
             if (CollectionUtils.isNotEmpty(productBean.getImageArray())) {
-                saveImage(saveResult.getId(), productBean.getImageArray());
+                saveImage(saveResult.getId(), productBean.getImageArray()
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())
+                );
             }
         }
     }
