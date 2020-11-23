@@ -91,7 +91,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     }
 
     private void saveDetail(int recordId, int productGroupId) {
-        detailDAO.saveAll(productDAO.findByGroupId(productGroupId)
+        detailDAO.saveAll(productDAO.findByGroupIdAndEnableIsTrue(productGroupId)
                 .parallelStream()
                 .map(detailTransformer::transferProductToEntity)
                 .peek(rentalDetail -> rentalDetail.setRecordId(recordId))

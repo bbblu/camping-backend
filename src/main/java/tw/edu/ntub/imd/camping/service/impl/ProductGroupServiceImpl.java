@@ -128,13 +128,21 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             List<Product> productList = productDAO.findAllById(idList);
             List<Product> newProductList = JavaBeanUtils.copy(productBeanList, productList);
             productDAO.saveAll(newProductList);
+
+            Product firstProduct = productList.get(0);
+            Integer groupId = firstProduct.getGroupId();
+            productDAO.updateAll(productDAO.findByGroupIdAndIdNotIn(groupId, idList)
+                    .stream()
+                    .peek(product -> product.setEnable(false))
+                    .collect(Collectors.toList())
+            );
         }
     }
 
     @Override
     public void delete(Integer id) {
         OwnerChecker.checkIsProductGroupOwner(groupDAO, id);
-        List<Product> productList = productDAO.findByGroupId(id);
+        List<Product> productList = productDAO.findByGroupIdAndEnableIsTrue(id);
         List<Integer> productIdList = productList.stream().map(Product::getId).collect(Collectors.toList());
         imageDAO.updateEnableByProductIdList(productIdList, false);
         productDAO.updateEnableByGroupId(id, false);
