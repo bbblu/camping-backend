@@ -31,7 +31,6 @@ import tw.edu.ntub.imd.camping.validation.UpdateProductGroup;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -45,7 +44,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "/product-group")
 public class ProductGroupController {
-    private final DecimalFormat priceFormat = new DecimalFormat("$ #,###");
     private final ProductGroupService productGroupService;
     private final CityService cityService;
 
@@ -177,7 +175,7 @@ public class ProductGroupController {
             data.add("id", canBorrowProductGroup.getId());
             data.add("name", canBorrowProductGroup.getName());
             data.add("coverImage", canBorrowProductGroup.getCoverImage());
-            data.add("price", priceFormat.format(canBorrowProductGroup.getPrice()));
+            data.add("price", canBorrowProductGroup.getPrice());
             data.add("borrowStartDate", canBorrowProductGroup.getBorrowStartDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
             data.add("borrowEndDate", canBorrowProductGroup.getBorrowEndDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
             data.add("city", canBorrowProductGroup.getCity());
@@ -250,8 +248,11 @@ public class ProductGroupController {
         data.add("name", productGroupBean.getName());
         data.add("coverImage", productGroupBean.getCoverImage());
         CityBean city = productGroupBean.getCity();
-        data.add("city", String.format("%s %s", city.getName(), city.getAreaName()));
-        data.add("price", priceFormat.format(productGroupBean.getPrice()));
+        ObjectData cityData = data.addObject("city");
+        cityData.add("id", city.getId());
+        cityData.add("name", city.getName());
+        cityData.add("areaName", city.getAreaName());
+        data.add("price", productGroupBean.getPrice());
         data.add("borrowStartDate", productGroupBean.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
         data.add("borrowEndDate", productGroupBean.getBorrowEndDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
         UserBean createUser = productGroupBean.getCreateUser();

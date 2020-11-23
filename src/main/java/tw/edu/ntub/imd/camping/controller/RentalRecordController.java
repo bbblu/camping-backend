@@ -28,8 +28,6 @@ import tw.edu.ntub.imd.camping.util.json.object.SingleValueObjectData;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.text.DecimalFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +37,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "/rental")
 public class RentalRecordController {
-    private static final DecimalFormat PRICE_FORMATTER = new DecimalFormat("$ #,###");
     private final RentalRecordService rentalRecordService;
 
     @GetMapping(path = "/status")
@@ -116,16 +113,11 @@ public class RentalRecordController {
         rentalRecordData.add("productGroupId", rentalRecord.getProductGroupId());
         rentalRecordData.add("borrowStartDate", rentalRecord.getBorrowStartDate(), DateTimePattern.DEFAULT_DATE);
         rentalRecordData.add("borrowEndDate", rentalRecord.getBorrowEndDate(), DateTimePattern.DEFAULT_DATE);
-        rentalRecordData.add("borrowRange", String.format(
-                "%s-%s",
-                rentalRecord.getBorrowStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")),
-                rentalRecord.getBorrowEndDate().format(DateTimeFormatter.ofPattern("MM/dd"))
-        ));
         rentalRecordData.add("name", productGroup.getName());
         rentalRecordData.add("coverImage", productGroup.getCoverImage());
         CityBean city = productGroup.getCity();
         rentalRecordData.add("areaName", city.getAreaName());
-        rentalRecordData.add("price", PRICE_FORMATTER.format(productGroup.getPrice()));
+        rentalRecordData.add("price", productGroup.getPrice());
         rentalRecordData.add("rentalDate", rentalRecord.getRentalDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
 
         CollectionObjectData collectionObjectData = rentalRecordData.createCollectionData();
