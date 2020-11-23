@@ -133,6 +133,29 @@
   </div>
 </div>
 
+<div id="compensateModal" class="modal">
+  <div class="modal-content">
+    <h4>賠償</h4>
+    <div class="row">
+      <div class="col s12">
+        <div class="input-field">
+          <textarea class="materialize-textarea" name="compensateDescription" id="compensateDescription"
+                    rows="4"></textarea>
+          <label for="compensateDescription" id="compensateDescriptionLabel">賠償原因</label>
+        </div>
+        <div class="input-field">
+          <input id="compensatePrice" type="text" class="validate">
+          <label for="compensatePrice">賠償金額</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="modal-close waves-effect waves-green btn-flat" id="compensateSubmit"
+       onclick="createCompensateRecord(this)">確定</a>
+  </div>
+</div>
+
 <script src="../../static/js/materialize.min.js" th:src="@{/static/js/materialize.min.js}"></script>
 <script src="../../static/js/sidenav.js" th:src="@{/static/js/sidenav.js}"></script>
 <script src="../../static/js/modal.js" th:src="@{/static/js/modal.js}"></script>
@@ -170,7 +193,7 @@
                         }
                     }
                     alert(response.message);
-                })
+                });
         };
     });
 
@@ -320,7 +343,37 @@
     }
 
     function compensate(index, id) {
-        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/compensate}]]*/"", id), index);
+        const modalSubmitButton = document.querySelector("#compensateSubmit");
+        modalSubmitButton.setAttribute("data-id", id);
+        modalSubmitButton.setAttribute("data-index", index);
+        const modal = M.Modal.getInstance(document.querySelector("#compensateModal"));
+        modal.open();
+    }
+
+    function createCompensateRecord(button) {
+        const id = button.dataset.id;
+        const index = button.dataset.index;
+        fetch(getReplacedUrl(/*[[@{/rental/#id#/status/compensate}]]*/"", id), {
+            method: "PATCH",
+            body: JSON.stringify({
+                description: document.querySelector("#compensateDescription").value,
+                compensatePrice: document.querySelector("#compensatePrice").value
+            }),
+            headers: {
+                "Content-Type": "application/json;charset=UTF-8"
+            }
+        }).then(response => response.json())
+            .then(response => {
+                if (response.result) {
+                    if (response.data) {
+                        table.data[index].status = response.data.name;
+                        table.reload();
+                        document.querySelector("#compensateDescription").value = "";
+                        document.querySelector("#compensatePrice").value = "";
+                    }
+                }
+                alert(response.message);
+            })
     }
 
     function doReturn(index, id) {

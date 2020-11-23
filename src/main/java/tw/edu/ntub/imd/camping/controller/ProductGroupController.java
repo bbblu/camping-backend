@@ -257,7 +257,7 @@ public class ProductGroupController {
         data.add("borrowEndDate", productGroupBean.getBorrowEndDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
         UserBean createUser = productGroupBean.getCreateUser();
         data.add("productOwnerAccount", createUser.getAccount());
-        data.add("productOwnerName", createUser.getFullName());
+        data.add("productOwnerName", createUser.getNickName());
         data.add("contact", createUser.getEmail());
         data.add("comment", productGroupBean.getComment());
 

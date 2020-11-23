@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Data
-@EqualsAndHashCode(exclude = {"userRoleByRoleId", "userByLastModifyAccount"})
 @Entity
 @EntityListeners(UserListener.class)
 @Table(name = "user", schema = Config.DATABASE_NAME)
@@ -185,6 +184,8 @@ public class User implements Persistable<String> {
      * @see UserRole
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
     private UserRole userRoleByRoleId;
@@ -194,6 +195,8 @@ public class User implements Persistable<String> {
      *
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_modify_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User userByLastModifyAccount;

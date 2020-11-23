@@ -6,9 +6,11 @@ import tw.edu.ntub.imd.camping.bean.RentalRecordProductBrokenBean;
 import tw.edu.ntub.imd.camping.bean.RentalRecordProductStatusBean;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.RentalRecordCheckLogDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.UserBadRecordDAO;
+import tw.edu.ntub.imd.camping.databaseconfig.dao.UserCompensateRecordDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecordCheckLog;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.UserBadRecord;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.UserCompensateRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.UserBadRecordType;
 import tw.edu.ntub.imd.camping.exception.RentalRecordStatusException;
@@ -23,6 +25,7 @@ public class RentalRecordNotReturnMapper implements RentalRecordStatusMapper {
     );
     private final RentalRecordCheckLogDAO checkLogDAO;
     private final UserBadRecordDAO userBadRecordDAO;
+    private final UserCompensateRecordDAO userCompensateRecordDAO;
 
     @Override
     public RentalRecordStatus getMappedStatus() {
@@ -48,8 +51,15 @@ public class RentalRecordNotReturnMapper implements RentalRecordStatusMapper {
     public void afterChange(RentalRecord record, RentalRecordStatus originStatus, Object payload) throws ClassCastException {
         if (record.getStatus() == RentalRecordStatus.NOT_RETRIEVE) {
             if (payload instanceof RentalRecordProductBrokenBean) {
+                RentalRecordProductBrokenBean brokenBean = (RentalRecordProductBrokenBean) payload;
                 saveBadRecord(record.getRenterAccount(), UserBadRecordType.BROKEN_PRODUCT);
-                saveCheckLog(record, originStatus, ((RentalRecordProductBrokenBean) payload).getDescription());
+                saveCheckLog(record, originStatus, brokenBean.getDescription());
+
+                UserCompensateRecord compensateRecord = new UserCompensateRecord();
+                compensateRecord.setUserAccount(record.getRenterAccount());
+                compensateRecord.setRentalRecordId(record.getId());
+                compensateRecord.setCompensatePrice(brokenBean.getCompensatePrice());
+                userCompensateRecordDAO.save(compensateRecord);
             } else if (payload instanceof RentalRecordProductStatusBean) {
                 saveCheckLog(record, originStatus, ((RentalRecordProductStatusBean) payload).getDescription());
             }
