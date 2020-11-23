@@ -217,14 +217,19 @@
         document.querySelector("#modalContent").textContent = dataset.content;
         document.querySelector("#modalSubmit").setAttribute("data-index", dataset.index);
         document.querySelector("#modalSubmit").setAttribute("data-id", dataset.id);
+        const handleResultDom = document.querySelector("#handleResult");
         if (dataset.handleResult && dataset.handleResult !== "null") {
-            const handleResultDom = document.querySelector("#handleResult");
             handleResultDom.disabled = true;
             handleResultDom.readOnly = true;
             handleResultDom.textContent = dataset.handleResult;
-            M.updateTextFields();
             document.querySelector("#modalSubmit").disabled = true;
+        } else {
+            handleResultDom.disabled = false;
+            handleResultDom.readOnly = false;
+            handleResultDom.textContent = "";
+            document.querySelector("#modalSubmit").disabled = false;
         }
+        M.updateTextFields();
         const modal = M.Modal.getInstance(document.querySelector("#modal1"));
         modal.open();
     }
@@ -242,13 +247,8 @@
         }).then(response => response.json())
             .then(response => {
                 if (response.result) {
-                    table.data[index].handleResult = handleResult;
-                    table.reload();
-                } else {
-                    alert(response.message);
+                    location.reload();
                 }
-                const modal = M.Modal.getInstance(document.querySelector("#modal1"));
-                modal.close();
             });
     }
 </script>
