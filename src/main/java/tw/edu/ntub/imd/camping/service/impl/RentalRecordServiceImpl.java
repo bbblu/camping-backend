@@ -43,6 +43,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     private final RentalRecordStatusMapperFactory statusMapperFactory;
     private final NotificationUtils notificationUtils;
     private final UserCommentDAO userCommentDAO;
+    private final UserCompensateRecordDAO userCompensateRecordDAO;
 
     public RentalRecordServiceImpl(
             RentalRecordDAO recordDAO,
@@ -57,7 +58,8 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             RentalRecordIndexTransformer indexTransformer,
             RentalRecordStatusMapperFactory statusMapperFactory,
             NotificationUtils notificationUtils,
-            UserCommentDAO userCommentDAO) {
+            UserCommentDAO userCommentDAO,
+            UserCompensateRecordDAO userCompensateRecordDAO) {
         super(recordDAO, transformer);
         this.recordDAO = recordDAO;
         this.transformer = transformer;
@@ -72,6 +74,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         this.statusMapperFactory = statusMapperFactory;
         this.notificationUtils = notificationUtils;
         this.userCommentDAO = userCommentDAO;
+        this.userCompensateRecordDAO = userCompensateRecordDAO;
     }
 
     @Override
@@ -79,6 +82,10 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         OwnerChecker.checkCanBorrowProductGroup(canBorrowProductGroupDAO, rentalRecordBean.getProductGroupId());
         if (userDAO.isLocked(SecurityUtils.getLoginUserAccount())) {
             throw new LockedUserException();
+        } else if (
+                userCompensateRecordDAO.existsByUserAccountAndCompensatedIsFalse(SecurityUtils.getLoginUserAccount())
+        ) {
+            throw new NotCompensateRentalRecordException();
         }
 
         RentalRecord rentalRecord = transformer.transferToEntity(rentalRecordBean);

@@ -10,17 +10,21 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.imd.camping.bean.UpdatePasswordBean;
+import tw.edu.ntub.imd.camping.bean.UserBadRecordBean;
 import tw.edu.ntub.imd.camping.bean.UserBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.UserBadRecordType;
+import tw.edu.ntub.imd.camping.dto.CreditCard;
 import tw.edu.ntub.imd.camping.service.UserService;
 import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
+import tw.edu.ntub.imd.camping.util.json.array.ArrayData;
 import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
 import tw.edu.ntub.imd.camping.validation.CreateUser;
 import tw.edu.ntub.imd.camping.validation.UpdateUser;
@@ -79,6 +83,7 @@ public class UserController {
             UserBean userBean = optionalUser.get();
             ObjectData data = new ObjectData();
             data.add("account", userBean.getAccount());
+            data.add("notCompensate", userBean.isNotCompensate());
             data.add("firstName", userBean.getFirstName());
             data.add("lastName", userBean.getLastName());
             data.add("nickName", userBean.getNickName());
@@ -199,6 +204,7 @@ public class UserController {
             )
     )
     @PatchMapping(path = "/{account}/enable")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Manager')")
     public ResponseEntity<String> enable(@PathVariable String account) {
         userService.updateEnable(account, true);
         return ResponseEntityBuilder.buildSuccessMessage("啟用成功");
@@ -215,21 +221,37 @@ public class UserController {
             )
     )
     @PatchMapping(path = "/{account}/disable")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Manager')")
     public ResponseEntity<String> disable(@PathVariable String account) {
         userService.updateEnable(account, false);
         return ResponseEntityBuilder.buildSuccessMessage("禁用成功");
     }
 
-    @GetMapping(path = "/{account}/bad-record")
+    @GetMapping(path = "/{account}/comment-and-bad-record")
     public ResponseEntity<String> searchBadRecord(@PathVariable String account) {
+        ObjectData data = new ObjectData();
+        addBadRecordData(account, data);
+        data.add("comment", userService.getComment(account));
         return ResponseEntityBuilder.success("查詢成功")
-                .data(userService.getBadRecord(account), (data, userBadRecord) -> {
-                    UserBadRecordType type = userBadRecord.getType();
-                    data.add("type", type.ordinal());
-                    data.add("typeName", type.toString());
-                    data.add("count", userBadRecord.getCount());
-                })
+                .data(data)
                 .build();
+    }
+
+    private void addBadRecordData(String account, ObjectData data) {
+        ArrayData badRecordArray = data.addArray("badRecordArray");
+        for (UserBadRecordBean userBadRecord : userService.getBadRecord(account)) {
+            ObjectData badRecordData = badRecordArray.addObject();
+            UserBadRecordType type = userBadRecord.getType();
+            badRecordData.add("type", type.ordinal());
+            badRecordData.add("typeName", type.toString());
+            badRecordData.add("count", userBadRecord.getCount());
+        }
+    }
+
+    @PatchMapping(path = "/compensate")
+    public ResponseEntity<String> compensate(@Valid @RequestBody CreditCard creditCard) {
+        userService.compensate(SecurityUtils.getLoginUserAccount(), creditCard);
+        return ResponseEntityBuilder.buildSuccessMessage("已賠償成功");
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|

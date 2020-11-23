@@ -40,6 +40,11 @@ public class UserBean {
     @Null(groups = {CreateUser.class, UpdateUser.class}, message = "enable - 不得填寫")
     private Boolean enable;
 
+    @Hidden
+    @Getter(AccessLevel.NONE)
+    @Null(groups = {CreateUser.class, UpdateUser.class}, message = "notCompensate - 不得填寫")
+    private Boolean notCompensate;
+
     @Schema(description = "露營經驗(0: 新手/ 1: 有過幾次經驗)", type = "int", example = "0")
     @NotNull(groups = CreateUser.class, message = "露營經驗 - 未填寫")
     private Experience experience;
@@ -132,5 +137,10 @@ public class UserBean {
     @Hidden
     public Boolean isEnable() {
         return enable;
+    }
+
+    @Hidden
+    public Boolean isNotCompensate() {
+        return notCompensate;
     }
 }
