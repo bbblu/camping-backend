@@ -166,6 +166,7 @@
                         if (response.data) {
                             table.data[index].status = response.data.name;
                             table.reload();
+                            document.querySelector("#description").value = "";
                         }
                     }
                     alert(response.message);
