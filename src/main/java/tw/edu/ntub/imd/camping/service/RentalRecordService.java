@@ -25,4 +25,6 @@ public interface RentalRecordService extends BaseService<RentalRecordBean, Integ
     void updateStatus(RentalRecordStatusChangeBean statusChangeBean);
 
     void saveComment(int id, int comment);
+
+    List<RentalRecordBean> searchByStatus(RentalRecordStatus status);
 }

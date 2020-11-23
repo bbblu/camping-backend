@@ -62,6 +62,21 @@ public class RentalRecordBean {
 
     @Hidden
     @JsonIgnore
+    @Null(message = "agreeDate - 不得填寫")
+    private LocalDateTime agreeDate;
+
+    @Hidden
+    @JsonIgnore
+    @Null(message = "paymentDate - 不得填寫")
+    private LocalDateTime paymentDate;
+
+    @Hidden
+    @JsonIgnore
+    @Null(message = "placedDate - 不得填寫")
+    private LocalDateTime placedDate;
+
+    @Hidden
+    @JsonIgnore
     @Null(message = "pickDate - 不得填寫")
     private LocalDateTime pickDate;
 
@@ -72,12 +87,8 @@ public class RentalRecordBean {
 
     @Hidden
     @JsonIgnore
-    @Null(message = "checkDate - 不得填寫")
-    private LocalDateTime checkDate;
-
-    @Hidden
-    @Null(message = "checkResult - 不得填寫")
-    private String checkResult;
+    @Null(message = "backDate - 不得填寫")
+    private LocalDateTime backDate;
 
     @Hidden
     @JsonIgnore

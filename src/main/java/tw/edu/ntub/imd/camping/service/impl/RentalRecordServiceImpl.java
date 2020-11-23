@@ -4,6 +4,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import tw.edu.ntub.birc.common.util.CollectionUtils;
 import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.RentalRecordBean;
 import tw.edu.ntub.imd.camping.bean.RentalRecordIndexBean;
@@ -208,5 +209,10 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
                 );
             }
         }
+    }
+
+    @Override
+    public List<RentalRecordBean> searchByStatus(RentalRecordStatus status) {
+        return CollectionUtils.map(recordDAO.findByStatus(status), transformer::transferToBean);
     }
 }

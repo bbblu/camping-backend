@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
+import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 
 import java.util.List;
 
@@ -22,4 +23,6 @@ public interface RentalRecordDAO extends BaseDAO<RentalRecord, Integer> {
             "INNER JOIN ProductGroup pg ON r.productGroupId = pg.id " +
             "WHERE r.id = :id AND (r.renterAccount = :account OR pg.createAccount = :account)")
     boolean isNotRenterAndProductGroupCreator(@Param("id") int id, @Param("account") String account);
+
+    List<RentalRecord> findByStatus(RentalRecordStatus status);
 }
