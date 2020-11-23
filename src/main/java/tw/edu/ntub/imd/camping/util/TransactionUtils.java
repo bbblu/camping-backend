@@ -41,7 +41,6 @@ public class TransactionUtils {
     private final String searchBankUrl;
     private final String createBankAccountUrl;
     private final String createTransactionUrl;
-    private final String transactionDebitUrl;
     private final ObjectMapper mapper;
 
     public TransactionUtils(
@@ -51,14 +50,11 @@ public class TransactionUtils {
                     String createBankAccountUrl,
             @Value("${camping.credit-card-api.base-url}/transaction")
                     String createTransactionUrl,
-            @Value("${camping.credit-card-api.base-url}/transaction/{id}/debit")
-                    String transactionDebitUrl,
             ObjectMapper mapper
     ) {
         this.searchBankUrl = searchBankUrl;
         this.createBankAccountUrl = createBankAccountUrl;
         this.createTransactionUrl = createTransactionUrl;
-        this.transactionDebitUrl = transactionDebitUrl;
         this.mapper = mapper;
     }
 
@@ -140,15 +136,6 @@ public class TransactionUtils {
         } catch (JsonProcessingException e) {
             throw new CreditCardTransactionException(e);
         }
-    }
-
-    public void transactionDebit(int transactionId) {
-        sendPostRequest(
-                transactionDebitUrl.replace("{id}", String.valueOf(transactionId)),
-                new ObjectData(),
-                new TypeReference<>() {
-                }
-        );
     }
 
     @Data
