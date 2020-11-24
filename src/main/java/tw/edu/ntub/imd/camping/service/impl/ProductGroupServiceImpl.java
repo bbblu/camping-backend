@@ -158,7 +158,7 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         return canBorrowProductGroupBeanTransformer.transferToBeanList(
                 canBorrowProductGroupDAO.findAll()
                         .stream()
-                        .filter(productGroup -> SecurityUtils.isNotLogin() || StringUtils.isEquals(productGroup.getCreateAccount(), SecurityUtils.getLoginUserAccount()))
+                        .filter(productGroup -> SecurityUtils.isNotLogin() || StringUtils.isNotEquals(productGroup.getCreateAccount(), SecurityUtils.getLoginUserAccount()))
                         .filter(filterData::isBorrowStartDateNullOrBeforeOrEquals)
                         .filter(filterData::isBorrowEndDateNullOrAfterOrEquals)
                         .filter(filterData::isCityIdNullOrEquals)
