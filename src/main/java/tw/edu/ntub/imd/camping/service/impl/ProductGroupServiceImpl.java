@@ -159,11 +159,11 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
                 canBorrowProductGroupDAO.findAll()
                         .stream()
                         .filter(productGroup -> SecurityUtils.isNotLogin() || StringUtils.isEquals(productGroup.getCreateAccount(), SecurityUtils.getLoginUserAccount()))
-                        .filter(productGroup -> filterData.isBorrowStartDateNullOrBeforeOrEquals(productGroup.getBorrowStartDate().toLocalDate()))
-                        .filter(productGroup -> filterData.isBorrowEndDateNullOrAfterOrEquals(productGroup.getBorrowEndDate().toLocalDate()))
-                        .filter(productGroup -> filterData.isCityIdNullOrEquals(productGroup.getCityId()))
-                        .filter(productGroup -> filterData.isTypeArrayNullOrAllMatchContains(productGroup.getProductType()))
-                        .filter(productGroup -> filterData.isPriceNullOrBetween(productGroup.getPrice()))
+                        .filter(filterData::isBorrowStartDateNullOrBeforeOrEquals)
+                        .filter(filterData::isBorrowEndDateNullOrAfterOrEquals)
+                        .filter(filterData::isCityIdNullOrEquals)
+                        .filter(filterData::isTypeArrayNullOrAllMatchContains)
+                        .filter(filterData::isPriceNullOrBetween)
                         .collect(Collectors.toList())
         );
     }
