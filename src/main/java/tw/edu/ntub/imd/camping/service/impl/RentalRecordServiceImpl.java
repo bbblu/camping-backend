@@ -88,10 +88,14 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             throw new NotCompensateRentalRecordException();
         }
 
+        ProductGroup productGroup = productGroupDAO.findById(rentalRecordBean.getProductGroupId()).orElseThrow();
+        if (StringUtils.isEquals(productGroup.getCreateAccount(), SecurityUtils.getLoginUserAccount())) {
+            throw new RentalSelfProductException();
+        }
+
         RentalRecord rentalRecord = transformer.transferToEntity(rentalRecordBean);
         RentalRecord saveResult = recordDAO.saveAndFlush(rentalRecord);
         saveDetail(saveResult.getId(), saveResult.getProductGroupId());
-        ProductGroup productGroup = productGroupDAO.findById(rentalRecord.getProductGroupId()).orElseThrow();
         saveResult.setProductGroupByProductGroupId(productGroup);
         notificationUtils.create(saveResult);
         return transformer.transferToBean(saveResult);
