@@ -101,6 +101,7 @@ public class RentalRecordController {
         ProductGroupBean productGroup = rentalRecord.getProductGroup();
         UserBean createUser = productGroup.getCreateUser();
         ObjectData sellerData = rentalRecordData.addObject("user");
+        sellerData.add("account", createUser.getAccount());
         sellerData.add("nickName", createUser.getNickName());
         sellerData.add("email", createUser.getEmail());
         sellerData.add("cellPhone", createUser.getCellPhone());
@@ -166,6 +167,7 @@ public class RentalRecordController {
         addRentalRecordToData(rentalRecordData, rentalRecord);
         UserBean renter = rentalRecord.getRenter();
         ObjectData sellerData = rentalRecordData.addObject("user");
+        sellerData.add("account", renter.getAccount());
         sellerData.add("nickName", renter.getNickName());
         sellerData.add("email", renter.getEmail());
         sellerData.add("cellPhone", renter.getCellPhone());
