@@ -168,7 +168,7 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         return canBorrowProductGroup ->
                 filterData.isBorrowStartDateNullOrBefore(canBorrowProductGroup.getBorrowStartDate().toLocalDate()) &&
                         filterData.isBorrowEndDateNullOrAfter(canBorrowProductGroup.getBorrowEndDate().toLocalDate()) &&
-                        filterData.isCityIdNullOrEquals(canBorrowProductGroup.getCity().getId()) &&
+                        filterData.isCityIdNullOrEquals(canBorrowProductGroup.getCityId()) &&
                         filterData.isTypeArrayNullOrAllMatchContains(canBorrowProductGroup.getProductType()) &&
                         filterData.isPriceNullOrBetween(canBorrowProductGroup.getPrice());
     }
