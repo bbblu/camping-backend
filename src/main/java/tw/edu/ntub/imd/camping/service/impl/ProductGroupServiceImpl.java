@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import tw.edu.ntub.birc.common.util.CollectionUtils;
 import tw.edu.ntub.birc.common.util.JavaBeanUtils;
 import tw.edu.ntub.birc.common.util.MathUtils;
+import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
@@ -159,6 +160,7 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         return canBorrowProductGroupBeanTransformer.transferToBeanList(
                 canBorrowProductGroupDAO.findAll()
                         .stream()
+                        .filter(productGroup -> SecurityUtils.isNotLogin() || StringUtils.isEquals(productGroup.getCreateAccount(), SecurityUtils.getLoginUserAccount()))
                         .filter(filterCanBorrowProductGroup(filterData))
                         .collect(Collectors.toList())
         );
