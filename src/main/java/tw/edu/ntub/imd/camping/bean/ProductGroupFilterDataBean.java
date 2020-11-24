@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Hidden;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import tw.edu.ntub.birc.common.util.ArrayUtils;
-import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.enumerate.ProductGroupPriceRange;
 
 import java.time.LocalDate;
@@ -16,7 +15,7 @@ import java.util.Arrays;
 public class ProductGroupFilterDataBean {
     private LocalDate borrowStartDate;
     private LocalDate borrowEndDate;
-    private String cityAreaName;
+    private Integer cityId;
     private int[] typeArray;
     private ProductGroupPriceRange priceRange;
 
@@ -28,8 +27,8 @@ public class ProductGroupFilterDataBean {
         return this.borrowEndDate == null || this.borrowEndDate.isAfter(borrowEndDate) || this.borrowEndDate.isEqual(borrowEndDate);
     }
 
-    public boolean isCityAreaNameNullOrEquals(String cityAreaName) {
-        return this.cityAreaName == null || StringUtils.isEquals(this.cityAreaName, cityAreaName);
+    public boolean isCityIdNullOrEquals(Integer cityId) {
+        return this.cityId == null || this.cityId.equals(cityId);
     }
 
     public boolean isTypeArrayNullOrAllMatchContains(String type) {
