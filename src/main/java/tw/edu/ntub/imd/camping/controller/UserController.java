@@ -34,6 +34,7 @@ import tw.edu.ntub.imd.camping.validation.UpdateUser;
 
 import javax.validation.Valid;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -249,6 +250,16 @@ public class UserController {
             badRecordData.add("typeName", type.toString());
             badRecordData.add("count", userBadRecord.getCount());
         }
+    }
+
+    @GetMapping(path = "/bad-record")
+    public ResponseEntity<String> searchBadRecordType() {
+        return ResponseEntityBuilder.success("查詢成功")
+                .data(List.of(UserBadRecordType.values()), (data, type) -> {
+                    data.add("id", type.ordinal());
+                    data.add("name", type.toString());
+                })
+                .build();
     }
 
     @PatchMapping(path = "/compensate")
