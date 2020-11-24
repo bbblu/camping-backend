@@ -121,8 +121,8 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
     }
 
     @Override
-    public int getComment(String account) {
-        return (int) commentDAO.getAverageCommentByUserAccount(account);
+    public Integer getComment(String account) {
+        return (Integer) commentDAO.getAverageCommentByUserAccount(account);
     }
 
     @Override
