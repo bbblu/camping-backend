@@ -189,6 +189,10 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     @Override
     public void saveComment(int id, int comment) {
         RentalRecord record = recordDAO.findById(id).orElseThrow(() -> new NotFoundException("無此租借紀錄"));
+        if (record.getStatus() != RentalRecordStatus.NOT_COMMENT) {
+            throw new RentalRecordStatusChangeException(record.getStatus(), RentalRecordStatus.ALREADY_COMMENT);
+        }
+
         UserComment userComment = new UserComment();
         userComment.setRentalRecordId(id);
         if (StringUtils.isEquals(record.getRenterAccount(), SecurityUtils.getLoginUserAccount())) {
@@ -204,7 +208,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             userCommentDAO.saveAndFlush(userComment);
             if (userCommentDAO.existsByRentalRecordIdAndUserAccountAndCommentAccount(
                     id,
-                    SecurityUtils.getLoginUserAccount(),
+                    userComment.getCommentAccount(),
                     userComment.getUserAccount()
             )) {
                 updateStatus(
