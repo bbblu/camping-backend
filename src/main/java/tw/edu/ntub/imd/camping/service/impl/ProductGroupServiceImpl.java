@@ -11,7 +11,6 @@ import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroupComment;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.view.CanBorrowProductGroup;
 import tw.edu.ntub.imd.camping.exception.DuplicateCommentException;
 import tw.edu.ntub.imd.camping.exception.InvalidCommentRangeException;
 import tw.edu.ntub.imd.camping.exception.NotFoundException;
@@ -23,7 +22,6 @@ import tw.edu.ntub.imd.camping.util.TransactionUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -161,18 +159,13 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
                 canBorrowProductGroupDAO.findAll()
                         .stream()
                         .filter(productGroup -> SecurityUtils.isNotLogin() || StringUtils.isEquals(productGroup.getCreateAccount(), SecurityUtils.getLoginUserAccount()))
-                        .filter(filterCanBorrowProductGroup(filterData))
+                        .filter(productGroup -> filterData.isBorrowStartDateNullOrBeforeOrEquals(productGroup.getBorrowStartDate().toLocalDate()))
+                        .filter(productGroup -> filterData.isBorrowEndDateNullOrAfterOrEquals(productGroup.getBorrowEndDate().toLocalDate()))
+                        .filter(productGroup -> filterData.isCityIdNullOrEquals(productGroup.getCityId()))
+                        .filter(productGroup -> filterData.isTypeArrayNullOrAllMatchContains(productGroup.getProductType()))
+                        .filter(productGroup -> filterData.isPriceNullOrBetween(productGroup.getPrice()))
                         .collect(Collectors.toList())
         );
-    }
-
-    private Predicate<CanBorrowProductGroup> filterCanBorrowProductGroup(ProductGroupFilterDataBean filterData) {
-        return canBorrowProductGroup ->
-                filterData.isBorrowStartDateNullOrBefore(canBorrowProductGroup.getBorrowStartDate().toLocalDate()) &&
-                        filterData.isBorrowEndDateNullOrAfter(canBorrowProductGroup.getBorrowEndDate().toLocalDate()) &&
-                        filterData.isCityIdNullOrEquals(canBorrowProductGroup.getCityId()) &&
-                        filterData.isTypeArrayNullOrAllMatchContains(canBorrowProductGroup.getProductType()) &&
-                        filterData.isPriceNullOrBetween(canBorrowProductGroup.getPrice());
     }
 
     @Override

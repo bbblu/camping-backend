@@ -19,12 +19,12 @@ public class ProductGroupFilterDataBean {
     private int[] typeArray;
     private ProductGroupPriceRange priceRange;
 
-    public boolean isBorrowStartDateNullOrBefore(LocalDate borrowStartDate) {
-        return this.borrowStartDate == null || this.borrowStartDate.isBefore(borrowStartDate) || this.borrowStartDate.isEqual(borrowStartDate);
+    public boolean isBorrowStartDateNullOrBeforeOrEquals(LocalDate productGroupBorrowStartDate) {
+        return this.borrowStartDate == null || this.borrowStartDate.isBefore(productGroupBorrowStartDate) || productGroupBorrowStartDate.isEqual(this.borrowStartDate);
     }
 
-    public boolean isBorrowEndDateNullOrAfter(LocalDate borrowEndDate) {
-        return this.borrowEndDate == null || this.borrowEndDate.isAfter(borrowEndDate) || this.borrowEndDate.isEqual(borrowEndDate);
+    public boolean isBorrowEndDateNullOrAfterOrEquals(LocalDate productGroupborrowEndDate) {
+        return this.borrowEndDate == null || this.borrowEndDate.isAfter(productGroupborrowEndDate) || productGroupborrowEndDate.isEqual(this.borrowEndDate);
     }
 
     public boolean isCityIdNullOrEquals(Integer cityId) {
