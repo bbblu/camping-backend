@@ -23,7 +23,7 @@ public class UserBean {
     @Schema(description = "帳號", example = "test")
     @Null(groups = UpdateUser.class, message = "帳號 - 不得更改")
     @NotBlank(groups = CreateUser.class, message = "帳號 - 未填寫")
-    @Size(max = 100, message = "帳號 - 輸入字數大於{max}個字")
+    @Size(groups = {CreateUser.class, UpdateUser.class}, max = 100, message = "帳號 - 輸入字數大於{max}個字")
     private String account;
 
     @Schema(description = "密碼", example = "hello")
@@ -52,18 +52,18 @@ public class UserBean {
     @Schema(description = "姓氏", example = "王")
     @Null(groups = UpdateUser.class, message = "姓氏 - 不得更改")
     @NotBlank(groups = CreateUser.class, message = "姓氏 - 未填寫")
-    @Size(max = 50, message = "姓氏 - 輸入字數大於{max}個字")
+    @Size(groups = {CreateUser.class, UpdateUser.class}, max = 50, message = "姓氏 - 輸入字數大於{max}個字")
     private String lastName;
 
     @Schema(description = "名字", example = "小明")
     @Null(groups = UpdateUser.class, message = "名字 - 不得更改")
     @NotBlank(groups = CreateUser.class, message = "名字 - 未填寫")
-    @Size(max = 50, message = "名字 - 輸入字數大於{max}個字")
+    @Size(groups = {CreateUser.class, UpdateUser.class}, max = 50, message = "名字 - 輸入字數大於{max}個字")
     private String firstName;
 
     @Schema(description = "暱稱", example = "煞氣a小明")
     @NotBlank(groups = CreateUser.class, message = "暱稱 - 未填寫")
-    @Size(max = 50, message = "暱稱 - 輸入字數大於{max}個字")
+    @Size(groups = {CreateUser.class, UpdateUser.class}, max = 50, message = "暱稱 - 輸入字數大於{max}個字")
     private String nickName;
 
     @Schema(description = "性別(0: 男/ 1: 女/ 2: 未提供)", type = "int", example = "0")
@@ -72,30 +72,30 @@ public class UserBean {
     private Gender gender;
 
     @Schema(description = "手機號碼", pattern = "^09[0-9]{8}$", example = "0912345678")
-    @Pattern(regexp = "^09[0-9]{8}$", message = "手機號碼 - 格式不符")
+    @Pattern(groups = {CreateUser.class, UpdateUser.class}, regexp = "^09[0-9]{8}$", message = "手機號碼 - 格式不符")
     @NotNull(groups = CreateUser.class, message = "手機號碼 - 未填寫")
     private String cellPhone;
 
     @Schema(description = "信箱", example = "10646000@ntub.edu.tw")
     @NotBlank(groups = CreateUser.class, message = "信箱 - 未填寫")
-    @Size(max = 255, message = "信箱 - 輸入字數大於{max}個字")
-    @Email(message = "信箱 - 格式不符合信箱格式")
+    @Size(groups = {CreateUser.class, UpdateUser.class}, max = 255, message = "信箱 - 輸入字數大於{max}個字")
+    @Email(groups = {CreateUser.class, UpdateUser.class}, message = "信箱 - 格式不符合信箱格式")
     private String email;
 
     @Schema(description = "地址", example = "台北市中正區濟南路321號")
     @NotBlank(groups = CreateUser.class, message = "地址 - 未填寫")
-    @Size(max = 50, message = "地址 - 輸入字數大於{max}個字")
+    @Size(groups = {CreateUser.class, UpdateUser.class}, max = 50, message = "地址 - 輸入字數大於{max}個字")
     private String address;
 
     @Schema(description = "生日", type = "string($date)", example = "2020/01/01")
     @Null(groups = UpdateUser.class, message = "生日 - 不得更改")
     @NotNull(groups = CreateUser.class, message = "生日 - 未填寫")
-    @Past(message = "生日 - 應為過去日期")
+    @Past(groups = {CreateUser.class, UpdateUser.class}, message = "生日 - 應為過去日期")
     private LocalDate birthday;
 
     @Schema(description = "匯款帳戶", minLength = 10, maxLength = 16, example = "12345671234567")
     @NotBlank(groups = CreateUser.class, message = "匯款帳戶 - 未填寫")
-    @Pattern(groups = CreateUser.class, regexp = "^[0-9]{10,16}$", message = "匯款帳戶 - 應為10到16個字")
+    @Pattern(groups = {CreateUser.class, UpdateUser.class}, regexp = "^[0-9]{10,16}$", message = "匯款帳戶 - 應為10到16個字")
     private String bankAccount;
 
     @Hidden
