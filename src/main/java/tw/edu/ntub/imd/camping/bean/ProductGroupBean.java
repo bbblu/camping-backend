@@ -9,6 +9,7 @@ import tw.edu.ntub.imd.camping.validation.UpdateProductGroup;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -68,6 +69,16 @@ public class ProductGroupBean {
     private boolean isBorrowStartDateAfterOrEqualEndDate() {
         if (borrowStartDate != null && borrowEndDate != null) {
             return borrowStartDate.isEqual(borrowEndDate) || borrowStartDate.isBefore(borrowEndDate);
+        } else {
+            return true;
+        }
+    }
+
+    @Hidden
+    @AssertTrue(groups = {CreateProductGroup.class, UpdateProductGroup.class}, message = "租借日期範圍應有十四日間隔")
+    private boolean isBorrowDateRangeLargeThen6Days() {
+        if (borrowStartDate != null && borrowEndDate != null) {
+            return Duration.between(borrowStartDate, borrowEndDate).toDays() >= 14;
         } else {
             return true;
         }
