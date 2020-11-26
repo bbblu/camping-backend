@@ -127,8 +127,10 @@ public class ProblemReportController {
                     data.add("reporterEmail", problemReportBean.getReporterEmail());
                     data.add("reportContent", problemReportBean.getReportContent());
                     data.add("reportDate", problemReportBean.getReportDate());
-                    UserBean handlerAsUser = problemReportBean.getHandlerAsUser();
-                    data.add("handler", handlerAsUser.getFullName());
+                    if (problemReportBean.getHandlerAsUser() != null) {
+                        UserBean handlerAsUser = problemReportBean.getHandlerAsUser();
+                        data.add("handler", handlerAsUser.getFullName());
+                    }
                     data.add("handleDate", problemReportBean.getHandleDate());
                     data.add("handleResult", problemReportBean.getHandleResult());
                 })
