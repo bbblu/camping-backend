@@ -2,6 +2,10 @@ package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.RentalDetailListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalDetailStatus;
@@ -15,13 +19,8 @@ import java.time.LocalDateTime;
  * @since 1.0.0
  */
 @Data
-@EqualsAndHashCode(exclude = {
-        "rentalRecordByRecordId",
-        "productByProductId",
-        "userByLastModifyAccount"
-})
 @Entity
-@EntityListeners(RentalDetailListener.class)
+@EntityListeners({AuditingEntityListener.class, RentalDetailListener.class})
 @Table(name = "rental_detail", schema = Config.DATABASE_NAME)
 public class RentalDetail {
     /**
@@ -72,6 +71,7 @@ public class RentalDetail {
      *
      * @since 1.0.0
      */
+    @LastModifiedBy
     @Column(name = "last_modify_account", length = 100, nullable = false)
     private String lastModifyAccount;
 
@@ -80,6 +80,7 @@ public class RentalDetail {
      *
      * @since 1.0.0
      */
+    @LastModifiedDate
     @Column(name = "last_modify_date", nullable = false)
     private LocalDateTime lastModifyDate;
 
@@ -89,6 +90,8 @@ public class RentalDetail {
      * @see RentalRecord
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "record_id", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
     private RentalRecord rentalRecordByRecordId;
@@ -99,6 +102,8 @@ public class RentalDetail {
      * @see Product
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
     private Product productByProductId;
@@ -109,6 +114,8 @@ public class RentalDetail {
      * @see User
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_modify_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User userByLastModifyAccount;

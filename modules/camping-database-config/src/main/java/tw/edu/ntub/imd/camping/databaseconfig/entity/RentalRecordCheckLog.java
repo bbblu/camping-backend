@@ -4,8 +4,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.RentalRecordCheckLogListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 
 import javax.persistence.*;
@@ -19,7 +21,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Entity
-@EntityListeners(RentalRecordCheckLogListener.class)
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "rental_record_check_log", schema = Config.DATABASE_NAME)
 public class RentalRecordCheckLog {
     /**
@@ -61,6 +63,7 @@ public class RentalRecordCheckLog {
      *
      * @since 1.6.1
      */
+    @CreatedBy
     @Column(name = "checker_account", length = 100, nullable = false)
     private String checkerAccount;
 
@@ -69,6 +72,7 @@ public class RentalRecordCheckLog {
      *
      * @since 1.6.1
      */
+    @CreatedDate
     @Column(name = "check_date", nullable = false)
     private LocalDateTime checkDate;
 

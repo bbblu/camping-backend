@@ -17,9 +17,8 @@ public class ForgotPasswordTokenListener {
         if (forgotPasswordToken.getToken() == null) {
             forgotPasswordToken.setToken(UUID.randomUUID().toString());
         }
-        if (forgotPasswordToken.getCreateDate() == null) {
-            forgotPasswordToken.setCreateDate(LocalDateTime.now());
-            forgotPasswordToken.setExpireDate(LocalDateTime.now().plusDays(7));
+        if (forgotPasswordToken.getCreateDate() != null) {
+            forgotPasswordToken.setExpireDate(forgotPasswordToken.getCreateDate().plusDays(7));
         }
     }
 

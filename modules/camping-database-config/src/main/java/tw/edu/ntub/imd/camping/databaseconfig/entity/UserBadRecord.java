@@ -3,8 +3,9 @@ package tw.edu.ntub.imd.camping.databaseconfig.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.UserBadRecordListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.UserBadRecordType;
 
 import javax.persistence.*;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Entity
-@EntityListeners(UserBadRecordListener.class)
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "user_bad_record", schema = Config.DATABASE_NAME)
 public class UserBadRecord {
     /**
@@ -51,6 +52,7 @@ public class UserBadRecord {
      *
      * @since 1.7.0
      */
+    @CreatedDate
     @Column(name = "record_date", nullable = false)
     private LocalDateTime recordDate;
 

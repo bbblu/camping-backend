@@ -1,6 +1,8 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.UserCompensateRecordListener;
 
@@ -14,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Entity
-@EntityListeners(UserCompensateRecordListener.class)
+@EntityListeners({AuditingEntityListener.class, UserCompensateRecordListener.class})
 @Table(name = "user_compensate_record", schema = Config.DATABASE_NAME)
 public class UserCompensateRecord {
     /**
@@ -81,6 +83,7 @@ public class UserCompensateRecord {
      *
      * @since 1.7.5
      */
+    @CreatedDate
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;
 

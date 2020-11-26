@@ -3,8 +3,10 @@ package tw.edu.ntub.imd.camping.databaseconfig.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.RentalRecordStatusChangeLogListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 
 import javax.persistence.*;
@@ -17,7 +19,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Entity
-@EntityListeners(RentalRecordStatusChangeLogListener.class)
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "rental_record_status_change_log", schema = Config.DATABASE_NAME)
 @IdClass(RentalRecordStatusChangeLogId.class)
 public class RentalRecordStatusChangeLog implements Persistable<RentalRecordStatusChangeLogId> {
@@ -60,6 +62,7 @@ public class RentalRecordStatusChangeLog implements Persistable<RentalRecordStat
      *
      * @since 1.6.0
      */
+    @CreatedBy
     @Column(name = "changer_account", length = 100, nullable = false)
     private String changerAccount;
 
@@ -68,6 +71,7 @@ public class RentalRecordStatusChangeLog implements Persistable<RentalRecordStat
      *
      * @since 1.6.0
      */
+    @CreatedDate
     @Column(name = "change_date", nullable = false)
     private LocalDateTime changeDate;
 

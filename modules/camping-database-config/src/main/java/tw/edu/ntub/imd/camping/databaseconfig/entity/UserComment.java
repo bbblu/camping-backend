@@ -3,8 +3,10 @@ package tw.edu.ntub.imd.camping.databaseconfig.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.UserCommentListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -16,7 +18,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Entity
-@EntityListeners(UserCommentListener.class)
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "user_comment", schema = Config.DATABASE_NAME)
 public class UserComment {
     /**
@@ -58,6 +60,7 @@ public class UserComment {
      *
      * @since 1.0.0
      */
+    @CreatedBy
     @Column(name = "comment_account", length = 100, nullable = false)
     private String commentAccount;
 
@@ -66,6 +69,7 @@ public class UserComment {
      *
      * @since 1.0.0
      */
+    @CreatedDate
     @Column(name = "comment_date", nullable = false)
     private LocalDateTime commentDate;
 

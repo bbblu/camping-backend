@@ -1,6 +1,10 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.NotificationListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.NotificationType;
@@ -15,7 +19,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Entity
-@EntityListeners(NotificationListener.class)
+@EntityListeners({AuditingEntityListener.class, NotificationListener.class})
 @Table(name = "notification", schema = Config.DATABASE_NAME)
 public class Notification {
     /**
@@ -66,6 +70,7 @@ public class Notification {
      *
      * @since 1.6.1
      */
+    @CreatedDate
     @Column(name = "send_date", nullable = false)
     private LocalDateTime sendDate;
 
@@ -83,6 +88,8 @@ public class Notification {
      * @see RentalRecord
      * @since 1.6.1
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rental_record_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
     private RentalRecord rentalRecord;
@@ -93,6 +100,8 @@ public class Notification {
      * @see User
      * @since 1.6.1
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User createUser;

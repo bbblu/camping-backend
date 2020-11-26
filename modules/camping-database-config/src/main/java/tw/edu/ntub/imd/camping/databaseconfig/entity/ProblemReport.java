@@ -3,6 +3,10 @@ package tw.edu.ntub.imd.camping.databaseconfig.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ProblemReportListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.ProblemReportStatus;
@@ -18,7 +22,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Entity
-@EntityListeners(ProblemReportListener.class)
+@EntityListeners({AuditingEntityListener.class, ProblemReportListener.class})
 @Table(name = "problem_report", schema = Config.DATABASE_NAME)
 public class ProblemReport {
     /**
@@ -62,6 +66,7 @@ public class ProblemReport {
      *
      * @since 1.4.0
      */
+    @CreatedDate
     @Column(name = "report_date", nullable = false)
     private LocalDateTime reportDate;
 
@@ -118,6 +123,7 @@ public class ProblemReport {
      *
      * @since 1.4.0
      */
+    @LastModifiedBy
     @Column(name = "last_modify_account", length = 100, nullable = false)
     private String lastModifyAccount;
 
@@ -126,6 +132,7 @@ public class ProblemReport {
      *
      * @since 1.4.0
      */
+    @LastModifiedDate
     @Column(name = "last_modify_date", nullable = false)
     private LocalDateTime lastModifyDate;
 

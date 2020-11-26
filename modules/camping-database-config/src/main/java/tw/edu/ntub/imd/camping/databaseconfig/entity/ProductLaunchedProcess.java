@@ -2,6 +2,10 @@ package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ProductLaunchedProcessListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.ProductLaunchedProcessStatus;
@@ -15,9 +19,8 @@ import java.time.LocalDateTime;
  * @since 1.0.0
  */
 @Data
-@EqualsAndHashCode(exclude = "productGroupByGroupId")
 @Entity
-@EntityListeners(ProductLaunchedProcessListener.class)
+@EntityListeners({AuditingEntityListener.class, ProductLaunchedProcessListener.class})
 @Table(name = "product_launched_process", schema = Config.DATABASE_NAME)
 public class ProductLaunchedProcess {
     /**
@@ -69,6 +72,7 @@ public class ProductLaunchedProcess {
      *
      * @since 1.0.0
      */
+    @CreatedDate
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;
 
@@ -77,6 +81,7 @@ public class ProductLaunchedProcess {
      *
      * @since 1.0.0
      */
+    @LastModifiedDate
     @Column(name = "last_modify_date", nullable = false)
     private LocalDateTime lastModifyDate;
 
@@ -86,6 +91,8 @@ public class ProductLaunchedProcess {
      * @see ProductGroup
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
     private ProductGroup productGroupByGroupId;

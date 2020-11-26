@@ -2,7 +2,6 @@ package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 
@@ -14,7 +13,6 @@ import javax.persistence.*;
  * @since 1.0.0
  */
 @Data
-@EqualsAndHashCode
 @Entity
 @Table(name = "city", schema = Config.DATABASE_NAME)
 public class City {

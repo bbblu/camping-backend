@@ -1,9 +1,9 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ProductListener;
 
@@ -16,13 +16,8 @@ import java.time.LocalDateTime;
  * @since 1.0.0
  */
 @Data
-@EqualsAndHashCode(exclude = {
-        "productGroupByGroupId",
-        "productTypeByType",
-        "userByLastModifyAccount"
-})
 @Entity
-@EntityListeners(ProductListener.class)
+@EntityListeners({AuditingEntityListener.class, ProductListener.class})
 @Table(name = "product", schema = Config.DATABASE_NAME)
 public class Product {
     /**
@@ -129,6 +124,7 @@ public class Product {
      *
      * @since 1.0.0
      */
+    @LastModifiedBy
     @Column(name = "last_modify_account", length = 100, nullable = false)
     private String lastModifyAccount;
 
@@ -137,6 +133,7 @@ public class Product {
      *
      * @since 1.0.0
      */
+    @LastModifiedDate
     @Column(name = "last_modify_date", nullable = false)
     private LocalDateTime lastModifyDate;
 
@@ -146,6 +143,8 @@ public class Product {
      * @see ProductGroup
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
     private ProductGroup productGroupByGroupId;
@@ -156,6 +155,8 @@ public class Product {
      * @see ProductType
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
     private ProductType productTypeByType;
@@ -166,6 +167,8 @@ public class Product {
      * @see User
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_modify_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User userByLastModifyAccount;

@@ -1,6 +1,11 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
 import lombok.*;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.RentalRecordListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
@@ -15,7 +20,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Entity
-@EntityListeners(RentalRecordListener.class)
+@EntityListeners({AuditingEntityListener.class, RentalRecordListener.class})
 @Table(name = "rental_record", schema = Config.DATABASE_NAME)
 public class RentalRecord {
     /**
@@ -83,6 +88,7 @@ public class RentalRecord {
      *
      * @since 1.0.0
      */
+    @CreatedBy
     @Column(name = "renter_account", length = 100, nullable = false)
     private String renterAccount;
 
@@ -99,6 +105,7 @@ public class RentalRecord {
      *
      * @since 1.0.0
      */
+    @CreatedDate
     @Column(name = "rental_date", nullable = false)
     private LocalDateTime rentalDate;
 
@@ -179,6 +186,7 @@ public class RentalRecord {
      *
      * @since 1.0.0
      */
+    @LastModifiedBy
     @Column(name = "last_modify_account", length = 100, nullable = false)
     private String lastModifyAccount;
 
@@ -187,6 +195,7 @@ public class RentalRecord {
      *
      * @since 1.0.0
      */
+    @LastModifiedDate
     @Column(name = "last_modify_date", nullable = false)
     private LocalDateTime lastModifyDate;
 

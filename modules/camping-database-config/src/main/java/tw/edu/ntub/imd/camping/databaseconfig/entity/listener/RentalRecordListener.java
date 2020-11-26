@@ -1,6 +1,5 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity.listener;
 
-import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 
@@ -18,24 +17,10 @@ public class RentalRecordListener {
         if (rentalRecord.getStatus() == null) {
             rentalRecord.setStatus(RentalRecordStatus.NOT_AGREE);
         }
-        if (rentalRecord.getRenterAccount() == null) {
-            rentalRecord.setRenterAccount(SecurityUtils.getLoginUserAccount());
-        }
-        if (rentalRecord.getRentalDate() == null) {
-            rentalRecord.setRentalDate(LocalDateTime.now());
-        }
-        if (rentalRecord.getLastModifyAccount() == null) {
-            rentalRecord.setLastModifyAccount(SecurityUtils.getLoginUserAccount());
-        }
-        if (rentalRecord.getLastModifyDate() == null) {
-            rentalRecord.setLastModifyDate(LocalDateTime.now());
-        }
     }
 
     @PreUpdate
     public void preUpdate(RentalRecord rentalRecord) {
-        rentalRecord.setLastModifyAccount(SecurityUtils.getLoginUserAccount());
-        rentalRecord.setLastModifyDate(LocalDateTime.now());
         switch (rentalRecord.getStatus()) {
             case ALREADY_CANCEL:
                 rentalRecord.setCancelDate(LocalDateTime.now());

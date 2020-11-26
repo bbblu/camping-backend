@@ -1,11 +1,9 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.LogRecordListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.LogRecordDevice;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.LogRecordDeviceType;
 
@@ -18,9 +16,8 @@ import java.time.LocalDateTime;
  * @since 1.0.0
  */
 @Data
-@EqualsAndHashCode(exclude = "userByExecutor")
 @Entity
-@EntityListeners(LogRecordListener.class)
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "log_record", schema = Config.DATABASE_NAME)
 public class LogRecord {
     /**
@@ -78,6 +75,7 @@ public class LogRecord {
      *
      * @since 1.0.0
      */
+    @CreatedDate
     @Column(name = "execute_date", nullable = false)
     private LocalDateTime executeDate;
 
@@ -136,6 +134,8 @@ public class LogRecord {
      * @see User
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "executor", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User userByExecutor;

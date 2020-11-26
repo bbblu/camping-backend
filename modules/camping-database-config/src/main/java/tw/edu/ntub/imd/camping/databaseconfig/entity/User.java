@@ -1,6 +1,10 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.UserListener;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.Experience;
@@ -21,7 +25,7 @@ import java.time.LocalDateTime;
 @Builder
 @Data
 @Entity
-@EntityListeners(UserListener.class)
+@EntityListeners({AuditingEntityListener.class, UserListener.class})
 @Table(name = "user", schema = Config.DATABASE_NAME)
 public class User implements Persistable<String> {
     @Transient
@@ -159,6 +163,7 @@ public class User implements Persistable<String> {
      *
      * @since 1.0.0
      */
+    @CreatedDate
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;
 
@@ -167,6 +172,7 @@ public class User implements Persistable<String> {
      *
      * @since 1.0.0
      */
+    @LastModifiedBy
     @Column(name = "last_modify_account", length = 100, nullable = false)
     private String lastModifyAccount;
 
@@ -175,6 +181,7 @@ public class User implements Persistable<String> {
      *
      * @since 1.0.0
      */
+    @LastModifiedDate
     @Column(name = "last_modify_date", nullable = false)
     private LocalDateTime lastModifyDate;
 
