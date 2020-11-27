@@ -98,6 +98,7 @@ public class UserController {
             data.add("email", userBean.getEmail());
             data.add("address", userBean.getAddress());
             data.add("comment", userBean.getComment());
+            data.add("bankAccount", userBean.getBankAccount());
             return ResponseEntityBuilder.success("查詢成功")
                     .data(data)
                     .build();
