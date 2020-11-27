@@ -6,6 +6,11 @@ import tw.edu.ntub.imd.camping.databaseconfig.Config;
 
 import javax.persistence.*;
 
+/**
+ * 可計算建議售價的品牌
+ *
+ * @since 1.8.1
+ */
 @Data
 @Entity
 @Table(name = "brand_product_type", schema = Config.DATABASE_NAME)

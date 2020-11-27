@@ -1,21 +1,26 @@
 package tw.edu.ntub.imd.camping.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.ProductBrandDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.ProductSubTypeDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.ProductTypeDAO;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.ThirdPartyProductRecordDAO;
+import tw.edu.ntub.birc.common.util.CollectionUtils;
+import tw.edu.ntub.birc.common.util.JavaBeanUtils;
+import tw.edu.ntub.imd.camping.bean.ThirdPartyProductRecordIndexBean;
+import tw.edu.ntub.imd.camping.bean.ThirdPartyProductRecordIndexFilterBean;
+import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductBrand;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductSubType;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductType;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ThirdPartyProductRecord;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.view.ThirdPartyProductRecordIndex;
 import tw.edu.ntub.imd.camping.dto.file.excel.row.Row;
 import tw.edu.ntub.imd.camping.dto.file.excel.workbook.Workbook;
 import tw.edu.ntub.imd.camping.exception.NotFoundException;
 import tw.edu.ntub.imd.camping.service.ThirdPartyProductRecordService;
+import tw.edu.ntub.imd.camping.service.transformer.ThirdPartyProductRecordIndexTransformer;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -26,6 +31,18 @@ public class ThirdPartyProductRecordServiceImpl implements ThirdPartyProductReco
     private final ProductBrandDAO productBrandDAO;
     private final ProductSubTypeDAO productSubTypeDAO;
     private final ThirdPartyProductRecordDAO thirdPartyProductRecordDAO;
+    private final ThirdPartyProductRecordIndexDAO indexDAO;
+    private final ThirdPartyProductRecordIndexTransformer indexTransformer;
+
+    @Override
+    public List<ThirdPartyProductRecordIndexBean> searchIndexRecord(ThirdPartyProductRecordIndexFilterBean filterBean) {
+        return CollectionUtils.map(
+                indexDAO.findAll(Example.of(
+                        JavaBeanUtils.copy(filterBean, new ThirdPartyProductRecordIndex())
+                )),
+                indexTransformer::transferToBean
+        );
+    }
 
     @Override
     @Transactional

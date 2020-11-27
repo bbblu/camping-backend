@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>借借露 - 其他商家資料</title>
+
+  <link rel="stylesheet" href="../../static/css/materialize.min.css" th:href="@{/static/css/materialize.min.css}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../../static/css/main.css" th:href="@{/static/css/main.css}">
+  <link rel="stylesheet" href="../../static/css/question-report.css" th:href="@{/static/css/question-report.css}">
+</head>
+<body>
+<nav>
+  <div class="nav-wrapper">
+    <a class="sidenav-trigger" href="#" data-target="slide-out">
+      <i class="material-icons">menu</i>
+    </a>
+
+    <a class="brand-logo right" href="#">
+      <i class="material-icons">account_circle</i>
+      <span class="account" th:text="${#authorization.authentication.principal}">帳號</span>
+    </a>
+  </div>
+</nav>
+
+<ul id="slide-out" class="sidenav sidenav-fixed collection with-header">
+  <li class="collection-header">
+    <a class="home" href="#" th:href="@{/rental/manager}">
+      <img class="logo col" alt="logo" src="../../static/images/logo.png" th:src="@{/static/images/logo.png}"/>
+      <span class="col">管理者頁面</span>
+    </a>
+  </li>
+
+  <li class="collection-item">
+    <a href="#" th:href="@{/problem-report/manager}">
+      <i class="material-icons">help</i>
+      <span>問題回報</span>
+    </a>
+  </li>
+  <li class="collection-item">
+    <a href="#" th:href="@{/rental/manager}">
+      <i class="material-icons">view_list</i>
+      <span>訂單管理</span>
+    </a>
+  </li>
+  <li class="collection-item">
+    <a href="#" th:href="@{/user/manager}">
+      <i class="material-icons">account_box</i>
+      <span>使用者管理</span>
+    </a>
+  </li>
+  <li class="collection-item">
+    <a href="#" th:href="@{/third-party-product}">
+      <i class="material-icons">assessment</i>
+      <span>其他商家資料</span>
+    </a>
+  </li>
+
+  <div class="divider"></div>
+
+  <li class="collection-item">
+    <a href="#">登出</a>
+  </li>
+</ul>
+
+<main class="container">
+  <div class="row">
+    <div class="input-field col s4">
+      <select id="brand" onchange="searchType(this.value); search();">
+        <option value="" selected>請選擇品牌</option>
+        <th:block th:remove="all-but-first">
+          <option value="1" th:each="brand, stauts: ${brandList}" th:value="${brand.id}" th:text="${brand.name}">
+            Option 1
+          </option>
+          <option value="2">Option 2</option>
+          <option value="3">Option 3</option>
+        </th:block>
+      </select>
+      <label for="brand">品牌</label>
+    </div>
+    <div class="input-field col s4">
+      <select id="type"
+              onchange="searchSubType(document.querySelector('#brand').value, this.value); search();"
+              th:remove="all-but-first">
+        <option value="" selected>請選擇商品類型</option>
+        <option value="1">Option 1</option>
+        <option value="2">Option 2</option>
+        <option value="3">Option 3</option>
+      </select>
+      <label for="type">商品類型</label>
+    </div>
+    <div class="input-field col s4">
+      <select id="subType" onchange="search()" th:remove="all-but-first">
+        <option value="" selected>請選擇商品子類型</option>
+        <option value="1">Option 1</option>
+        <option value="2">Option 2</option>
+        <option value="3">Option 3</option>
+      </select>
+      <label for="subType">商品子類型</label>
+    </div>
+  </div>
+
+  <table class="striped centered">
+    <thead>
+    <tr>
+      <th>編號</th>
+      <th>品牌</th>
+      <th>類型</th>
+      <th>子類型</th>
+      <th>價格</th>
+    </tr>
+    </thead>
+
+    <tbody id="thirdPartyRecordTable" th:remove="body">
+    <tr>
+      <td>1</td>
+      <td>天天借</td>
+      <td>睡帳</td>
+      <td>三人登山帳</td>
+      <td>8,248</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <ul class="pagination" id="pagination">
+    <li class="disabled"><a href="#"><i class="material-icons">chevron_left</i></a></li>
+
+    <li class="waves-effect"><a href="#"><i class="material-icons">chevron_right</i></a></li>
+  </ul>
+</main>
+
+<script src="../../static/js/materialize.min.js" th:src="@{/static/js/materialize.min.js}"></script>
+<script src="../../static/js/sidenav.js" th:src="@{/static/js/sidenav.js}"></script>
+<script src="../../static/js/modal.js" th:src="@{/static/js/modal.js}"></script>
+<script src="../../static/js/pagination.js" th:src="@{/static/js/pagination.js}"></script>
+<script th:inline="javascript">
+    const datePerPage = 10;
+    let table;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        M.FormSelect.init(document.querySelectorAll("select"));
+        search();
+    });
+
+    function search() {
+        const url = /*[[@{/third-party-product/record}]]*/"";
+        const param = {
+            brandId: document.querySelector("#brand").value,
+            type: document.querySelector("#type").value,
+            subType: document.querySelector("#subType").value
+        };
+        fetch(`${url}?${new URLSearchParams(param).toString()}`)
+            .then(response => response.json())
+            .then(response => {
+                if (response.result) {
+                    table = new Table(
+                        "thirdPartyRecordTable",
+                        response.data,
+                        (index, row) => `
+                        <tr>
+                            <td>${row.id}</td>
+                            <td>${row.brandName}</td>
+                            <td>${row.typeName}</td>
+                            <td>${row.subTypeName}</td>
+                            <td>${row.price}</td>
+                        </tr>
+                    `,
+                        "pagination",
+                        datePerPage
+                    );
+                    table.reload();
+                } else {
+                    alert(response.message);
+                }
+            });
+    }
+
+    function searchType(brand) {
+        if (brand) {
+            const url = /*[[@{/product-group/type}]]*/"";
+            fetch(`${url}?brand=${brand}`)
+                .then(response => response.json())
+                .then(response => {
+                    if (response.result) {
+                        refreshSelect("type", "商品類型", response.data);
+                    } else {
+                        alert(response.message);
+                    }
+                });
+        } else {
+            refreshSelect("type", "商品類型", []);
+            refreshSelect("subType", "商品子類型", []);
+        }
+    }
+
+    function refreshSelect(id, label, optionArray) {
+        const selectElement = document.querySelector(`#${id}`);
+        clearSelect(selectElement);
+        const pleaseSelectOption = document.createElement("option");
+        pleaseSelectOption.text = `請選擇${label}`;
+        pleaseSelectOption.value = "";
+        selectElement.add(pleaseSelectOption);
+        optionArray.map(option => {
+            const optionElement = document.createElement("option");
+            optionElement.value = option.id;
+            optionElement.text = option.name;
+            return optionElement;
+        }).forEach(option => selectElement.add(option));
+        M.FormSelect.init(selectElement);
+    }
+
+    function clearSelect(selectElement) {
+        const options = selectElement.options;
+        for (let i = options.length - 1; i >= 0; i--) {
+            selectElement.remove(i);
+        }
+    }
+
+    function searchSubType(brand, type) {
+        if (type) {
+            const url = /*[[@{/product-group/sub-type}]]*/"";
+            fetch(`${url}?brand=${brand}&type=${type}`)
+                .then(response => response.json())
+                .then(response => {
+                    if (response.result) {
+                        refreshSelect("subType", "商品子類型", response.data);
+                    } else {
+                        alert(response.message);
+                    }
+                });
+        } else {
+            refreshSelect("subType", "商品子類型", []);
+        }
+    }
+
+</script>
+</body>
+</html>
