@@ -96,7 +96,8 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
 
         RentalRecord rentalRecord = transformer.transferToEntity(rentalRecordBean);
         Duration betweenStartDateAndEndDate = Duration.between(rentalRecordBean.getBorrowStartDate(), rentalRecordBean.getBorrowEndDate());
-        int borrowDays = (int) betweenStartDateAndEndDate.toDays();
+        final int EXCLUSIVE_END_DATE = 1;
+        int borrowDays = (int) betweenStartDateAndEndDate.toDays() + EXCLUSIVE_END_DATE;
         rentalRecord.setPrice(productGroup.getPrice() * borrowDays);
         RentalRecord saveResult = recordDAO.saveAndFlush(rentalRecord);
         saveDetail(saveResult.getId(), saveResult.getProductGroupId());
