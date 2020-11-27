@@ -76,6 +76,14 @@ public class RentalRecord {
     private RentalRecordStatus status;
 
     /**
+     * 訂單總金額
+     *
+     * @since 1.8.5
+     */
+    @Column(name = "price", nullable = false)
+    private Integer price;
+
+    /**
      * 信用卡交易編號
      *
      * @since 1.4.0

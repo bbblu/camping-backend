@@ -24,6 +24,7 @@ import tw.edu.ntub.imd.camping.service.transformer.RentalRecordTransformer;
 import tw.edu.ntub.imd.camping.util.NotificationUtils;
 import tw.edu.ntub.imd.camping.util.OwnerChecker;
 
+import java.time.Duration;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -94,6 +95,9 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         }
 
         RentalRecord rentalRecord = transformer.transferToEntity(rentalRecordBean);
+        Duration betweenStartDateAndEndDate = Duration.between(rentalRecordBean.getBorrowStartDate(), rentalRecordBean.getBorrowEndDate());
+        int borrowDays = (int) betweenStartDateAndEndDate.toDays();
+        rentalRecord.setPrice(productGroup.getPrice() * borrowDays);
         RentalRecord saveResult = recordDAO.saveAndFlush(rentalRecord);
         saveDetail(saveResult.getId(), saveResult.getProductGroupId());
         saveResult.setProductGroupByProductGroupId(productGroup);

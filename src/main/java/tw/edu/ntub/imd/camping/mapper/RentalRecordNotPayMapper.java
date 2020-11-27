@@ -53,7 +53,7 @@ public class RentalRecordNotPayMapper implements RentalRecordStatusMapper {
                 CreditCard creditCard = (CreditCard) payload;
                 ProductGroup productGroup = record.getProductGroupByProductGroupId();
                 User creator = productGroup.getUserByCreateAccount();
-                transactionUtils.createTransaction(creditCard, creator.getBankAccount(), productGroup.getPrice());
+                transactionUtils.createTransaction(creditCard, creator.getBankAccount(), record.getPrice());
             } catch (RuntimeException e) {
                 Notification notification = new Notification();
                 notification.setRentalRecordId(record.getId());
