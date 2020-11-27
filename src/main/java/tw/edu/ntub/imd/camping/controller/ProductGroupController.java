@@ -25,11 +25,13 @@ import tw.edu.ntub.imd.camping.util.http.BindingResultUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
 import tw.edu.ntub.imd.camping.util.json.object.CollectionObjectData;
 import tw.edu.ntub.imd.camping.util.json.object.ObjectData;
+import tw.edu.ntub.imd.camping.util.json.object.SingleValueObjectData;
 import tw.edu.ntub.imd.camping.validation.CreateProductGroup;
 import tw.edu.ntub.imd.camping.validation.UpdateProduct;
 import tw.edu.ntub.imd.camping.validation.UpdateProductGroup;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -526,6 +528,67 @@ public class ProductGroupController {
         return ResponseEntityBuilder.buildSuccessMessage("評價成功");
     }
 
+    @Operation(
+            tags = "Product",
+            method = "GET",
+            summary = "查詢商品子類型",
+            description = "查詢商品子類型",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "查詢成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ProductSubTypeSchema.class)
+                    )
+            )
+    )
+    @GetMapping(path = "/sub-type")
+    public ResponseEntity<String> searchSubType() {
+        return ResponseEntityBuilder.success("查詢成功")
+                .data(productGroupService.searchAllSubType(), (data, productSubType) -> {
+                    data.add("id", productSubType.getId());
+                    data.add("name", productSubType.getName());
+                    ProductTypeBean productType = productSubType.getProductType();
+                    data.add("type", productType.getId());
+                    data.add("typeName", productType.getName());
+                })
+                .build();
+    }
+
+    @Operation(
+            tags = "Product",
+            method = "GET",
+            summary = "查詢商品建議售價",
+            description = "查詢商品建議售價",
+            parameters = {
+                    @Parameter(name = "type", description = "商品類型編號", required = true, example = "1"),
+                    @Parameter(name = "subType", description = "商品子類型編號", required = true, example = "1")
+            },
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "查詢成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = RecommendProductPriceSchema.class)
+                    )
+            )
+    )
+    @GetMapping(path = "/recommend-price")
+    public ResponseEntity<String> getRecommendPrice(
+            @RequestParam
+            @NotNull(message = "商品類型 - 未填寫")
+            @Positive(message = "商品類型 - 應為大於0的數字")
+                    Integer type,
+            @RequestParam
+            @NotNull(message = "商品子類型 - 未填寫")
+            @Positive(message = "商品子類型 - 應為大於0的數字")
+                    Integer subType
+    ) {
+        return ResponseEntityBuilder.success("查詢成功")
+                .data(SingleValueObjectData.create("price", productGroupService.getRecommendPrice(type, subType)))
+                .build();
+    }
+
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
     // |---------------------------------------------------------以下為Swagger所需使用的Schema---------------------------------------------------------|
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
@@ -713,5 +776,25 @@ public class ProductGroupController {
     private static class ProductGroupCommentSchema {
         @Schema(description = "評價分數", minimum = "1", maximum = "5")
         private Byte comment;
+    }
+
+    @Schema(name = "商品子類型查詢資料", description = "商品子類型查詢資料")
+    @Data
+    private static class ProductSubTypeSchema {
+        @Schema(description = "子類型編號", example = "1")
+        private Integer id;
+        @Schema(description = "子類型名稱", example = "小於四人帳篷")
+        private String name;
+        @Schema(description = "類型編號", example = "2")
+        private Integer type;
+        @Schema(description = "類型名稱", example = "睡帳")
+        private String typeName;
+    }
+
+    @Schema(name = "建議售價查詢資料", description = "建議售價查詢資料")
+    @Data
+    private static class RecommendProductPriceSchema {
+        @Schema(description = "建議售價", minimum = "0", example = "472")
+        private Integer price;
     }
 }

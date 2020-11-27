@@ -18,4 +18,8 @@ public interface ProductGroupService extends BaseService<ProductGroupBean, Integ
     void deleteProductImage(Integer productImageId);
 
     void createComment(int id, byte comment);
+
+    List<ProductSubTypeBean> searchAllSubType();
+
+    long getRecommendPrice(int type, int subType);
 }

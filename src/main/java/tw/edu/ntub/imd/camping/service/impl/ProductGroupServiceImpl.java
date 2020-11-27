@@ -1,6 +1,8 @@
 package tw.edu.ntub.imd.camping.service.impl;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import tw.edu.ntub.birc.common.enumerate.Round;
 import tw.edu.ntub.birc.common.util.CollectionUtils;
 import tw.edu.ntub.birc.common.util.JavaBeanUtils;
 import tw.edu.ntub.birc.common.util.MathUtils;
@@ -10,13 +12,15 @@ import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroupComment;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductSubType_;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.view.RecommendProductPrice;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.view.RecommendProductPriceId;
 import tw.edu.ntub.imd.camping.exception.DuplicateCommentException;
 import tw.edu.ntub.imd.camping.exception.InvalidCommentRangeException;
 import tw.edu.ntub.imd.camping.exception.NotFoundException;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.service.transformer.*;
 import tw.edu.ntub.imd.camping.util.OwnerChecker;
-import tw.edu.ntub.imd.camping.util.TransactionUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,8 +39,10 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     private final ProductImageTransformer imageTransformer;
     private final CanBorrowProductGroupDAO canBorrowProductGroupDAO;
     private final CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer;
-    private final TransactionUtils transactionUtils;
     private final ProductGroupCommentDAO commentDAO;
+    private final ProductSubTypeDAO subTypeDAO;
+    private final ProductSubTypeTransformer subTypeTransformer;
+    private final RecommendProductPriceDAO recommendProductPriceDAO;
 
     public ProductGroupServiceImpl(
             ProductGroupDAO groupDAO,
@@ -49,8 +55,10 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             ProductImageTransformer imageTransformer,
             CanBorrowProductGroupDAO canBorrowProductGroupDAO,
             CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer,
-            TransactionUtils transactionUtils,
-            ProductGroupCommentDAO commentDAO) {
+            ProductGroupCommentDAO commentDAO,
+            ProductSubTypeDAO subTypeDAO,
+            ProductSubTypeTransformer subTypeTransformer,
+            RecommendProductPriceDAO recommendProductPriceDAO) {
         super(groupDAO, transformer);
         this.groupDAO = groupDAO;
         this.transformer = transformer;
@@ -62,8 +70,10 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         this.imageTransformer = imageTransformer;
         this.canBorrowProductGroupDAO = canBorrowProductGroupDAO;
         this.canBorrowProductGroupBeanTransformer = canBorrowProductGroupBeanTransformer;
-        this.transactionUtils = transactionUtils;
         this.commentDAO = commentDAO;
+        this.subTypeDAO = subTypeDAO;
+        this.subTypeTransformer = subTypeTransformer;
+        this.recommendProductPriceDAO = recommendProductPriceDAO;
     }
 
     @Override
@@ -204,5 +214,29 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         } else {
             throw new InvalidCommentRangeException(comment);
         }
+    }
+
+    @Override
+    public List<ProductSubTypeBean> searchAllSubType() {
+        return CollectionUtils.map(
+                subTypeDAO.findByEnableIsTrue(Sort.by(Sort.Order.asc(ProductSubType_.TYPE))),
+                subTypeTransformer::transferToBean
+        );
+    }
+
+    @Override
+    public long getRecommendPrice(int type, int subType) {
+        RecommendProductPrice recommendProductPrice =
+                recommendProductPriceDAO.findById(new RecommendProductPriceId(type, subType))
+                        .orElseThrow(() -> new NotFoundException("本系統目前無該商品類型的建議售價"));
+        double price;
+        if (recommendProductPrice.getCount() > 1) {
+            price = recommendProductPrice.getPrice() * 0.9;
+        } else if (recommendProductPrice.getCount() == 1) {
+            price = recommendProductPrice.getPrice() * 0.85;
+        } else {
+            throw new NotFoundException("本系統目前無該商品類型的建議售價");
+        }
+        return (long) MathUtils.round((long) price, MathUtils.getRoundDecimalDigit(2), Round.STORE_DISCOUNT_ROUNDING);
     }
 }
