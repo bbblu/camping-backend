@@ -15,7 +15,10 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductType;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ThirdPartyProductRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.view.ThirdPartyProductRecordIndex;
 import tw.edu.ntub.imd.camping.dto.file.excel.row.Row;
+import tw.edu.ntub.imd.camping.dto.file.excel.sheet.Sheet;
+import tw.edu.ntub.imd.camping.dto.file.excel.workbook.PoiWorkbook;
 import tw.edu.ntub.imd.camping.dto.file.excel.workbook.Workbook;
+import tw.edu.ntub.imd.camping.enumerate.ExcelType;
 import tw.edu.ntub.imd.camping.exception.NotFoundException;
 import tw.edu.ntub.imd.camping.service.ThirdPartyProductRecordService;
 import tw.edu.ntub.imd.camping.service.transformer.ThirdPartyProductRecordIndexTransformer;
@@ -42,6 +45,25 @@ public class ThirdPartyProductRecordServiceImpl implements ThirdPartyProductReco
                 )),
                 indexTransformer::transferToBean
         );
+    }
+
+    @Override
+    public Workbook getTemplateExcel() {
+        Workbook result = new PoiWorkbook(ExcelType.XLSX, "商家資料匯入檔");
+        Sheet dataSheet = result.getSheet("資料");
+        dataSheet.setCellValue("A1", "品牌");
+        dataSheet.setCellValue("B1", "商品類型");
+        dataSheet.setCellValue("C1", "子類型");
+        dataSheet.setCellValue("D1", "價格");
+
+        String productTypeColumn = "G";
+        dataSheet.setCellValue(productTypeColumn + "1", "商品類型");
+        List<ProductType> productTypeList = productTypeDAO.findByEnableIsTrue();
+        for (int i = 0; i < productTypeList.size(); i++) {
+            ProductType productType = productTypeList.get(i);
+            dataSheet.setCellValue(productTypeColumn + (i + 2), productType.getName());
+        }
+        return result;
     }
 
     @Override

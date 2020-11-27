@@ -16,5 +16,7 @@ public interface ThirdPartyProductRecordService {
             @Nullable ThirdPartyProductRecordIndexFilterBean filterBean
     );
 
+    Workbook getTemplateExcel();
+
     void importRecord(Workbook recordWorkbook);
 }

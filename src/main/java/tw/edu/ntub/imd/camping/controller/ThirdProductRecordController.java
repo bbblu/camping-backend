@@ -15,8 +15,10 @@ import tw.edu.ntub.imd.camping.dto.file.excel.workbook.PoiWorkbook;
 import tw.edu.ntub.imd.camping.dto.file.excel.workbook.Workbook;
 import tw.edu.ntub.imd.camping.service.ProductGroupService;
 import tw.edu.ntub.imd.camping.service.ThirdPartyProductRecordService;
+import tw.edu.ntub.imd.camping.util.http.ExcelResponseUtils;
 import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @AllArgsConstructor
@@ -47,6 +49,12 @@ public class ThirdProductRecordController {
                     data.add("price", index.getPrice());
                 })
                 .build();
+    }
+
+    @GetMapping(path = "/template")
+    public void downloadTemplate(HttpServletResponse response) {
+        Workbook workbook = thirdPartyProductRecordService.getTemplateExcel();
+        ExcelResponseUtils.response(response, workbook);
     }
 
     @PostMapping(path = "/import")
