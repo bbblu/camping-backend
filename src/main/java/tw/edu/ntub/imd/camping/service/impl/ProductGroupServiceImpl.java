@@ -1,6 +1,5 @@
 package tw.edu.ntub.imd.camping.service.impl;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import tw.edu.ntub.birc.common.enumerate.Round;
 import tw.edu.ntub.birc.common.util.CollectionUtils;
@@ -12,7 +11,6 @@ import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.Product;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroupComment;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductSubType_;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.view.RecommendProductPrice;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.view.RecommendProductPriceId;
 import tw.edu.ntub.imd.camping.exception.DuplicateCommentException;
@@ -28,7 +26,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, ProductGroup, Integer> implements ProductGroupService {
+public class ProductGroupServiceImpl
+        extends BaseServiceImpl<ProductGroupBean, ProductGroup, Integer>
+        implements ProductGroupService {
     private final ProductGroupDAO groupDAO;
     private final ProductGroupTransformer transformer;
     private final ProductDAO productDAO;
@@ -40,6 +40,9 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     private final CanBorrowProductGroupDAO canBorrowProductGroupDAO;
     private final CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer;
     private final ProductGroupCommentDAO commentDAO;
+    private final ProductBrandDAO brandDAO;
+    private final ProductBrandTransformer brandTransformer;
+    private final BrandProductTypeDAO brandProductTypeDAO;
     private final ProductSubTypeDAO subTypeDAO;
     private final ProductSubTypeTransformer subTypeTransformer;
     private final RecommendProductPriceDAO recommendProductPriceDAO;
@@ -56,6 +59,9 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
             CanBorrowProductGroupDAO canBorrowProductGroupDAO,
             CanBorrowProductGroupBeanTransformer canBorrowProductGroupBeanTransformer,
             ProductGroupCommentDAO commentDAO,
+            ProductBrandDAO brandDAO,
+            ProductBrandTransformer brandTransformer,
+            BrandProductTypeDAO brandProductTypeDAO,
             ProductSubTypeDAO subTypeDAO,
             ProductSubTypeTransformer subTypeTransformer,
             RecommendProductPriceDAO recommendProductPriceDAO) {
@@ -71,6 +77,9 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
         this.canBorrowProductGroupDAO = canBorrowProductGroupDAO;
         this.canBorrowProductGroupBeanTransformer = canBorrowProductGroupBeanTransformer;
         this.commentDAO = commentDAO;
+        this.brandDAO = brandDAO;
+        this.brandTransformer = brandTransformer;
+        this.brandProductTypeDAO = brandProductTypeDAO;
         this.subTypeDAO = subTypeDAO;
         this.subTypeTransformer = subTypeTransformer;
         this.recommendProductPriceDAO = recommendProductPriceDAO;
@@ -217,17 +226,33 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     }
 
     @Override
-    public List<ProductSubTypeBean> searchSubTypeByType(int type) {
+    public List<ProductBrandBean> searchAllBrand() {
         return CollectionUtils.map(
-                subTypeDAO.findByTypeAndEnableIsTrue(type, Sort.by(Sort.Order.asc(ProductSubType_.TYPE))),
+                brandDAO.findByEnableIsTrue(),
+                brandTransformer::transferToBean
+        );
+    }
+
+    @Override
+    public List<ProductTypeBean> searchTypeByBrand(int brand) {
+        return CollectionUtils.map(
+                brandProductTypeDAO.findTypeByBrand(brand),
+                typeTransformer::transferToBean
+        );
+    }
+
+    @Override
+    public List<ProductSubTypeBean> searchSubTypeByBrandAndType(int brand, int type) {
+        return CollectionUtils.map(
+                brandProductTypeDAO.findSubTypeByBrandAndType(brand, type),
                 subTypeTransformer::transferToBean
         );
     }
 
     @Override
-    public long getRecommendPrice(int type, int subType) {
+    public long getRecommendPrice(int brand, int type, int subType) {
         RecommendProductPrice recommendProductPrice =
-                recommendProductPriceDAO.findById(new RecommendProductPriceId(type, subType))
+                recommendProductPriceDAO.findById(new RecommendProductPriceId(brand, type, subType))
                         .orElseThrow(() -> new NotFoundException("本系統目前無該商品類型的建議售價"));
         double price;
         if (recommendProductPrice.getCount() > 1) {

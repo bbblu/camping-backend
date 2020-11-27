@@ -13,7 +13,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RecommendProductPriceId implements Serializable {
+public class BrandProductTypeId implements Serializable {
     /**
      * 品牌
      *
@@ -26,18 +26,17 @@ public class RecommendProductPriceId implements Serializable {
     /**
      * 商品類型
      *
-     * @since 1.8.0
+     * @since 1.8.1
      */
     @Id
     @Column(name = "type", nullable = false)
     private Integer type;
 
     /**
-     * 商品子類型
+     * 類型名稱
      *
-     * @since 1.8.0
+     * @since 1.8.1
      */
-    @Id
-    @Column(name = "sub_type", nullable = false)
-    private Integer subType;
+    @Column(name = "type_name", length = 50, nullable = false)
+    private String typeName;
 }

@@ -533,7 +533,64 @@ public class ProductGroupController {
             method = "GET",
             summary = "查詢商品子類型",
             description = "查詢商品子類型",
-            parameters = @Parameter(name = "type", description = "商品類型編號", required = true, example = "1"),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "查詢成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ProductSubTypeSchema.class)
+                    )
+            )
+    )
+    @GetMapping(path = "/brand")
+    public ResponseEntity<String> searchBrand() {
+        return ResponseEntityBuilder.success("查詢成功")
+                .data(productGroupService.searchAllBrand(), (data, productBrand) -> {
+                    data.add("id", productBrand.getId());
+                    data.add("name", productBrand.getName());
+                })
+                .build();
+    }
+
+    @Operation(
+            tags = "Product",
+            method = "GET",
+            summary = "查詢商品類型",
+            description = "依據品牌搜尋商品類型",
+            parameters = @Parameter(name = "brand", description = "商品品牌編號", required = true, example = "1"),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "查詢成功",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ProductSubTypeSchema.class)
+                    )
+            )
+    )
+    @GetMapping(path = "/type", params = "brand")
+    public ResponseEntity<String> searchProductByBrand(
+            @RequestParam
+            @NotNull(message = "品牌 - 未填寫")
+            @Positive(message = "品牌 - 應為大於0的數字")
+                    Integer brand
+    ) {
+        return ResponseEntityBuilder.success("查詢成功")
+                .data(productGroupService.searchTypeByBrand(brand), (data, productType) -> {
+                    data.add("id", productType.getId());
+                    data.add("name", productType.getName());
+                })
+                .build();
+    }
+
+    @Operation(
+            tags = "Product",
+            method = "GET",
+            summary = "查詢商品子類型",
+            description = "查詢商品子類型",
+            parameters = {
+                    @Parameter(name = "brand", description = "商品品牌編號", required = true, example = "1"),
+                    @Parameter(name = "type", description = "商品類型編號", required = true, example = "1")
+            },
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "查詢成功",
@@ -546,12 +603,16 @@ public class ProductGroupController {
     @GetMapping(path = "/sub-type")
     public ResponseEntity<String> searchSubType(
             @RequestParam
+            @NotNull(message = "品牌 - 未填寫")
+            @Positive(message = "品牌 - 應為大於0的數字")
+                    Integer brand,
+            @RequestParam
             @NotNull(message = "商品類型 - 未填寫")
             @Positive(message = "商品類型 - 應為大於0的數字")
                     Integer type
     ) {
         return ResponseEntityBuilder.success("查詢成功")
-                .data(productGroupService.searchSubTypeByType(type), (data, productSubType) -> {
+                .data(productGroupService.searchSubTypeByBrandAndType(brand, type), (data, productSubType) -> {
                     data.add("id", productSubType.getId());
                     data.add("name", productSubType.getName());
                 })
@@ -564,6 +625,7 @@ public class ProductGroupController {
             summary = "查詢商品建議售價",
             description = "查詢商品建議售價",
             parameters = {
+                    @Parameter(name = "brand", description = "商品品牌編號", required = true, example = "1"),
                     @Parameter(name = "type", description = "商品類型編號", required = true, example = "1"),
                     @Parameter(name = "subType", description = "商品子類型編號", required = true, example = "1")
             },
@@ -579,6 +641,10 @@ public class ProductGroupController {
     @GetMapping(path = "/recommend-price")
     public ResponseEntity<String> getRecommendPrice(
             @RequestParam
+            @NotNull(message = "品牌 - 未填寫")
+            @Positive(message = "品牌 - 應為大於0的數字")
+                    Integer brand,
+            @RequestParam
             @NotNull(message = "商品類型 - 未填寫")
             @Positive(message = "商品類型 - 應為大於0的數字")
                     Integer type,
@@ -588,7 +654,7 @@ public class ProductGroupController {
                     Integer subType
     ) {
         return ResponseEntityBuilder.success("查詢成功")
-                .data(SingleValueObjectData.create("price", productGroupService.getRecommendPrice(type, subType)))
+                .data(SingleValueObjectData.create("price", productGroupService.getRecommendPrice(brand, type, subType)))
                 .build();
     }
 

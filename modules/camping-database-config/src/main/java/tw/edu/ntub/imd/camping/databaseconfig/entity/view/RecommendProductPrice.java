@@ -18,6 +18,15 @@ import javax.persistence.*;
 @Immutable
 public class RecommendProductPrice {
     /**
+     * 品牌
+     *
+     * @since 1.8.1
+     */
+    @Id
+    @Column(name = "brand", nullable = false)
+    private Integer brand;
+
+    /**
      * 商品類型
      *
      * @since 1.8.0

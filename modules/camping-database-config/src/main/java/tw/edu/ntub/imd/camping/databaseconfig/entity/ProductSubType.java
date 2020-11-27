@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
  * @since 1.8.0
  */
 @Data
+@NoArgsConstructor
 @Entity
 @EntityListeners({AuditingEntityListener.class, ProductSubTypeListener.class})
 @Table(name = "product_sub_type", schema = Config.DATABASE_NAME)
@@ -97,6 +98,11 @@ public class ProductSubType {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "create_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
     private User creator;
+
+    public ProductSubType(Integer id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     /**
      * 是否啟用(0: 不啟用/ 1: 啟用)
