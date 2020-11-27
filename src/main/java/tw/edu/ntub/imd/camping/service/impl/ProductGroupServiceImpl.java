@@ -217,9 +217,9 @@ public class ProductGroupServiceImpl extends BaseServiceImpl<ProductGroupBean, P
     }
 
     @Override
-    public List<ProductSubTypeBean> searchAllSubType() {
+    public List<ProductSubTypeBean> searchSubTypeByType(int type) {
         return CollectionUtils.map(
-                subTypeDAO.findByEnableIsTrue(Sort.by(Sort.Order.asc(ProductSubType_.TYPE))),
+                subTypeDAO.findByTypeAndEnableIsTrue(type, Sort.by(Sort.Order.asc(ProductSubType_.TYPE))),
                 subTypeTransformer::transferToBean
         );
     }

@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface ProductSubTypeDAO extends BaseDAO<ProductSubType, Integer> {
 
-    List<ProductSubType> findByEnableIsTrue(Sort sort);
+    List<ProductSubType> findByTypeAndEnableIsTrue(int type, Sort sort);
 
-    Optional<ProductSubType> findByTypeAndName(Integer type, String subTypeName);
+    Optional<ProductSubType> findByTypeAndName(int type, String subTypeName);
 }

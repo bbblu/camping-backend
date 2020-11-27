@@ -19,7 +19,7 @@ public interface ProductGroupService extends BaseService<ProductGroupBean, Integ
 
     void createComment(int id, byte comment);
 
-    List<ProductSubTypeBean> searchAllSubType();
+    List<ProductSubTypeBean> searchSubTypeByType(int type);
 
     long getRecommendPrice(int type, int subType);
 }

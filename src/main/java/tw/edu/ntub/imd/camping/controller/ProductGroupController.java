@@ -533,6 +533,7 @@ public class ProductGroupController {
             method = "GET",
             summary = "查詢商品子類型",
             description = "查詢商品子類型",
+            parameters = @Parameter(name = "type", description = "商品類型編號", required = true, example = "1"),
             responses = @ApiResponse(
                     responseCode = "200",
                     description = "查詢成功",
@@ -543,14 +544,16 @@ public class ProductGroupController {
             )
     )
     @GetMapping(path = "/sub-type")
-    public ResponseEntity<String> searchSubType() {
+    public ResponseEntity<String> searchSubType(
+            @RequestParam
+            @NotNull(message = "商品類型 - 未填寫")
+            @Positive(message = "商品類型 - 應為大於0的數字")
+                    Integer type
+    ) {
         return ResponseEntityBuilder.success("查詢成功")
-                .data(productGroupService.searchAllSubType(), (data, productSubType) -> {
+                .data(productGroupService.searchSubTypeByType(type), (data, productSubType) -> {
                     data.add("id", productSubType.getId());
                     data.add("name", productSubType.getName());
-                    ProductTypeBean productType = productSubType.getProductType();
-                    data.add("type", productType.getId());
-                    data.add("typeName", productType.getName());
                 })
                 .build();
     }
@@ -785,10 +788,6 @@ public class ProductGroupController {
         private Integer id;
         @Schema(description = "子類型名稱", example = "小於四人帳篷")
         private String name;
-        @Schema(description = "類型編號", example = "2")
-        private Integer type;
-        @Schema(description = "類型名稱", example = "睡帳")
-        private String typeName;
     }
 
     @Schema(name = "建議售價查詢資料", description = "建議售價查詢資料")
