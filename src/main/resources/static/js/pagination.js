@@ -33,7 +33,8 @@ class Pagination {
         <li class="disabled" id="${id}PrePage"><a href="#"><i class="material-icons">chevron_left</i></a></li>
             ${
             Array.from({length: this.totalPage}, (_, i) => i + 1)
-                .map(i => `<li class="waves-effect" id="${id}${i}" ${i > 5 ? "hidden=\"hidden\"" : ""}><a href="#">${i}</a></li>`)
+                .map(i => `<li class="waves-effect" id="${id}${i}"><a href="#">${i}</a></li>`)
+                .join("\n")
         }
         <li class="waves-effect" id="${id}NextPage"><a href="#"><i class="material-icons">chevron_right</i></a></li>
         `;
@@ -41,16 +42,26 @@ class Pagination {
         for (let i = 0; i < pagination.childElementCount; i++) {
             const element = pagination.children.item(i);
             if (i === 0) {
-                element.onclick = () => this.prePage();
+                element.onclick = e => {
+                    e.preventDefault();
+                    this.prePage();
+                }
             } else if (i === pagination.childElementCount - 1) {
-                element.onclick = () => this.nextPage();
+                element.onclick = e => {
+                    e.preventDefault();
+                    this.nextPage();
+                }
                 if (this.totalPage === 1) {
                     element.className = "disabled";
                 }
             } else {
                 element.onclick = e => {
+                    e.preventDefault();
                     this.onPageClick(i);
                 };
+                if (i >= 5) {
+                    element.classList.add("hide");
+                }
             }
         }
     }
@@ -64,11 +75,17 @@ class Pagination {
     onPageClick(page) {
         document.querySelector(`#${this.id}${this.currentPage}`).className = "waves-effect";
 
+        this.hidden(this.currentPage - 2);
+        this.hidden(this.currentPage - 1);
+        this.hidden(this.currentPage);
+        this.hidden(this.currentPage + 1);
+        this.hidden(this.currentPage + 2);
+
         this.removeHidden(page - 2);
         this.removeHidden(page - 1);
         document.querySelector(`#${this.id}${page}`).className = "active";
-        this.hidden(page + 1);
-        this.hidden(page + 2);
+        this.removeHidden(page + 1);
+        this.removeHidden(page + 2);
 
         document.querySelector(`#${this.id}PrePage`).className = page === 1 ? "disabled" : "waves-effect";
         document.querySelector(`#${this.id}NextPage`).className = page === this.totalPage ? "disabled" : "waves-effect";
@@ -80,14 +97,14 @@ class Pagination {
     removeHidden(page) {
         const pageElement = document.querySelector(`#${this.id}${page}`);
         if (pageElement) {
-            pageElement.removeAttribute("hidden");
+            pageElement.classList.remove("hide");
         }
     }
 
     hidden(page) {
         const pageElement = document.querySelector(`#${this.id}${page}`);
         if (pageElement) {
-            pageElement.setAttribute("hidden", "hidden");
+            pageElement.classList.add("hide");
         }
     }
 
