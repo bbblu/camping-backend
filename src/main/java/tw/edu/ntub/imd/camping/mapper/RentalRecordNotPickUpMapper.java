@@ -23,9 +23,8 @@ import java.util.EnumSet;
 public class RentalRecordNotPickUpMapper implements RentalRecordStatusMapper {
     private static final EnumSet<RentalRecordStatus> CAN_CHANGE_TO_STATUS_SET = EnumSet.of(
             RentalRecordStatus.NOT_RETURN,
-            RentalRecordStatus.BE_RETURNED,
             RentalRecordStatus.NOT_RETRIEVE,
-            RentalRecordStatus.ALREADY_CANCEL
+            RentalRecordStatus.TERMINATE
     );
     private final RentalRecordCheckLogDAO checkLogDAO;
     private final UserBadRecordDAO userBadRecordDAO;
@@ -57,10 +56,10 @@ public class RentalRecordNotPickUpMapper implements RentalRecordStatusMapper {
     public void afterChange(RentalRecord record, RentalRecordStatus originStatus, Object payload) throws ClassCastException {
         if (record.getStatus() == RentalRecordStatus.NOT_RETURN) {
             saveCheckLog(record, originStatus, (RentalRecordProductStatusBean) payload);
-        } else if (isProductOwnerCancel(record)) {
+        } else if (isProductOwnerTerminate(record)) {
             ProductGroup productGroup = record.getProductGroupByProductGroupId();
             saveBadRecord(productGroup.getCreateAccount(), UserBadRecordType.CANCEL_RECORD);
-        } else if (isRenterCancel(record)) {
+        } else if (isRenterTerminate(record)) {
             saveBadRecord(record.getRenterAccount(), UserBadRecordType.TERMINATE_RECORD);
         }
     }
@@ -70,9 +69,9 @@ public class RentalRecordNotPickUpMapper implements RentalRecordStatusMapper {
         checkLogDAO.save(checkLog);
     }
 
-    private boolean isProductOwnerCancel(RentalRecord record) {
+    private boolean isProductOwnerTerminate(RentalRecord record) {
         ProductGroup productGroup = record.getProductGroupByProductGroupId();
-        return record.getStatus() == RentalRecordStatus.ALREADY_CANCEL &&
+        return record.getStatus() == RentalRecordStatus.TERMINATE &&
                 StringUtils.isEquals(productGroup.getCreateAccount(), SecurityUtils.getLoginUserAccount());
     }
 
@@ -83,8 +82,8 @@ public class RentalRecordNotPickUpMapper implements RentalRecordStatusMapper {
         userBadRecordDAO.save(badRecord);
     }
 
-    private boolean isRenterCancel(RentalRecord record) {
-        return record.getStatus() == RentalRecordStatus.ALREADY_CANCEL &&
+    private boolean isRenterTerminate(RentalRecord record) {
+        return record.getStatus() == RentalRecordStatus.TERMINATE &&
                 StringUtils.isEquals(record.getRenterAccount(), SecurityUtils.getLoginUserAccount());
     }
 

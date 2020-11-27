@@ -1,9 +1,9 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ProductImageListener;
 
@@ -16,9 +16,8 @@ import java.time.LocalDateTime;
  * @since 1.0.0
  */
 @Data
-@EqualsAndHashCode(exclude = "productByProductId")
 @Entity
-@EntityListeners(ProductImageListener.class)
+@EntityListeners({AuditingEntityListener.class, ProductImageListener.class})
 @Table(name = "product_image", schema = Config.DATABASE_NAME)
 public class ProductImage {
     /**
@@ -61,6 +60,7 @@ public class ProductImage {
      *
      * @since 1.0.0
      */
+    @CreatedDate
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;
 
@@ -69,6 +69,7 @@ public class ProductImage {
      *
      * @since 1.0.0
      */
+    @LastModifiedDate
     @Column(name = "last_modify_date", nullable = false)
     private LocalDateTime lastModifyDate;
 
@@ -78,6 +79,8 @@ public class ProductImage {
      * @see Product
      * @since 1.0.0
      */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", referencedColumnName = "id", nullable = false, columnDefinition = "UNSIGNED", insertable = false, updatable = false)
     private Product productByProductId;

@@ -3,20 +3,25 @@ package tw.edu.ntub.imd.camping.databaseconfig;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.AuditorAware;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.interceptor.*;
+import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Configuration("databaseConfig")
 @EnableJpaRepositories(basePackages = "tw.edu.ntub.imd.camping.databaseconfig.dao")
 @EnableTransactionManagement
 @EntityScan(basePackages = "tw.edu.ntub.imd.camping.databaseconfig.entity")
+@EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class Config {
     public static final String DATABASE_NAME = "camping";
 
@@ -44,5 +49,10 @@ public class Config {
         namedMap.put("*", readOnlyTransactionAttributes);
         attributeSource.setNameMap(namedMap);
         return new TransactionInterceptor(transactionManager, attributeSource);
+    }
+
+    @Bean
+    public AuditorAware<String> auditorAware() {
+        return () -> SecurityUtils.isLogin() ? Optional.of(SecurityUtils.getLoginUserAccount()) : Optional.empty();
     }
 }

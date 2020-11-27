@@ -1,9 +1,6 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ProductTypeListener;
 
@@ -15,6 +12,7 @@ import javax.persistence.*;
  * @since 1.0.0
  */
 @Data
+@NoArgsConstructor
 @EqualsAndHashCode
 @Entity
 @EntityListeners(ProductTypeListener.class)
@@ -46,6 +44,11 @@ public class ProductType {
     @Getter(AccessLevel.NONE)
     @Column(name = "enable", nullable = false)
     private Boolean enable;
+
+    public ProductType(Integer id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     /**
      * 是否啟用(0: 否/ 1: 是)

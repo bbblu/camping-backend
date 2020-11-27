@@ -1,6 +1,8 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity;
 
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.edu.ntub.imd.camping.databaseconfig.Config;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.listener.ForgotPasswordTokenListener;
 
@@ -14,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Entity
-@EntityListeners(ForgotPasswordTokenListener.class)
+@EntityListeners({AuditingEntityListener.class, ForgotPasswordTokenListener.class})
 @Table(name = "forgot_password_token", schema = Config.DATABASE_NAME)
 public class ForgotPasswordToken {
     /**
@@ -65,6 +67,7 @@ public class ForgotPasswordToken {
      *
      * @since 1.7.6
      */
+    @CreatedDate
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;
 

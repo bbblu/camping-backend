@@ -5,7 +5,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 
 public class RentalRecordStatusChangeException extends ProjectException {
     public RentalRecordStatusChangeException(RentalRecordStatus oldStatus, RentalRecordStatus newStatus) {
-        super("無法從" + oldStatus.name() + "轉換至" + newStatus.name());
+        super("無法從" + oldStatus.toString() + "轉換至" + newStatus.toString());
     }
 
     @Override

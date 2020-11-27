@@ -58,6 +58,7 @@ public class RentalRecordNotPayMapper implements RentalRecordStatusMapper {
                 Notification notification = new Notification();
                 notification.setRentalRecordId(record.getId());
                 notification.setType(NotificationType.PAYMENT_FAIL);
+                notification.setContent(NotificationType.PAYMENT_FAIL.getMessage(record.getId()));
                 notificationDAO.save(notification);
                 throw e;
             }

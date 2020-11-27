@@ -35,9 +35,12 @@ input:focus,
 /* button */
 button.btn {
     padding: 0 15%;
+}
+
+button.btn, a.btn, div.btn {
     background-color: #c0dd6f;
 }
 
-button.btn:hover {
+button.btn:hover, a.btn:hover, div.btn:hover {
     background-color: #c0dd6f;
 }

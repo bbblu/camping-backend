@@ -14,7 +14,7 @@ public interface UserService extends BaseService<UserBean, String> {
 
     List<UserBadRecordBean> getBadRecord(String account);
 
-    int getComment(String account);
+    Double getComment(String account);
 
     void compensate(String account, CreditCard creditCard);
 

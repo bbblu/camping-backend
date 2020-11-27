@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import tw.edu.ntub.birc.common.util.JavaBeanUtils;
 import tw.edu.ntub.imd.camping.bean.ProductTypeBean;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductType;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.view.BrandProductType;
 import tw.edu.ntub.imd.camping.service.transformer.ProductTypeTransformer;
 
 import javax.annotation.Nonnull;
@@ -20,5 +21,13 @@ public class ProductTypeTransformerImpl implements ProductTypeTransformer {
     @Override
     public ProductTypeBean transferToBean(@Nonnull ProductType productType) {
         return JavaBeanUtils.copy(productType, new ProductTypeBean());
+    }
+
+    @Override
+    public ProductTypeBean transferBrandProductTypeToBean(BrandProductType brandProductType) {
+        ProductTypeBean result = new ProductTypeBean();
+        result.setId(brandProductType.getType());
+        result.setName(brandProductType.getTypeName());
+        return result;
     }
 }

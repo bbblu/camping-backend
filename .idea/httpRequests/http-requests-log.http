@@ -1,0 +1,195 @@
+GET http://localhost:8080/user
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJMb2dpbiIsImlzcyI6ImFkbWluIiwiaWF0IjoxNjA2MTIyNjg3LCJyb2xlcyI6WyJBZG1pbmlzdHJhdG9yIl19.P3aOBv-cIAY93A_fm52E6eljIBztBG3Zvyi916xAP9hD2oRatP469CVv2mLh0mAJD5ezj4z_tU4tFPXHyCq7tA
+
+<> 2020-11-27T024943.200.json
+
+###
+
+GET http://localhost:8080/user
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJMb2dpbiIsImlzcyI6ImFkbWluIiwiaWF0IjoxNjA2MTIyNjg3LCJyb2xlcyI6WyJBZG1pbmlzdHJhdG9yIl19.P3aOBv-cIAY93A_fm52E6eljIBztBG3Zvyi916xAP9hD2oRatP469CVv2mLh0mAJD5ezj4z_tU4tFPXHyCq7tA
+
+<> 2020-11-27T024915.200.json
+
+###
+
+GET http://localhost:8080/user
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJMb2dpbiIsImlzcyI6ImFkbWluIiwiaWF0IjoxNjA2MTIyNjg3LCJyb2xlcyI6WyJBZG1pbmlzdHJhdG9yIl19.P3aOBv-cIAY93A_fm52E6eljIBztBG3Zvyi916xAP9hD2oRatP469CVv2mLh0mAJD5ezj4z_tU4tFPXHyCq7tA
+
+<> 2020-11-27T024837.200.json
+
+###
+
+GET http://localhost:8080/user
+X-Auth-Token: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJMb2dpbiIsImlzcyI6ImFkbWluIiwiaWF0IjoxNjA2MTIyNjg3LCJyb2xlcyI6WyJBZG1pbmlzdHJhdG9yIl19.P3aOBv-cIAY93A_fm52E6eljIBztBG3Zvyi916xAP9hD2oRatP469CVv2mLh0mAJD5ezj4z_tU4tFPXHyCq7tA
+
+<> 2020-11-27T024529.200.json
+
+###
+
+GET http://localhost:8080/user
+
+X-Auth-Token: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJMb2dpbiIsImlzcyI6ImFkbWluIiwiaWF0IjoxNjA2MTIyNjg3LCJyb2xlcyI6WyJBZG1pbmlzdHJhdG9yIl19.P3aOBv-cIAY93A_fm52E6eljIBztBG3Zvyi916xAP9hD2oRatP469CVv2mLh0mAJD5ezj4z_tU4tFPXHyCq7tA
+
+<> 2020-11-27T024454.200.json
+
+###
+
+GET http://localhost:8080/user
+X-Auth-Token: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJMb2dpbiIsImlzcyI6ImFkbWluIiwiaWF0IjoxNjA2MTIyNjg3LCJyb2xlcyI6WyJBZG1pbmlzdHJhdG9yIl19.P3aOBv-cIAY93A_fm52E6eljIBztBG3Zvyi916xAP9hD2oRatP469CVv2mLh0mAJD5ezj4z_tU4tFPXHyCq7tA
+
+<> 2020-11-27T024433.200.json
+
+###
+
+GET http://localhost:8080/product-group/recommend-price?brand=38&type=4&subType=48
+
+<> 2020-11-27T023802.200.json
+
+###
+
+GET http://localhost:8080/product-group/sub-type?brand=38&type=4
+
+<> 2020-11-27T023751.200.json
+
+###
+
+GET http://localhost:8080/product-group/recommend-price?brand=38&type=4&subType=44
+
+<> 2020-11-27T023749.200.json
+
+###
+
+GET http://localhost:8080/product-group/recommend-price?brand=38&type=5&subType=44
+
+<> 2020-11-27T023641.200.json
+
+###
+
+GET http://localhost:8080/product-group/recommend-price?type=5&subType=44
+
+<> 2020-11-27T023615.200.json
+
+###
+
+GET http://localhost:8080/product-group/sub-type?brand=38&type=4
+
+<> 2020-11-27T023614.200.json
+
+###
+
+GET http://localhost:8080/product-group/type?brand=38
+
+<> 2020-11-27T023612.200.json
+
+###
+
+GET http://localhost:8080/product-group/brand
+
+<> 2020-11-27T023611.200.json
+
+###
+
+GET http://localhost:8080/product-group/sub-type?brand=38&type=4
+
+<> 2020-11-27T023546.200.json
+
+###
+
+GET http://localhost:8080/product-group/type?brand=38
+
+<> 2020-11-27T023533.200.json
+
+###
+
+GET http://localhost:8080/product-group/type?brand=21
+
+<> 2020-11-27T023502.200.json
+
+###
+
+GET http://localhost:8080/product-group/brand
+
+<> 2020-11-27T023458.200.json
+
+###
+
+GET http://localhost:8080/product-group/type?brand=21
+
+<> 2020-11-27T023421.200.json
+
+###
+
+GET http://localhost:8080/product-group/type?brand=21
+
+<> 2020-11-27T023400.200.json
+
+###
+
+GET http://localhost:8080/product-group/type?brand=21
+
+<> 2020-11-27T022351.200.json
+
+###
+
+GET http://localhost:8080/product-group/brand
+
+<> 2020-11-27T022319.200.json
+
+###
+
+GET http://localhost:8080/product-group/brand
+
+<> 2020-11-27T015048.200.json
+
+###
+
+GET http://localhost:8080/product-group/brand
+
+###
+
+GET http://localhost:8080/product-group/sub-type?type=5
+
+<> 2020-11-27T110819.200.json
+
+###
+
+GET http://localhost:8080/product-group/sub-type
+
+<> 2020-11-27T110302.200.json
+
+###
+
+GET http://localhost:8080/product-group/recommend-price?type=5&subType=44
+
+<> 2020-11-27T104311.200.json
+
+###
+
+GET http://localhost:8080/product-group/sub-type
+
+<> 2020-11-27T103140.200.json
+
+###
+
+GET http://localhost:8080/product-group/sub-type
+
+<> 2020-11-27T102944.200.json
+
+###
+
+GET http://localhost:8080/product-group/recommend-price?type=睡帳&subType=兩人登山帳
+
+<> 2020-11-27T101954.200.json
+
+###
+
+GET http://localhost:8080/product-group/recommend-price?type=睡帳&subType=兩人登山帳
+
+###
+
+GET http://localhost:8080/product-group/recommend-price?type=睡帳&subType=兩人登山帳
+
+<> 2020-11-27T100613.200.json
+
+###
+

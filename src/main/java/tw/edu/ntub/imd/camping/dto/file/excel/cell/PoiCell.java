@@ -93,9 +93,9 @@ public class PoiCell implements Cell {
         CellValue formulaValue = formulaEvaluator.evaluate(cell);
         if (formulaValue.getCellType() == org.apache.poi.ss.usermodel.CellType.ERROR) {
             CellValue errorValue = CellValue.getError(formulaValue.getErrorValue());
-            return errorValue.formatAsString();
+            return errorValue.formatAsString().replace("\"", "");
         }
-        return formulaValue.formatAsString();
+        return formulaValue.formatAsString().replace("\"", "");
     }
 
     @Nonnull

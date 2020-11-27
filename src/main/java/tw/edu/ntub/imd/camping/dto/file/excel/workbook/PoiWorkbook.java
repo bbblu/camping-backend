@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.lang.NonNull;
 import tw.edu.ntub.imd.camping.dto.file.excel.cell.Cell;
 import tw.edu.ntub.imd.camping.dto.file.excel.function.ExcelFunctionValue;
 import tw.edu.ntub.imd.camping.dto.file.excel.row.Row;
@@ -19,6 +20,7 @@ import tw.edu.ntub.imd.camping.util.file.FileUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.*;
@@ -31,6 +33,24 @@ public class PoiWorkbook implements Workbook {
     private final org.apache.poi.ss.usermodel.Workbook workbook;
     private final FormulaEvaluator formulaEvaluator;
     private final List<Sheet> sheetList = new ArrayList<>();
+
+    public PoiWorkbook(@NonNull InputStream workbookInputStream) {
+        try {
+            this.workbook = WorkbookFactory.create(workbookInputStream);
+            if (this.workbook instanceof HSSFWorkbook) {
+                this.type = ExcelType.XLS;
+            } else {
+                this.type = ExcelType.XLSX;
+            }
+            CreationHelper creationHelper = workbook.getCreationHelper();
+            this.formulaEvaluator = creationHelper.createFormulaEvaluator();
+            for (org.apache.poi.ss.usermodel.Sheet sheet : workbook) {
+                sheetList.add(new PoiSheet(this, sheet, formulaEvaluator));
+            }
+        } catch (IOException e) {
+            throw new FileUnknownException(e);
+        }
+    }
 
     public PoiWorkbook(@Nonnull Path workbookPath) {
         try {

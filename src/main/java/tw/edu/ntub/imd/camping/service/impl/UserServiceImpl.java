@@ -28,7 +28,9 @@ import tw.edu.ntub.imd.camping.util.TransactionUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> implements UserService {
@@ -110,19 +112,22 @@ public class UserServiceImpl extends BaseServiceImpl<UserBean, User, String> imp
 
     @Override
     public List<UserBadRecordBean> getBadRecord(String account) {
+        Map<UserBadRecordType, Long> badRecordCountMap = badRecordDAO.findByUserAccount(account)
+                .stream()
+                .collect(Collectors.groupingBy(UserBadRecord::getType, Collectors.counting()));
         List<UserBadRecordBean> result = new ArrayList<>();
-        for (Object[] row : badRecordDAO.findBadRecordCount(account)) {
+        for (UserBadRecordType type : UserBadRecordType.values()) {
             UserBadRecordBean userBadRecordBean = new UserBadRecordBean();
-            userBadRecordBean.setType((UserBadRecordType) row[0]);
-            userBadRecordBean.setCount((Long) row[1]);
+            userBadRecordBean.setType(type);
+            userBadRecordBean.setCount(badRecordCountMap.getOrDefault(type, 0L));
             result.add(userBadRecordBean);
         }
         return result;
     }
 
     @Override
-    public int getComment(String account) {
-        return (int) commentDAO.getAverageCommentByUserAccount(account);
+    public Double getComment(String account) {
+        return (Double) commentDAO.getAverageCommentByUserAccount(account);
     }
 
     @Override

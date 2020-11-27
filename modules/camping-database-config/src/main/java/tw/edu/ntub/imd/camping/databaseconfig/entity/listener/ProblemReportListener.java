@@ -1,6 +1,5 @@
 package tw.edu.ntub.imd.camping.databaseconfig.entity.listener;
 
-import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProblemReport;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.ProblemReportStatus;
 import tw.edu.ntub.imd.camping.databaseconfig.exception.EmptyProblemReportHandleResult;
@@ -16,15 +15,6 @@ public class ProblemReportListener {
     public void preSave(ProblemReport problemReport) {
         if (problemReport.getStatus() == null) {
             problemReport.setStatus(ProblemReportStatus.UNPROCESSED);
-        }
-        if (problemReport.getReportDate() == null) {
-            problemReport.setReportDate(LocalDateTime.now());
-        }
-        if (problemReport.getLastModifyAccount() == null) {
-            problemReport.setLastModifyAccount(SecurityUtils.getLoginUserAccount());
-        }
-        if (problemReport.getLastModifyDate() == null) {
-            problemReport.setLastModifyDate(LocalDateTime.now());
         }
     }
 
@@ -46,7 +36,5 @@ public class ProblemReportListener {
                 problemReport.setCompleteDate(LocalDateTime.now());
                 break;
         }
-        problemReport.setLastModifyAccount(SecurityUtils.getLoginUserAccount());
-        problemReport.setLastModifyDate(LocalDateTime.now());
     }
 }
