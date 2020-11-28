@@ -20,6 +20,7 @@ import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -232,7 +233,7 @@ public class ObjectData implements ResponseData {
     }
 
     public ArrayData addStringArray(String key, String[] dataArray) {
-        return addStringArray(key, Arrays.asList(dataArray));
+        return addStringArray(key, dataArray != null ? Arrays.asList(dataArray) : Collections.emptyList());
     }
 
     public ArrayData addStringArray(String key, Collection<String> dataCollection) {
