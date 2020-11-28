@@ -37,9 +37,12 @@ class Pagination {
                 .map(i => `<li class="waves-effect" id="${id}${i}"><a href="#">${i}</a></li>`)
                 .join("\n")
         }
-        <span id="${id}NextMore">...</span>
+        <span class="hide" id="${id}NextMore">...</span>
         <li class="waves-effect" id="${id}NextPage"><a href="#"><i class="material-icons">chevron_right</i></a></li>
         `;
+        if (this.totalPage > 3) {
+            document.querySelector(`#${id}NextMore`).className = "";
+        }
         pagination.children[2].className = "active";
         for (let i = 0; i < pagination.childElementCount; i++) {
             const element = pagination.children.item(i);
