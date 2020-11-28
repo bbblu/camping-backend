@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Controller
 @RequestMapping(path = "/user/manager")
-public class UserManagerRouteController {
+public class UserManagerController {
     private final UserService userService;
 
     @GetMapping(path = "")
