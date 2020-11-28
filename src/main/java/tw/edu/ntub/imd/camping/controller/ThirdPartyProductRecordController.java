@@ -25,7 +25,7 @@ import java.io.IOException;
 @Tag(name = "ThirdPartyProduct")
 @Controller
 @RequestMapping(path = "/third-party-product")
-public class ThirdProductRecordController {
+public class ThirdPartyProductRecordController {
     private final ProductGroupService productGroupService;
     private final ThirdPartyProductRecordService thirdPartyProductRecordService;
 
