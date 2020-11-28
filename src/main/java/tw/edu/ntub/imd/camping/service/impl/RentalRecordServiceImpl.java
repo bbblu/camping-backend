@@ -6,27 +6,29 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import tw.edu.ntub.birc.common.util.CollectionUtils;
 import tw.edu.ntub.birc.common.util.StringUtils;
-import tw.edu.ntub.imd.camping.bean.RentalRecordBean;
-import tw.edu.ntub.imd.camping.bean.RentalRecordIndexBean;
-import tw.edu.ntub.imd.camping.bean.RentalRecordIndexFilterBean;
-import tw.edu.ntub.imd.camping.bean.RentalRecordStatusChangeBean;
+import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.*;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
+import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
+import tw.edu.ntub.imd.camping.dto.file.uploader.UploadResult;
 import tw.edu.ntub.imd.camping.exception.*;
 import tw.edu.ntub.imd.camping.factory.RentalRecordStatusMapperFactory;
 import tw.edu.ntub.imd.camping.mapper.RentalRecordStatusMapper;
 import tw.edu.ntub.imd.camping.service.RentalRecordService;
 import tw.edu.ntub.imd.camping.service.transformer.RentalDetailTransformer;
+import tw.edu.ntub.imd.camping.service.transformer.RentalRecordCheckLogTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.RentalRecordIndexTransformer;
 import tw.edu.ntub.imd.camping.service.transformer.RentalRecordTransformer;
 import tw.edu.ntub.imd.camping.util.NotificationUtils;
 import tw.edu.ntub.imd.camping.util.OwnerChecker;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,6 +47,10 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     private final NotificationUtils notificationUtils;
     private final UserCommentDAO userCommentDAO;
     private final UserCompensateRecordDAO userCompensateRecordDAO;
+    private final RentalRecordCheckLogDAO checkLogDAO;
+    private final RentalRecordCheckLogTransformer checkLogTransformer;
+    private final RentalRecordCheckLogImageDAO checkLogImageDAO;
+    private final MultipartFileUploader fileUploader;
 
     public RentalRecordServiceImpl(
             RentalRecordDAO recordDAO,
@@ -60,7 +66,11 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             RentalRecordStatusMapperFactory statusMapperFactory,
             NotificationUtils notificationUtils,
             UserCommentDAO userCommentDAO,
-            UserCompensateRecordDAO userCompensateRecordDAO) {
+            UserCompensateRecordDAO userCompensateRecordDAO,
+            RentalRecordCheckLogDAO checkLogDAO,
+            RentalRecordCheckLogTransformer checkLogTransformer,
+            RentalRecordCheckLogImageDAO checkLogImageDAO,
+            MultipartFileUploader fileUploader) {
         super(recordDAO, transformer);
         this.recordDAO = recordDAO;
         this.transformer = transformer;
@@ -76,6 +86,10 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         this.notificationUtils = notificationUtils;
         this.userCommentDAO = userCommentDAO;
         this.userCompensateRecordDAO = userCompensateRecordDAO;
+        this.checkLogDAO = checkLogDAO;
+        this.checkLogTransformer = checkLogTransformer;
+        this.checkLogImageDAO = checkLogImageDAO;
+        this.fileUploader = fileUploader;
     }
 
     @Override
@@ -234,5 +248,37 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     @Override
     public List<RentalRecordBean> searchByStatus(RentalRecordStatus status) {
         return CollectionUtils.map(recordDAO.findByStatus(status), transformer::transferToBean);
+    }
+
+    @Override
+    public void saveProductStatus(int id, RentalRecordCheckLogBean productStatusBean) {
+        RentalRecord record = recordDAO.findById(id)
+                .orElseThrow(() -> new NotFoundException("找不到此紀錄"));
+        RentalRecordCheckLog checkLog = new RentalRecordCheckLog();
+        checkLog.setRecordId(id);
+        checkLog.setRecordStatus(record.getStatus());
+        checkLog.setContent(productStatusBean.getContent());
+        RentalRecordCheckLog saveResult = checkLogDAO.saveAndFlush(checkLog);
+        Optional.ofNullable(productStatusBean.getImages())
+                .stream()
+                .flatMap(Arrays::stream)
+                .map(imageFile -> fileUploader.upload(
+                        imageFile,
+                        "rental-record", String.valueOf(saveResult.getId())
+                ))
+                .map(UploadResult::getUrl)
+                .map(RentalRecordCheckLogImage::new)
+                .peek(image -> image.setLogId(saveResult.getId()))
+                .forEach(checkLogImageDAO::save);
+    }
+
+    @Override
+    public List<RentalRecordCheckLogBean> searchCheckLog(int id) {
+        RentalRecord record = recordDAO.findById(id)
+                .orElseThrow(() -> new NotFoundException("找不到此紀錄"));
+        return CollectionUtils.map(
+                checkLogDAO.findByRecordIdAndRecordStatus(id, record.getStatus()),
+                checkLogTransformer::transferToBean
+        );
     }
 }

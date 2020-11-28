@@ -5,3 +5,15 @@
 .modal .datepicker-date-display {
     background-color: #C0DD6F;
 }
+
+main {
+    padding-left: 150px;
+}
+
+.container {
+    margin: 5% 15% 0 auto;
+}
+
+button.action {
+    padding: 0 5%;
+}

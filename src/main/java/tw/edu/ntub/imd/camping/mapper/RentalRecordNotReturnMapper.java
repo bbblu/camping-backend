@@ -2,8 +2,8 @@ package tw.edu.ntub.imd.camping.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import tw.edu.ntub.imd.camping.bean.RentalRecordCheckLogBean;
 import tw.edu.ntub.imd.camping.bean.RentalRecordProductBrokenBean;
-import tw.edu.ntub.imd.camping.bean.RentalRecordProductStatusBean;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.RentalRecordCheckLogDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.UserBadRecordDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.UserCompensateRecordDAO;
@@ -60,8 +60,8 @@ public class RentalRecordNotReturnMapper implements RentalRecordStatusMapper {
                 compensateRecord.setRentalRecordId(record.getId());
                 compensateRecord.setCompensatePrice(brokenBean.getCompensatePrice());
                 userCompensateRecordDAO.save(compensateRecord);
-            } else if (payload instanceof RentalRecordProductStatusBean) {
-                saveCheckLog(record, originStatus, ((RentalRecordProductStatusBean) payload).getDescription());
+            } else if (payload instanceof RentalRecordCheckLogBean) {
+                saveCheckLog(record, originStatus, ((RentalRecordCheckLogBean) payload).getContent());
             }
         }
     }

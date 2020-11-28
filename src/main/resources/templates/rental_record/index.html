@@ -122,20 +122,52 @@
   </ul>
 </main>
 
-<div id="changeStatusModal" class="modal">
+<div id="productStatusModal" class="modal">
   <div class="modal-content">
-    <h4 id="modalHeader">Modal Header</h4>
-    <div class="row">
-      <div class="col s12">
-        <div class="input-field">
-          <textarea class="materialize-textarea" name="description" id="description" rows="4"></textarea>
-          <label for="description" id="descriptionLabel"></label>
+    <h4>商品狀況</h4>
+    <form>
+      <div class="row">
+        <div class="input-field col s12">
+          <textarea class="materialize-textarea" name="productStatus" id="productStatus" rows="4"></textarea>
+          <label for="productStatus">商品狀況</label>
         </div>
       </div>
+      <div class="row">
+        <div class="file-field input-field col s12">
+          <div class="btn">
+            <span>選擇圖片</span>
+            <input type="file" id="images" accept="image/*" multiple>
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text" placeholder="上傳圖片">
+          </div>
+        </div>
+      </div>
+    </form>
+    <div class="row">
+      <button class="col s1 btn waves-effect waves-light right" id="productStatusSubmit"
+              onclick="createRecord(this.dataset.index)">新增紀錄
+      </button>
     </div>
+    <table class="striped centered">
+      <thead>
+      <tr>
+        <th>敘述</th>
+        <th>圖片</th>
+      </tr>
+      </thead>
+      <tbody id="productStatusTable">
+
+      </tbody>
+    </table>
+    <ul class="pagination" id="productStatusPagination">
+      <li class="disabled"><a href="#"><i class="material-icons">chevron_left</i></a></li>
+
+      <li class="waves-effect"><a href="#"><i class="material-icons">chevron_right</i></a></li>
+    </ul>
   </div>
   <div class="modal-footer">
-    <a href="#" class="modal-close waves-effect waves-green btn-flat" id="modalSubmit">確定</a>
+    <a href="#" class="modal-close waves-effect waves-green btn-flat">關閉</a>
   </div>
 </div>
 
@@ -174,33 +206,6 @@
         table = new Table("rentalRecordTable", /*[[${rentalRecordList}]]*/[], rentalRecordToTrHtml, "pagination", datePerPage);
         table.reload();
         initMaterializeInstances();
-        document.querySelector("#modalSubmit").onclick = function (e) {
-            const button = e.target;
-            const dataset = button.dataset;
-            const url = dataset.url;
-            const method = dataset.method;
-            const description = document.querySelector("#description").value;
-            const index = dataset.index;
-            fetch(url, {
-                method,
-                body: JSON.stringify({
-                    description
-                }),
-                headers: {
-                    "Content-Type": "application/json;charset=UTF-8"
-                }
-            }).then(response => response.json())
-                .then(response => {
-                    if (response.result) {
-                        if (response.data) {
-                            table.data[index].status = response.data.name;
-                            table.reload();
-                            document.querySelector("#description").value = "";
-                        }
-                    }
-                    alert(response.message);
-                });
-        };
     });
 
     function initMaterializeInstances() {
@@ -227,40 +232,55 @@
             switch (rentalRecord.status) {
                 case "未寄放":
                     return `
-                        <button class="btn waves-effect waves-light" type="button" onclick="placed(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                        <button class="btn waves-effect waves-light action" type="button" onclick="displayProductDescriptionModal(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                            檢視商品狀況
+                        </button>
+                        <button class="btn waves-effect waves-light action" type="button" onclick="placed(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             寄放完成
                         </button>
-                        <button class="btn waves-effect waves-light" type="button" onclick="beReturned(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                        <button class="btn waves-effect waves-light action" type="button" onclick="beReturned(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             退貨
                         </button>
                     `;
                 case "未領取":
                     return `
-                        <button class="btn waves-effect waves-light" type="button" onclick="pickUp(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                        <button class="btn waves-effect waves-light action" type="button" onclick="displayProductDescriptionModal(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                            檢視商品狀況
+                        </button>
+                        <button class="btn waves-effect waves-light action" type="button" onclick="pickUp(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             取貨完成
                         </button>
-                        <button class="btn waves-effect waves-light" type="button" onclick="terminate(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                        <button class="btn waves-effect waves-light action" type="button" onclick="terminate(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             退貨
                         </button>
                     `;
                 case "已終止":
                     return `
-                        <button class="btn waves-effect waves-light" type="button" onclick="alreadyTerminate(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                        <button class="btn waves-effect waves-light action" type="button" onclick="displayProductDescriptionModal(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                            檢視商品狀況
+                        </button>
+                        <button class="btn waves-effect waves-light action" type="button" onclick="alreadyTerminate(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             取回商品
                         </button>
                     `;
                 case "未歸還":
                     return `
-                        <button class="btn waves-effect waves-light" type="button" onclick="doReturn(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                        <button class="btn waves-effect waves-light action" type="button" onclick="displayProductDescriptionModal(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                            檢視商品狀況
+                        </button>
+                        <button class="btn waves-effect waves-light action" type="button" onclick="doReturn(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             歸還完成
                         </button>
-                        <button class="btn waves-effect waves-light" type="button" onclick="compensate(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                        <button class="btn waves-effect waves-light action" type="button" onclick="compensate(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             求償
                         </button>
                     `;
                 case "未取回":
                     return `
-                        <button class="btn waves-effect waves-light" type="button" onclick="retrieve(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                        <button class="btn waves-effect waves-light action" type="button" onclick="displayProductDescriptionModal(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                            檢視商品狀況
+                        </button>
+                        <button class="btn waves-effect waves-light action" type="button" onclick="retrieve(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             取回商品
                         </button>
                     `;
@@ -300,27 +320,66 @@
             });
     }
 
+    function displayProductDescriptionModal(index, id) {
+        fetch(getReplacedUrl(/*[[@{/rental/#id#/status/check-log}]]*/"", id))
+            .then(response => response.json())
+            .then(response => {
+                if (response.result) {
+                    let productStatusTable = new Table(
+                        "productStatusTable",
+                        response.data,
+                        (index, row) => `
+                        <tr>
+                            <td>${row.content}</td>
+                            <td>${row.imageArray}</td>
+                        </tr>
+                    `,
+                        "productStatusPagination",
+                        5
+                    );
+                    productStatusTable.reload();
+                }
+            });
+        const modalSubmitButton = document.querySelector("#productStatusSubmit");
+        modalSubmitButton.setAttribute("data-index", index);
+        const modal = M.Modal.getInstance(document.querySelector("#productStatusModal"));
+        modal.open();
+    }
+
+    function createRecord(index) {
+        const descriptionElement = document.querySelector("#productStatus");
+        const imagesElement = document.querySelector("#images");
+        const record = table.data[index];
+        const url = /*[[@{/rental/#id#/status/check-log}]]*/"";
+        const formData = new FormData();
+        formData.append("content", descriptionElement.value);
+        for (const file of imagesElement.files) {
+            formData.append("images", file);
+        }
+        fetch(getReplacedUrl(url, record.id), {
+            method: "POST",
+            body: formData
+        }).then(response => response.json())
+            .then(response => {
+                if (response.result) {
+                    if (response.data) {
+                        descriptionElement.form.reset();
+                    }
+                }
+                alert(response.message);
+            });
+    }
+
     function beReturned(index, id) {
-        displayChangeStatusModal("退貨", "退貨原因", getReplacedUrl(/*[[@{/rental/#id#/status/be-returned}]]*/"", id), "PATCH", index);
+        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/be-returned}]]*/"", id), "PATCH", index);
     }
 
     function getReplacedUrl(url, id) {
         return url.replace("#id#", id);
     }
 
-    function displayChangeStatusModal(header, label, url, method, index) {
-        document.querySelector("#modalHeader").textContent = header;
-        document.querySelector("#descriptionLabel").textContent = label;
-        const modalSubmitButton = document.querySelector("#modalSubmit");
-        modalSubmitButton.setAttribute("data-url", url);
-        modalSubmitButton.setAttribute("data-method", method);
-        modalSubmitButton.setAttribute("data-index", index);
-        const modal = M.Modal.getInstance(document.querySelector("#changeStatusModal"));
-        modal.open();
-    }
-
     function placed(index, id) {
-        displayChangeStatusModal("寄放", "寄放時的商品狀況", getReplacedUrl(/*[[@{/rental/#id#/status/placed}]]*/"", id), "PATCH", index);
+        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/placed}]]*/"", id), "PATCH", index);
     }
 
     function terminate(index, id) {
@@ -341,7 +400,7 @@
     }
 
     function pickUp(index, id) {
-        displayChangeStatusModal("取貨", "取貨時的商品狀況", getReplacedUrl(/*[[@{/rental/#id#/status/pick-up}]]*/"", id), "PATCH", index);
+        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/pick-up}]]*/"", id), "PATCH", index);
     }
 
     function alreadyTerminate(index, id) {
@@ -383,7 +442,7 @@
     }
 
     function doReturn(index, id) {
-        displayChangeStatusModal("歸還", "歸還時的商品狀況", getReplacedUrl(/*[[@{/rental/#id#/status/return}]]*/"", id), "PATCH", index);
+        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/return}]]*/"", id), "PATCH", index);
     }
 
     function retrieve(index, id) {

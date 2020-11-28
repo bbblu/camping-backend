@@ -3,7 +3,7 @@ package tw.edu.ntub.imd.camping.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import tw.edu.ntub.birc.common.util.StringUtils;
-import tw.edu.ntub.imd.camping.bean.RentalRecordProductStatusBean;
+import tw.edu.ntub.imd.camping.bean.RentalRecordCheckLogBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.RentalRecordCheckLogDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.UserBadRecordDAO;
@@ -55,7 +55,7 @@ public class RentalRecordNotPickUpMapper implements RentalRecordStatusMapper {
     @Override
     public void afterChange(RentalRecord record, RentalRecordStatus originStatus, Object payload) throws ClassCastException {
         if (record.getStatus() == RentalRecordStatus.NOT_RETURN) {
-            saveCheckLog(record, originStatus, (RentalRecordProductStatusBean) payload);
+            saveCheckLog(record, originStatus, (RentalRecordCheckLogBean) payload);
         } else if (isProductOwnerTerminate(record)) {
             ProductGroup productGroup = record.getProductGroupByProductGroupId();
             saveBadRecord(productGroup.getCreateAccount(), UserBadRecordType.CANCEL_RECORD);
@@ -64,8 +64,8 @@ public class RentalRecordNotPickUpMapper implements RentalRecordStatusMapper {
         }
     }
 
-    private void saveCheckLog(RentalRecord record, RentalRecordStatus originStatus, RentalRecordProductStatusBean productStatus) {
-        RentalRecordCheckLog checkLog = new RentalRecordCheckLog(record.getId(), originStatus, productStatus.getDescription());
+    private void saveCheckLog(RentalRecord record, RentalRecordStatus originStatus, RentalRecordCheckLogBean productStatus) {
+        RentalRecordCheckLog checkLog = new RentalRecordCheckLog(record.getId(), originStatus, productStatus.getContent());
         checkLogDAO.save(checkLog);
     }
 

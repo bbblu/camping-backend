@@ -3,7 +3,7 @@ package tw.edu.ntub.imd.camping.schedule;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import tw.edu.ntub.imd.camping.bean.RentalRecordProductStatusBean;
+import tw.edu.ntub.imd.camping.bean.RentalRecordCheckLogBean;
 import tw.edu.ntub.imd.camping.bean.RentalRecordStatusChangeBean;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.service.RentalRecordService;
@@ -38,7 +38,7 @@ public class RentalRecordScheduler {
                         .id(record.getId())
                         .changeDescription("超過租借結束時間，視作已歸還")
                         .newStatus(RentalRecordStatus.NOT_RETRIEVE)
-                        .payload(new RentalRecordProductStatusBean("超過租借結束時間，與送達時一致"))
+                        .payload(new RentalRecordCheckLogBean("超過租借結束時間，與送達時一致"))
                         .build()
                 )
                 .forEach(rentalRecordService::updateStatus);
