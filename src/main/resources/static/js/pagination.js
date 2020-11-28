@@ -31,14 +31,16 @@ class Pagination {
         const pagination = document.querySelector(`#${id}`);
         pagination.innerHTML = `
         <li class="disabled" id="${id}PrePage"><a href="#"><i class="material-icons">chevron_left</i></a></li>
+        <span class="hide" id="${id}PreMore">...</span>
             ${
             Array.from({length: this.totalPage}, (_, i) => i + 1)
                 .map(i => `<li class="waves-effect" id="${id}${i}"><a href="#">${i}</a></li>`)
                 .join("\n")
         }
+        <span id="${id}NextMore">...</span>
         <li class="waves-effect" id="${id}NextPage"><a href="#"><i class="material-icons">chevron_right</i></a></li>
         `;
-        pagination.children[1].className = "active";
+        pagination.children[2].className = "active";
         for (let i = 0; i < pagination.childElementCount; i++) {
             const element = pagination.children.item(i);
             if (i === 0) {
@@ -54,10 +56,10 @@ class Pagination {
                 if (this.totalPage === 1) {
                     element.className = "disabled";
                 }
-            } else {
+            } else if (i > 1 && i < pagination.childElementCount - 2) {
                 element.onclick = e => {
                     e.preventDefault();
-                    this.onPageClick(i);
+                    this.onPageClick(i - 1);
                 };
                 if (i >= 5) {
                     element.classList.add("hide");
@@ -89,6 +91,18 @@ class Pagination {
 
         document.querySelector(`#${this.id}PrePage`).className = page === 1 ? "disabled" : "waves-effect";
         document.querySelector(`#${this.id}NextPage`).className = page === this.totalPage ? "disabled" : "waves-effect";
+
+        if (page - 3 > 0) {
+            document.querySelector(`#${this.id}PreMore`).className = "";
+        } else {
+            document.querySelector(`#${this.id}PreMore`).className = "hide";
+        }
+
+        if (page + 2 < this.totalPage) {
+            document.querySelector(`#${this.id}NextMore`).className = "";
+        } else {
+            document.querySelector(`#${this.id}NextMore`).className = "hide";
+        }
 
         this.currentPage = page;
         this.table.reload();
