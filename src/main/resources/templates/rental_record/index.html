@@ -152,6 +152,7 @@
     <table class="striped centered">
       <thead>
       <tr>
+        <th>狀態</th>
         <th>敘述</th>
         <th>圖片</th>
       </tr>
@@ -321,6 +322,14 @@
     }
 
     function displayProductDescriptionModal(index, id) {
+        searchCheckLog(id);
+        const modalSubmitButton = document.querySelector("#productStatusSubmit");
+        modalSubmitButton.setAttribute("data-index", index);
+        const modal = M.Modal.getInstance(document.querySelector("#productStatusModal"));
+        modal.open();
+    }
+
+    function searchCheckLog(id) {
         fetch(getReplacedUrl(/*[[@{/rental/#id#/status/check-log}]]*/"", id))
             .then(response => response.json())
             .then(response => {
@@ -330,6 +339,7 @@
                         response.data,
                         (index, row) => `
                         <tr>
+                            <td>${row.recordStatus}</td>
                             <td>${row.content}</td>
                             <td>${row.imageArray}</td>
                         </tr>
@@ -340,10 +350,6 @@
                     productStatusTable.reload();
                 }
             });
-        const modalSubmitButton = document.querySelector("#productStatusSubmit");
-        modalSubmitButton.setAttribute("data-index", index);
-        const modal = M.Modal.getInstance(document.querySelector("#productStatusModal"));
-        modal.open();
     }
 
     function createRecord(index) {
@@ -364,6 +370,7 @@
                 if (response.result) {
                     if (response.data) {
                         descriptionElement.form.reset();
+                        searchCheckLog(record.id);
                     }
                 }
                 alert(response.message);

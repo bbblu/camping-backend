@@ -176,6 +176,7 @@ public class RentalRecordStatusController {
         return ResponseEntityBuilder.success("查詢成功")
                 .data(rentalRecordService.searchCheckLog(id), (data, log) -> {
                     data.add("id", log.getId());
+                    data.add("recordStatus", log.getRecordStatus().toString());
                     data.add("content", log.getContent());
                     data.addStringArray("imageArray", log.getImageUrlList());
                 })
