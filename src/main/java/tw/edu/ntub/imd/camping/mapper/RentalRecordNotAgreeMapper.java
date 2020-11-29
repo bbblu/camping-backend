@@ -11,7 +11,9 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.NotificationType;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.exception.RentalRecordStatusException;
+import tw.edu.ntub.imd.camping.util.http.RequestUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.EnumSet;
 
 @AllArgsConstructor
@@ -37,9 +39,21 @@ public class RentalRecordNotAgreeMapper implements RentalRecordStatusMapper {
     public void validate(RentalRecord record, RentalRecordStatus newStatus) throws RentalRecordStatusException {
         ProductGroup productGroup = record.getProductGroupByProductGroupId();
         String loginUserAccount = SecurityUtils.getLoginUserAccount();
-        if (StringUtils.isNotEquals(productGroup.getCreateAccount(), loginUserAccount)) {
-            throw new NotProductOwnerException();
+        if (isAgree(newStatus) || isDenied(newStatus)) {
+            if (StringUtils.isNotEquals(productGroup.getCreateAccount(), loginUserAccount)) {
+                throw new NotProductOwnerException();
+            }
         }
+    }
+
+    private boolean isAgree(RentalRecordStatus newStatus) {
+        return newStatus == RentalRecordStatus.NOT_PAY;
+    }
+
+    private boolean isDenied(RentalRecordStatus newStatus) {
+        HttpServletRequest request = RequestUtils.getRequest();
+        String requestUrl = request.getRequestURI();
+        return newStatus == RentalRecordStatus.ALREADY_CANCEL && requestUrl.endsWith("/denied");
     }
 
     @Override
@@ -52,12 +66,14 @@ public class RentalRecordNotAgreeMapper implements RentalRecordStatusMapper {
         Notification notification = new Notification();
         ProductGroup productGroup = record.getProductGroupByProductGroupId();
         notification.setRentalRecordId(record.getId());
-        if (record.getStatus() == RentalRecordStatus.NOT_PAY) {
+        if (isAgree(record.getStatus())) {
             notification.setType(NotificationType.RENTAL_AGREE);
             notification.setContent(NotificationType.RENTAL_AGREE.getMessage(productGroup.getName()));
-        } else if (record.getStatus() == RentalRecordStatus.ALREADY_CANCEL) {
+        } else if (isDenied(record.getStatus())) {
             notification.setType(NotificationType.RENTAL_DENIED);
             notification.setContent(NotificationType.RENTAL_DENIED.getMessage(productGroup.getName()));
+        } else {
+            return;
         }
         notification.setUserAccount(record.getRenterAccount());
         notificationDAO.save(notification);
