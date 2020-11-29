@@ -3,13 +3,10 @@ package tw.edu.ntub.imd.camping.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import tw.edu.ntub.birc.common.util.StringUtils;
-import tw.edu.ntub.imd.camping.bean.RentalRecordCheckLogBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.RentalRecordCheckLogDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.UserBadRecordDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecordCheckLog;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.UserBadRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.UserBadRecordType;
@@ -25,7 +22,6 @@ public class RentalRecordNotPlaceMapper implements RentalRecordStatusMapper {
             RentalRecordStatus.BE_RETURNED,
             RentalRecordStatus.ALREADY_CANCEL
     );
-    private final RentalRecordCheckLogDAO checkLogDAO;
     private final UserBadRecordDAO userBadRecordDAO;
 
     @Override
@@ -50,19 +46,12 @@ public class RentalRecordNotPlaceMapper implements RentalRecordStatusMapper {
 
     @Override
     public void afterChange(RentalRecord record, RentalRecordStatus originStatus, Object payload) throws ClassCastException {
-        if (record.getStatus() == RentalRecordStatus.NOT_PICK_UP && payload instanceof RentalRecordCheckLogBean) {
-            saveCheckLog(record, originStatus, ((RentalRecordCheckLogBean) payload).getContent());
-        } else if (isProductOwnerCancel(record)) {
+        if (isProductOwnerCancel(record)) {
             ProductGroup productGroup = record.getProductGroupByProductGroupId();
             saveBadRecord(productGroup.getCreateAccount(), UserBadRecordType.CANCEL_RECORD);
         } else if (record.getStatus() == RentalRecordStatus.BE_RETURNED) {
             saveBadRecord(record.getRenterAccount(), UserBadRecordType.BE_RETURN);
         }
-    }
-
-    private void saveCheckLog(RentalRecord record, RentalRecordStatus originStatus, String content) {
-        RentalRecordCheckLog checkLog = new RentalRecordCheckLog(record.getId(), originStatus, content);
-        checkLogDAO.save(checkLog);
     }
 
     private boolean isProductOwnerCancel(RentalRecord record) {

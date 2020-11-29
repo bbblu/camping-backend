@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'tw.edu.ntub.imd'
-version = '1.8.7'
+version = '1.8.8'
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
