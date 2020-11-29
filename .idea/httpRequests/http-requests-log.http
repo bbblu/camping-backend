@@ -1,3 +1,15 @@
+GET http://localhost:8080/rental/12/status/check-log
+
+<> 2020-11-29T014330.200.json
+
+###
+
+GET http://localhost:8080/rental/12/status/check-log
+
+<> 2020-11-29T014324.200.html
+
+###
+
 GET http://localhost:8080/rental/{{id}}/status/check-log
 id=12:
 

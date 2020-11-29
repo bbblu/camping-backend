@@ -288,10 +288,8 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
 
     @Override
     public List<RentalRecordCheckLogBean> searchCheckLog(int id) {
-        RentalRecord record = recordDAO.findById(id)
-                .orElseThrow(() -> new NotFoundException("找不到此紀錄"));
         return CollectionUtils.map(
-                checkLogDAO.findByRecordIdAndRecordStatus(id, record.getStatus()),
+                checkLogDAO.findByRecordIdOrderByIdDesc(id),
                 checkLogTransformer::transferToBean
         );
     }
