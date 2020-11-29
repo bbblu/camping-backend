@@ -38,6 +38,10 @@ public class RentalRecordBean {
     private RentalRecordStatus status;
 
     @Hidden
+    @Null(message = "price - 不得填寫")
+    private Integer price;
+
+    @Hidden
     @Null(message = "renterAccount - 不得填寫")
     private String renterAccount;
 

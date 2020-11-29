@@ -57,4 +57,21 @@ public enum UserRoleEnum {
         }
         throw new IllegalStateException("無此對應的權限：" + id);
     }
+
+
+    @Override
+    public String toString() {
+        switch (this) {
+            case ADMINISTRATOR:
+                return "最高權限";
+            case MANAGER:
+                return "管理員";
+            case USER:
+                return "一般使用者";
+            case RENTER:
+                return "出租者";
+            default:
+                return name;
+        }
+    }
 }

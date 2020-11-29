@@ -9,13 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import tw.edu.ntub.imd.camping.bean.RentalRecordBeReturnDescriptionBean;
+import tw.edu.ntub.imd.camping.bean.RentalRecordCheckLogBean;
 import tw.edu.ntub.imd.camping.bean.RentalRecordProductBrokenBean;
-import tw.edu.ntub.imd.camping.bean.RentalRecordProductStatusBean;
 import tw.edu.ntub.imd.camping.bean.RentalRecordStatusChangeBean;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.dto.CreditCard;
@@ -143,6 +140,51 @@ public class RentalRecordStatusController {
 
     @Operation(
             tags = "Rental",
+            method = "POST",
+            summary = "新增商品檢查紀錄",
+            description = "新增商品檢查紀錄",
+            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1"),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "紀錄成功"
+            )
+    )
+    @PostMapping(path = "/check-log")
+    public ResponseEntity<String> createCheckLog(
+            @PathVariable @Positive(message = "id - 應大於0") int id,
+            @Valid RentalRecordCheckLogBean checkLog,
+            BindingResult bindingResult
+    ) {
+        BindingResultUtils.validate(bindingResult);
+        rentalRecordService.saveProductStatus(id, checkLog);
+        return ResponseEntityBuilder.buildSuccessMessage("紀錄成功");
+    }
+
+    @Operation(
+            tags = "Rental",
+            method = "GET",
+            summary = "查詢商品檢查紀錄",
+            description = "查詢商品檢查紀錄",
+            parameters = @Parameter(name = "id", description = "紀錄編號", required = true, example = "1"),
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "查詢成功"
+            )
+    )
+    @GetMapping(path = "/check-log")
+    public ResponseEntity<String> searchCheckLog(@PathVariable @Positive(message = "id - 應大於0") int id) {
+        return ResponseEntityBuilder.success("查詢成功")
+                .data(rentalRecordService.searchCheckLog(id), (data, log) -> {
+                    data.add("id", log.getId());
+                    data.add("recordStatus", log.getRecordStatus().toString());
+                    data.add("content", log.getContent());
+                    data.addStringArray("imageArray", log.getImageUrlList());
+                })
+                .build();
+    }
+
+    @Operation(
+            tags = "Rental",
             method = "PATCH",
             summary = "退貨",
             description = "管理方退貨",
@@ -184,17 +226,13 @@ public class RentalRecordStatusController {
     @PatchMapping(path = "/placed")
     @PreAuthorize("hasAnyAuthority('Administrator', 'Manager')")
     public ResponseEntity<String> placed(
-            @PathVariable @Positive(message = "id - 應大於0") int id,
-            @Valid @RequestBody RentalRecordProductStatusBean productStatus,
-            BindingResult bindingResult
+            @PathVariable @Positive(message = "id - 應大於0") int id
     ) {
-        BindingResultUtils.validate(bindingResult);
         rentalRecordService.updateStatus(
                 RentalRecordStatusChangeBean.builder()
                         .id(id)
                         .newStatus(RentalRecordStatus.NOT_PICK_UP)
                         .changeDescription("已送達倉庫")
-                        .payload(productStatus)
                         .build()
         );
         return createResponse("紀錄完成", RentalRecordStatus.NOT_PICK_UP);
@@ -213,17 +251,13 @@ public class RentalRecordStatusController {
     )
     @PatchMapping(path = "/pick-up")
     public ResponseEntity<String> pickUp(
-            @PathVariable @Positive(message = "id - 應大於0") int id,
-            @Valid @RequestBody RentalRecordProductStatusBean productStatus,
-            BindingResult bindingResult
+            @PathVariable @Positive(message = "id - 應大於0") int id
     ) {
-        BindingResultUtils.validate(bindingResult);
         rentalRecordService.updateStatus(
                 RentalRecordStatusChangeBean.builder()
                         .id(id)
                         .newStatus(RentalRecordStatus.NOT_RETURN)
                         .changeDescription("取貨完成")
-                        .payload(productStatus)
                         .build()
         );
         return createResponse("取貨完成", RentalRecordStatus.NOT_RETURN);
@@ -324,17 +358,13 @@ public class RentalRecordStatusController {
     )
     @PatchMapping(path = "/return")
     public ResponseEntity<String> returnProduct(
-            @PathVariable @Positive(message = "id - 應大於0") int id,
-            @Valid @RequestBody RentalRecordProductStatusBean productStatus,
-            BindingResult bindingResult
+            @PathVariable @Positive(message = "id - 應大於0") int id
     ) {
-        BindingResultUtils.validate(bindingResult);
         rentalRecordService.updateStatus(
                 RentalRecordStatusChangeBean.builder()
                         .id(id)
                         .newStatus(RentalRecordStatus.NOT_RETRIEVE)
                         .changeDescription("買方歸還商品")
-                        .payload(productStatus)
                         .build()
         );
         return createResponse("歸還完成", RentalRecordStatus.NOT_RETRIEVE);

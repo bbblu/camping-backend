@@ -118,7 +118,7 @@ public class RentalRecordController {
         rentalRecordData.add("coverImage", productGroup.getCoverImage());
         CityBean city = productGroup.getCity();
         rentalRecordData.add("areaName", city.getAreaName());
-        rentalRecordData.add("price", productGroup.getPrice());
+        rentalRecordData.add("price", rentalRecord.getPrice());
         rentalRecordData.add("rentalDate", rentalRecord.getRentalDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
 
         CollectionObjectData collectionObjectData = rentalRecordData.createCollectionData();

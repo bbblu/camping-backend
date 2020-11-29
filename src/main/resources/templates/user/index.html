@@ -104,6 +104,65 @@
   </ul>
 </main>
 
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <h4 id="title">系統管理員</h4>
+    <div class="row">
+      <div class="input-field col s6">
+        <input type="text" class="validate" id="account" value="admin" disabled>
+        <label for="account">帳號</label>
+      </div>
+      <div class="input-field col s6">
+        <input type="text" class="validate" id="enable" value="啟用中" disabled>
+        <label for="enable">狀態</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s6">
+        <input type="text" class="validate" id="roleName" value="系統管理員" disabled>
+        <label for="roleName">權限</label>
+      </div>
+      <div class="input-field col s6">
+        <input type="text" class="validate" id="gender" value="男" disabled>
+        <label for="gender">性別</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s6">
+        <input type="text" class="validate" id="name" value="系統 管理員" disabled>
+        <label for="name">姓名</label>
+      </div>
+      <div class="input-field col s6">
+        <input type="text" class="validate" id="nickName" value="測試" disabled>
+        <label for="nickName">暱稱</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s6">
+        <input type="text" class="validate" id="birthday" value="1999/04/03" disabled>
+        <label for="birthday">生日</label>
+      </div>
+      <div class="input-field col s6">
+        <input type="text" class="validate" id="address" value="台北市中正區濟南路321號" disabled>
+        <label for="address">地址</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s6">
+        <input type="text" class="validate" id="cellPhone" value="0912364587" disabled>
+        <label for="cellPhone">電話</label>
+      </div>
+      <div class="input-field col s6">
+        <input type="text" class="validate" id="email" value="10646007@ntub.edu.tw" disabled>
+        <label for="email">信箱</label>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="modal-close waves-effect waves-green btn-flat">關閉</a>
+  </div>
+</div>
+
 <script src="../../static/js/materialize.min.js" th:src="@{/static/js/materialize.min.js}"></script>
 <script src="../../static/js/sidenav.js" th:src="@{/static/js/sidenav.js}"></script>
 <script src="../../static/js/modal.js" th:src="@{/static/js/modal.js}"></script>
@@ -112,6 +171,7 @@
     let table;
 
     document.addEventListener("DOMContentLoaded", function () {
+        M.Modal.init(document.querySelectorAll(".modal"));
         table = new Table("userTable", /*[[${userList}]]*/[], function (index, user) {
             const getOperationHtml = user => {
                 if (user.enable) {
@@ -133,12 +193,44 @@
               <td>${user.account}</td>
               <td>${user.nickName}</td>
               <td>${user.gender}</td>
-              <td>${getOperationHtml(user)}</td>
+              <td>
+                  <button class="waves-effect waves-light btn" onclick="displayDetailModal(${table.data.indexOf(user)}, '${user.account}')">
+                    詳細資料
+                  </button>
+                  ${getOperationHtml(user)}
+              </td>
             </tr>
             `;
         }, "pagination", 10);
         table.reload();
     });
+
+    function displayDetailModal(index, account) {
+        const url = /*[[@{/user/manager/#account#}]]*/"";
+        fetch(url.replace("#account#", account))
+            .then(response => response.json())
+            .then(response => {
+                if (response.result) {
+                    const user = response.data;
+                    const titleElement = document.querySelector("#title");
+                    titleElement.removeChild(titleElement.firstChild);
+                    titleElement.appendChild(document.createTextNode(`${user.lastName}${user.firstName}`));
+                    document.querySelector("#account").value = user.account;
+                    document.querySelector("#enable").value = user.enable ? "啟用中" : "禁用中";
+                    document.querySelector("#roleName").value = user.roleName;
+                    document.querySelector("#gender").value = user.gender;
+                    document.querySelector("#name").value = `${user.lastName} ${user.firstName}`;
+                    document.querySelector("#nickName").value = user.nickName;
+                    document.querySelector("#birthday").value = user.birthday;
+                    document.querySelector("#address").value = user.address;
+                    document.querySelector("#cellPhone").value = user.cellPhone;
+                    document.querySelector("#email").value = user.email;
+                    M.updateTextFields();
+                    const modal = M.Modal.getInstance(document.querySelector("#modal"));
+                    modal.open();
+                }
+            });
+    }
 
     function enable(index, account) {
         send(index, /*[[@{/user/#account#/enable}]]*/"", account);

@@ -42,11 +42,25 @@ public class Notification {
 
     /**
      * 通知類型
+     * <ul>
+     * <li>0: 租借</li>
+     * <li>1: 租借成功</li>
+     * <li>2: 租借遭拒</li>
+     * <li>3: 付款成功</li>
+     * <li>4: 付款失敗</li>
+     * <li>5: 對方付款</li>
+     * <li>6: 取消成功</li>
+     * <li>7: 對方取消</li>
+     * <li>8: 物品退貨</li>
+     * <li>9: 物品送達</li>
+     * <li>10: 物品歸還</li>
+     * <li>11: 評價邀請</li>
+     * </ul>
      *
      * @since 1.6.1
      */
     @Enumerated
-    @Column(name = "type", length = 1, nullable = false)
+    @Column(name = "type", length = 2, nullable = false)
     private NotificationType type;
 
     /**

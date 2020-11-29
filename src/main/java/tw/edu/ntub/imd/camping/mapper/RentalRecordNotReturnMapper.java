@@ -3,12 +3,9 @@ package tw.edu.ntub.imd.camping.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import tw.edu.ntub.imd.camping.bean.RentalRecordProductBrokenBean;
-import tw.edu.ntub.imd.camping.bean.RentalRecordProductStatusBean;
-import tw.edu.ntub.imd.camping.databaseconfig.dao.RentalRecordCheckLogDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.UserBadRecordDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.UserCompensateRecordDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
-import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecordCheckLog;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.UserBadRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.UserCompensateRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
@@ -23,7 +20,6 @@ public class RentalRecordNotReturnMapper implements RentalRecordStatusMapper {
     private static final EnumSet<RentalRecordStatus> CAN_CHANGE_TO_STATUS_SET = EnumSet.of(
             RentalRecordStatus.NOT_RETRIEVE
     );
-    private final RentalRecordCheckLogDAO checkLogDAO;
     private final UserBadRecordDAO userBadRecordDAO;
     private final UserCompensateRecordDAO userCompensateRecordDAO;
 
@@ -53,15 +49,12 @@ public class RentalRecordNotReturnMapper implements RentalRecordStatusMapper {
             if (payload instanceof RentalRecordProductBrokenBean) {
                 RentalRecordProductBrokenBean brokenBean = (RentalRecordProductBrokenBean) payload;
                 saveBadRecord(record.getRenterAccount(), UserBadRecordType.BROKEN_PRODUCT);
-                saveCheckLog(record, originStatus, brokenBean.getDescription());
 
                 UserCompensateRecord compensateRecord = new UserCompensateRecord();
                 compensateRecord.setUserAccount(record.getRenterAccount());
                 compensateRecord.setRentalRecordId(record.getId());
                 compensateRecord.setCompensatePrice(brokenBean.getCompensatePrice());
                 userCompensateRecordDAO.save(compensateRecord);
-            } else if (payload instanceof RentalRecordProductStatusBean) {
-                saveCheckLog(record, originStatus, ((RentalRecordProductStatusBean) payload).getDescription());
             }
         }
     }
@@ -71,10 +64,5 @@ public class RentalRecordNotReturnMapper implements RentalRecordStatusMapper {
         badRecord.setType(type);
         badRecord.setUserAccount(account);
         userBadRecordDAO.save(badRecord);
-    }
-
-    private void saveCheckLog(RentalRecord record, RentalRecordStatus originStatus, String logContent) {
-        RentalRecordCheckLog checkLog = new RentalRecordCheckLog(record.getId(), originStatus, logContent);
-        checkLogDAO.save(checkLog);
     }
 }

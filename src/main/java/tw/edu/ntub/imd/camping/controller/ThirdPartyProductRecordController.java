@@ -1,7 +1,7 @@
 package tw.edu.ntub.imd.camping.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,12 +20,14 @@ import tw.edu.ntub.imd.camping.util.http.ResponseEntityBuilder;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.DecimalFormat;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Tag(name = "ThirdPartyProduct")
 @Controller
 @RequestMapping(path = "/third-party-product")
-public class ThirdProductRecordController {
+public class ThirdPartyProductRecordController {
+    private static final DecimalFormat PRICE_FORMATTER = new DecimalFormat("#,###");
     private final ProductGroupService productGroupService;
     private final ThirdPartyProductRecordService thirdPartyProductRecordService;
 
@@ -46,7 +48,7 @@ public class ThirdProductRecordController {
                     data.add("brandName", index.getBrandName());
                     data.add("typeName", index.getTypeName());
                     data.add("subTypeName", index.getSubTypeName());
-                    data.add("price", index.getPrice());
+                    data.add("price", PRICE_FORMATTER.format(index.getPrice()));
                 })
                 .build();
     }
