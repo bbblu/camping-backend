@@ -2,12 +2,15 @@ package tw.edu.ntub.imd.camping.util;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import tw.edu.ntub.birc.common.util.StringUtils;
+import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.NotificationDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.Notification;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.NotificationType;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @AllArgsConstructor
@@ -20,21 +23,57 @@ public class NotificationUtils {
             case ALREADY_CANCEL:
                 createCancelNotification(rentalRecord);
                 break;
+            case BE_RETURNED:
+                createBeReturnedNotification(rentalRecord);
+                break;
             case NOT_AGREE:
                 createRentalNotification(rentalRecord);
                 break;
+            case NOT_PLACE:
+                createAlreadyPayNotification(rentalRecord);
+                break;
             case NOT_RETURN:
-                createProductServiceNotification(rentalRecord);
+                createPlacedNotification(rentalRecord);
                 break;
             case NOT_RETRIEVE:
-                createProductReturned(rentalRecord);
-                break;
-            case NOT_COMMENT:
-                createCommentNotification(rentalRecord);
+                createAlreadyReturnNotification(rentalRecord);
                 break;
             default:
                 break;
         }
+    }
+
+    private void createCancelNotification(RentalRecord rentalRecord) {
+        Notification renterNotification = new Notification();
+        renterNotification.setType(NotificationType.CANCEL_SUCCESS);
+        renterNotification.setRentalRecordId(rentalRecord.getId());
+        renterNotification.setContent(NotificationType.CANCEL_SUCCESS.getMessage(rentalRecord.getId()));
+        renterNotification.setUserAccount(SecurityUtils.getLoginUserAccount());
+        notificationDAO.save(renterNotification);
+
+        Notification productOwnerNotification = new Notification();
+        productOwnerNotification.setType(NotificationType.ALREADY_CANCEL);
+        productOwnerNotification.setRentalRecordId(rentalRecord.getId());
+        productOwnerNotification.setContent(NotificationType.ALREADY_CANCEL.getMessage(rentalRecord.getId()));
+        String userAccount;
+        if (StringUtils.isEquals(rentalRecord.getRenterAccount(), SecurityUtils.getLoginUserAccount())) {
+            ProductGroup productGroup = rentalRecord.getProductGroupByProductGroupId();
+            userAccount = productGroup.getCreateAccount();
+        } else {
+            userAccount = rentalRecord.getRenterAccount();
+        }
+        productOwnerNotification.setUserAccount(userAccount);
+        notificationDAO.save(productOwnerNotification);
+    }
+
+    private void createBeReturnedNotification(RentalRecord rentalRecord) {
+        ProductGroup productGroup = rentalRecord.getProductGroupByProductGroupId();
+        Notification renterNotification = new Notification();
+        renterNotification.setType(NotificationType.BE_RETURN);
+        renterNotification.setRentalRecordId(rentalRecord.getId());
+        renterNotification.setContent(NotificationType.BE_RETURN.getMessage(rentalRecord.getId(), 3));
+        renterNotification.setUserAccount(productGroup.getCreateAccount());
+        notificationDAO.save(renterNotification);
     }
 
     private void createRentalNotification(RentalRecord rentalRecord) {
@@ -47,29 +86,25 @@ public class NotificationUtils {
         notificationDAO.save(notification);
     }
 
-    private void createCancelNotification(RentalRecord rentalRecord) {
-        Notification renterNotification = new Notification();
-        renterNotification.setType(NotificationType.CANCEL_RENTER);
-        renterNotification.setRentalRecordId(rentalRecord.getId());
-        renterNotification.setContent(NotificationType.CANCEL_RENTER.getMessage(rentalRecord.getId()));
-        renterNotification.setUserAccount(rentalRecord.getRenterAccount());
-        notificationDAO.save(renterNotification);
-
-        Notification productOwnerNotification = new Notification();
-        productOwnerNotification.setType(NotificationType.CANCEL_PRODUCT_OWNER);
-        productOwnerNotification.setRentalRecordId(rentalRecord.getId());
-        productOwnerNotification.setContent(NotificationType.CANCEL_PRODUCT_OWNER.getMessage(rentalRecord.getId()));
+    private void createAlreadyPayNotification(RentalRecord rentalRecord) {
+        Notification notification = new Notification();
+        notification.setRentalRecordId(rentalRecord.getId());
+        notification.setType(NotificationType.ALREADY_PAY);
+        LocalDateTime borrowStartDate = rentalRecord.getBorrowStartDate();
+        LocalDateTime beforeBorrowStartDateOneDay = borrowStartDate.minusDays(1);
+        Date date = DateUtils.convertLocalDateTimeToDate(beforeBorrowStartDateOneDay);
+        notification.setContent(NotificationType.ALREADY_PAY.getMessage(rentalRecord.getId(), date, date));
         ProductGroup productGroup = rentalRecord.getProductGroupByProductGroupId();
-        productOwnerNotification.setUserAccount(productGroup.getCreateAccount());
-        notificationDAO.save(productOwnerNotification);
+        notification.setUserAccount(productGroup.getCreateAccount());
+        notificationDAO.save(notification);
     }
 
-    private void createProductServiceNotification(RentalRecord rentalRecord) {
+    private void createPlacedNotification(RentalRecord rentalRecord) {
         Notification notification = new Notification();
-        notification.setType(NotificationType.PRODUCT_SERVICE);
+        notification.setType(NotificationType.PLACED);
         notification.setRentalRecordId(rentalRecord.getId());
         Date borrowEndDate = DateUtils.convertLocalDateTimeToDate(rentalRecord.getBorrowEndDate());
-        notification.setContent(NotificationType.PRODUCT_SERVICE.getMessage(
+        notification.setContent(NotificationType.PLACED.getMessage(
                 rentalRecord.getId(),
                 borrowEndDate,
                 borrowEndDate,
@@ -79,36 +114,19 @@ public class NotificationUtils {
         notificationDAO.save(notification);
     }
 
-    private void createProductReturned(RentalRecord rentalRecord) {
+    private void createAlreadyReturnNotification(RentalRecord rentalRecord) {
         Notification notification = new Notification();
-        notification.setType(NotificationType.PRODUCT_SERVICE);
+        notification.setType(NotificationType.ALREADY_RETURN);
         notification.setRentalRecordId(rentalRecord.getId());
-        Date borrowEndDate = DateUtils.convertLocalDateTimeToDate(rentalRecord.getReturnDate().plusDays(7));
-        notification.setContent(NotificationType.PRODUCT_SERVICE.getMessage(
+        Date shouldRetrieveDate = DateUtils.convertLocalDateTimeToDate(rentalRecord.getReturnDate().plusDays(3));
+        notification.setContent(NotificationType.ALREADY_RETURN.getMessage(
                 rentalRecord.getId(),
-                borrowEndDate,
-                borrowEndDate,
-                borrowEndDate
+                shouldRetrieveDate,
+                shouldRetrieveDate,
+                shouldRetrieveDate
         ));
         ProductGroup productGroup = rentalRecord.getProductGroupByProductGroupId();
         notification.setUserAccount(productGroup.getCreateAccount());
         notificationDAO.save(notification);
-    }
-
-    private void createCommentNotification(RentalRecord rentalRecord) {
-        Notification renterNotification = new Notification();
-        renterNotification.setType(NotificationType.COMMENT);
-        renterNotification.setRentalRecordId(rentalRecord.getId());
-        renterNotification.setContent(NotificationType.COMMENT.getMessage(rentalRecord.getId()));
-        renterNotification.setUserAccount(rentalRecord.getRenterAccount());
-        notificationDAO.save(renterNotification);
-
-        Notification productOwnerNotification = new Notification();
-        productOwnerNotification.setType(NotificationType.COMMENT);
-        productOwnerNotification.setRentalRecordId(rentalRecord.getId());
-        productOwnerNotification.setContent(NotificationType.COMMENT.getMessage(rentalRecord.getId()));
-        ProductGroup productGroup = rentalRecord.getProductGroupByProductGroupId();
-        productOwnerNotification.setUserAccount(productGroup.getCreateAccount());
-        notificationDAO.save(productOwnerNotification);
     }
 }

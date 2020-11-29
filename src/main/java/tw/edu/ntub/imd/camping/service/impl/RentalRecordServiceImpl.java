@@ -10,6 +10,7 @@ import tw.edu.ntub.imd.camping.bean.*;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.*;
+import tw.edu.ntub.imd.camping.databaseconfig.enumerate.NotificationType;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.dto.file.uploader.MultipartFileUploader;
 import tw.edu.ntub.imd.camping.dto.file.uploader.UploadResult;
@@ -44,6 +45,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     private final UserDAO userDAO;
     private final RentalRecordIndexTransformer indexTransformer;
     private final RentalRecordStatusMapperFactory statusMapperFactory;
+    private final NotificationDAO notificationDAO;
     private final NotificationUtils notificationUtils;
     private final UserCommentDAO userCommentDAO;
     private final UserCompensateRecordDAO userCompensateRecordDAO;
@@ -64,6 +66,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             UserDAO userDAO,
             RentalRecordIndexTransformer indexTransformer,
             RentalRecordStatusMapperFactory statusMapperFactory,
+            NotificationDAO notificationDAO,
             NotificationUtils notificationUtils,
             UserCommentDAO userCommentDAO,
             UserCompensateRecordDAO userCompensateRecordDAO,
@@ -83,6 +86,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         this.userDAO = userDAO;
         this.indexTransformer = indexTransformer;
         this.statusMapperFactory = statusMapperFactory;
+        this.notificationDAO = notificationDAO;
         this.notificationUtils = notificationUtils;
         this.userCommentDAO = userCommentDAO;
         this.userCompensateRecordDAO = userCompensateRecordDAO;
@@ -218,11 +222,14 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
 
         UserComment userComment = new UserComment();
         userComment.setRentalRecordId(id);
+        NotificationType notificationType;
         if (StringUtils.isEquals(record.getRenterAccount(), SecurityUtils.getLoginUserAccount())) {
             ProductGroup productGroup = record.getProductGroupByProductGroupId();
             userComment.setUserAccount(productGroup.getCreateAccount());
+            notificationType = NotificationType.PRODUCT_OWNER_ALREADY_COMMENT;
         } else {
             userComment.setUserAccount(record.getRenterAccount());
+            notificationType = NotificationType.RENTER_ALREADY_COMMENT;
         }
         if (userCommentDAO.exists(Example.of(userComment))) {
             throw new DuplicateCommentException();
@@ -241,6 +248,13 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
                                 .changeDescription("對方已評價")
                                 .build()
                 );
+            } else {
+                Notification notification = new Notification();
+                notification.setRentalRecordId(record.getId());
+                notification.setType(notificationType);
+                notification.setUserAccount(userComment.getUserAccount());
+                notification.setContent(notificationType.getMessage(record.getId()));
+                notificationDAO.save(notification);
             }
         }
     }
