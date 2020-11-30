@@ -3,10 +3,13 @@ package tw.edu.ntub.imd.camping.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import tw.edu.ntub.birc.common.util.StringUtils;
+import tw.edu.ntub.imd.camping.bean.RentalRecordBeReturnDescriptionBean;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
+import tw.edu.ntub.imd.camping.databaseconfig.dao.RentalRecordTerminateRecordDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.UserBadRecordDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecordTerminateRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.UserBadRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.UserBadRecordType;
@@ -24,6 +27,7 @@ public class RentalRecordNotPickUpMapper implements RentalRecordStatusMapper {
             RentalRecordStatus.TERMINATE
     );
     private final UserBadRecordDAO userBadRecordDAO;
+    private final RentalRecordTerminateRecordDAO rentalRecordTerminateRecordDAO;
 
     @Override
     public RentalRecordStatus getMappedStatus() {
@@ -50,12 +54,26 @@ public class RentalRecordNotPickUpMapper implements RentalRecordStatusMapper {
 
     @Override
     public void afterChange(RentalRecord record, RentalRecordStatus originStatus, Object payload) throws ClassCastException {
-        if (isProductOwnerTerminate(record)) {
+        if (isManagerTerminate(record, payload)) {
+            createReturnRecord(record, (RentalRecordBeReturnDescriptionBean) payload);
+        } else if (isProductOwnerTerminate(record)) {
             ProductGroup productGroup = record.getProductGroupByProductGroupId();
             saveBadRecord(productGroup.getCreateAccount(), UserBadRecordType.CANCEL_RECORD);
         } else if (isRenterTerminate(record)) {
             saveBadRecord(record.getRenterAccount(), UserBadRecordType.TERMINATE_RECORD);
         }
+    }
+
+    private boolean isManagerTerminate(RentalRecord record, Object payload) {
+        return record.getStatus() == RentalRecordStatus.TERMINATE &&
+                payload instanceof RentalRecordBeReturnDescriptionBean;
+    }
+
+    private void createReturnRecord(RentalRecord record, RentalRecordBeReturnDescriptionBean descriptionBean) {
+        RentalRecordTerminateRecord recordReturnRecord = new RentalRecordTerminateRecord();
+        recordReturnRecord.setRecordId(record.getId());
+        recordReturnRecord.setContent(descriptionBean.getDescription());
+        rentalRecordTerminateRecordDAO.save(recordReturnRecord);
     }
 
     private boolean isProductOwnerTerminate(RentalRecord record) {

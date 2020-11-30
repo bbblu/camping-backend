@@ -53,6 +53,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
     private final RentalRecordCheckLogTransformer checkLogTransformer;
     private final RentalRecordCheckLogImageDAO checkLogImageDAO;
     private final MultipartFileUploader fileUploader;
+    private final RentalRecordTerminateRecordDAO terminateRecordDAO;
 
     public RentalRecordServiceImpl(
             RentalRecordDAO recordDAO,
@@ -73,7 +74,8 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
             RentalRecordCheckLogDAO checkLogDAO,
             RentalRecordCheckLogTransformer checkLogTransformer,
             RentalRecordCheckLogImageDAO checkLogImageDAO,
-            MultipartFileUploader fileUploader) {
+            MultipartFileUploader fileUploader,
+            RentalRecordTerminateRecordDAO terminateRecordDAO) {
         super(recordDAO, transformer);
         this.recordDAO = recordDAO;
         this.transformer = transformer;
@@ -94,6 +96,7 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
         this.checkLogTransformer = checkLogTransformer;
         this.checkLogImageDAO = checkLogImageDAO;
         this.fileUploader = fileUploader;
+        this.terminateRecordDAO = terminateRecordDAO;
     }
 
     @Override
@@ -292,5 +295,12 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
                 checkLogDAO.findByRecordIdOrderByIdDesc(id),
                 checkLogTransformer::transferToBean
         );
+    }
+
+    @Override
+    public String getTerminateDescription(int id) {
+        return terminateRecordDAO.findByRecordId(id)
+                .map(RentalRecordTerminateRecord::getContent)
+                .orElse("此紀錄為交易其中一方取消交易");
     }
 }

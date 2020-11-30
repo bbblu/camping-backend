@@ -224,6 +224,13 @@ public class RentalRecordController {
         }
     }
 
+    @GetMapping(path = "/{id}/terminate-description")
+    public ResponseEntity<String> searchTerminateDescription(@PathVariable int id) {
+        return ResponseEntityBuilder.success("查詢成功")
+                .data(SingleValueObjectData.create("description", rentalRecordService.getTerminateDescription(id)))
+                .build();
+    }
+
     // |---------------------------------------------------------------------------------------------------------------------------------------------|
     // |---------------------------------------------------------以下為Swagger所需使用的Schema---------------------------------------------------------|
     // |---------------------------------------------------------------------------------------------------------------------------------------------|

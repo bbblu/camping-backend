@@ -28,4 +28,6 @@ public interface RentalRecordService extends BaseService<RentalRecordBean, Integ
     void saveProductStatus(int id, RentalRecordCheckLogBean productStatusBean);
 
     List<RentalRecordCheckLogBean> searchCheckLog(int id);
+
+    String getTerminateDescription(int id);
 }
