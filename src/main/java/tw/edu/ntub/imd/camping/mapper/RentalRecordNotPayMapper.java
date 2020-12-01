@@ -13,8 +13,12 @@ import tw.edu.ntub.imd.camping.databaseconfig.enumerate.NotificationType;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.dto.CreditCard;
 import tw.edu.ntub.imd.camping.exception.RentalRecordStatusException;
+import tw.edu.ntub.imd.camping.util.DateUtils;
+import tw.edu.ntub.imd.camping.util.NotificationUtils;
 import tw.edu.ntub.imd.camping.util.TransactionUtils;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.EnumSet;
 
 @RequiredArgsConstructor
@@ -26,6 +30,7 @@ public class RentalRecordNotPayMapper implements RentalRecordStatusMapper {
     );
     private final TransactionUtils transactionUtils;
     private final NotificationDAO notificationDAO;
+    private final NotificationUtils notificationUtils;
 
     @Override
     public RentalRecordStatus getMappedStatus() {
@@ -68,13 +73,31 @@ public class RentalRecordNotPayMapper implements RentalRecordStatusMapper {
     @Override
     public void afterChange(RentalRecord record, RentalRecordStatus originStatus, Object payload) throws ClassCastException {
         if (record.getStatus() == RentalRecordStatus.NOT_PLACE) {
-            Notification notification = new Notification();
-            notification.setRentalRecordId(record.getId());
-            notification.setType(NotificationType.PAYMENT_SUCCESS);
-            notification.setUserAccount(SecurityUtils.getLoginUserAccount());
-            notification.setContent(NotificationType.PAYMENT_SUCCESS.getMessage(record.getId()));
-            notificationDAO.save(notification);
+            createPaymentSuccessNotification(record);
+            createAlreadyPayNotification(record);
         }
+    }
+
+    private void createPaymentSuccessNotification(RentalRecord record) {
+        Notification notification = new Notification();
+        notification.setRentalRecordId(record.getId());
+        notification.setType(NotificationType.PAYMENT_SUCCESS);
+        notification.setUserAccount(SecurityUtils.getLoginUserAccount());
+        notification.setContent(NotificationType.PAYMENT_SUCCESS.getMessage(record.getId()));
+        notificationDAO.save(notification);
+    }
+
+    private void createAlreadyPayNotification(RentalRecord record) {
+        Notification notification = new Notification();
+        notification.setRentalRecordId(record.getId());
+        notification.setType(NotificationType.ALREADY_PAY);
+        ProductGroup productGroup = record.getProductGroupByProductGroupId();
+        notification.setUserAccount(productGroup.getCreateAccount());
+        LocalDateTime placeDeadline = record.getBorrowStartDate().minusDays(1);
+        Date date = DateUtils.convertLocalDateTimeToDate(placeDeadline);
+        notification.setContent(NotificationType.ALREADY_PAY.getMessage(record.getId(), date, date));
+        notificationDAO.save(notification);
+        notificationUtils.sendMail(notification);
     }
 
     private static class NotRenterException extends RentalRecordStatusException {

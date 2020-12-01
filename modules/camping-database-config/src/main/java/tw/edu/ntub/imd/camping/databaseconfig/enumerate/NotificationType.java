@@ -108,4 +108,38 @@ public enum NotificationType {
     public String getMessage(Object... args) {
         return String.format(template, args);
     }
+
+    @Override
+    public String toString() {
+        switch (this) {
+            case RENTAL:
+                return "租借";
+            case RENTAL_AGREE:
+                return "租借成功";
+            case RENTAL_DENIED:
+                return "租借遭拒";
+            case PAYMENT_SUCCESS:
+                return "付款成功";
+            case PAYMENT_FAIL:
+                return "付款失敗";
+            case ALREADY_PAY:
+                return "對方付款";
+            case CANCEL_SUCCESS:
+                return "取消成功";
+            case ALREADY_CANCEL:
+                return "對方取消";
+            case BE_RETURN:
+                return "物品退貨";
+            case PLACED:
+                return "物品送達";
+            case ALREADY_RETURN:
+                return "物品歸還";
+            case RENTER_ALREADY_COMMENT:
+                return "出租方已評價";
+            case PRODUCT_OWNER_ALREADY_COMMENT:
+                return "租借方已平價";
+            default:
+                return name();
+        }
+    }
 }
