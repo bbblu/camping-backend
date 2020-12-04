@@ -11,4 +11,6 @@ public interface UserCommentDAO extends BaseDAO<UserComment, Integer> {
     Object getAverageCommentByUserAccount(@Param("userAccount") String userAccount);
 
     boolean existsByRentalRecordIdAndUserAccountAndCommentAccount(int rentalRecordId, String account, String commentAccount);
+
+    boolean existsByRentalRecordIdAndCommentAccount(Integer rentalRecordId, String commentAccount);
 }

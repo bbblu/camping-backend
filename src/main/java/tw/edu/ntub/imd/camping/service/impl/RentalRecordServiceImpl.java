@@ -303,4 +303,9 @@ public class RentalRecordServiceImpl extends BaseServiceImpl<RentalRecordBean, R
                 .map(RentalRecordTerminateRecord::getContent)
                 .orElse("此紀錄為交易其中一方取消交易");
     }
+
+    @Override
+    public boolean isComment(Integer id, String commentAccount) {
+        return userCommentDAO.existsByRentalRecordIdAndCommentAccount(id, commentAccount);
+    }
 }

@@ -30,4 +30,6 @@ public interface RentalRecordService extends BaseService<RentalRecordBean, Integ
     List<RentalRecordCheckLogBean> searchCheckLog(int id);
 
     String getTerminateDescription(int id);
+
+    boolean isComment(Integer id, String commentAccount);
 }

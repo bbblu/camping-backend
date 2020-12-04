@@ -120,6 +120,13 @@ public class RentalRecordController {
         rentalRecordData.add("areaName", city.getAreaName());
         rentalRecordData.add("price", rentalRecord.getPrice());
         rentalRecordData.add("rentalDate", rentalRecord.getRentalDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
+        rentalRecordData.add(
+                "isComment",
+                rentalRecordService.isComment(
+                        rentalRecord.getId(),
+                        SecurityUtils.getLoginUserAccount()
+                )
+        );
 
         CollectionObjectData collectionObjectData = rentalRecordData.createCollectionData();
         collectionObjectData.add("detailArray", rentalRecord.getDetailBeanList(), (detailData, detail) -> {
