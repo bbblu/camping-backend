@@ -92,7 +92,7 @@ public class NotificationUtils {
     }
 
     public void sendMail(Notification notification) {
-        Mail mail = new Mail("/notification/message");
+        Mail mail = new Mail("/mail/notification/message");
         mail.setSubject("借借露 - " + notification.getType());
         mail.addSendTo(notification.getUserAccount());
         mail.addAttribute("notification", notification);
