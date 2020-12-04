@@ -5,9 +5,11 @@ import org.springframework.stereotype.Component;
 import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.NotificationDAO;
+import tw.edu.ntub.imd.camping.databaseconfig.dao.UserDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.Notification;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.User;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.NotificationType;
 import tw.edu.ntub.imd.camping.dto.Mail;
 
@@ -19,6 +21,7 @@ import java.util.Date;
 public class NotificationUtils {
     private final NotificationDAO notificationDAO;
     private final MailSender mailSender;
+    private final UserDAO userDAO;
 
     public void create(RentalRecord rentalRecord) {
         switch (rentalRecord.getStatus()) {
@@ -94,7 +97,7 @@ public class NotificationUtils {
     public void sendMail(Notification notification) {
         Mail mail = new Mail("/mail/notification/message");
         mail.setSubject("借借露 - " + notification.getType());
-        mail.addSendTo(notification.getUserAccount());
+        mail.addSendTo(userDAO.findById(notification.getUserAccount()).map(User::getEmail).orElseThrow());
         mail.addAttribute("notification", notification);
         mailSender.sendMail(mail);
     }
