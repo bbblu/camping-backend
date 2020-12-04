@@ -124,4 +124,21 @@ public class ThirdPartyProductRecordServiceImpl implements ThirdPartyProductReco
             return productBrandDAO.saveAndFlush(productBrand);
         }
     }
+
+    @Override
+    public Workbook getRecordExcel() {
+        Workbook result = getTemplateExcel();
+        Sheet sheet = result.getSheet(0);
+
+        int rowNumber = 2;
+        for (ThirdPartyProductRecordIndex index : indexDAO.findAll()) {
+            Row row = sheet.getRowByRowNumber(rowNumber++);
+            row.getCell("A").setValue(index.getBrandName());
+            row.getCell("B").setValue(index.getTypeName());
+            row.getCell("C").setValue(index.getSubTypeName());
+            row.getCell("D").setValue(index.getPrice());
+        }
+
+        return result;
+    }
 }

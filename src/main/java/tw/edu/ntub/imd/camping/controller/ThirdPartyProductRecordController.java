@@ -65,4 +65,10 @@ public class ThirdPartyProductRecordController {
         thirdPartyProductRecordService.importRecord(workbook);
         return ResponseEntityBuilder.buildSuccessMessage("匯入成功");
     }
+
+    @GetMapping(path = "/record/export")
+    public void downloadRecord(HttpServletResponse response) {
+        Workbook workbook = thirdPartyProductRecordService.getRecordExcel();
+        ExcelResponseUtils.response(response, workbook);
+    }
 }

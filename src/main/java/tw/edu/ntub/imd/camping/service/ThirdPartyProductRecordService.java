@@ -19,4 +19,6 @@ public interface ThirdPartyProductRecordService {
     Workbook getTemplateExcel();
 
     void importRecord(Workbook recordWorkbook);
+
+    Workbook getRecordExcel();
 }

@@ -1,3 +1,15 @@
+GET http://localhost:8080/third-party-product/record/export
+
+<> 2020-12-04T164553.200.txt
+
+###
+
+GET http://localhost:8080/third-party-product/record/export
+
+<> 2020-12-04T164542.200.html
+
+###
+
 GET http://localhost:8080/rental/12/status/check-log
 
 <> 2020-11-29T014330.200.json
