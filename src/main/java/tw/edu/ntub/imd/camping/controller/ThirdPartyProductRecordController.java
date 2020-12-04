@@ -43,12 +43,12 @@ public class ThirdPartyProductRecordController {
             ThirdPartyProductRecordIndexFilterBean filter
     ) {
         return ResponseEntityBuilder.success("查詢成功")
-                .data(thirdPartyProductRecordService.searchIndexRecord(filter), (data, index) -> {
-                    data.add("id", index.getId());
-                    data.add("brandName", index.getBrandName());
-                    data.add("typeName", index.getTypeName());
-                    data.add("subTypeName", index.getSubTypeName());
-                    data.add("price", PRICE_FORMATTER.format(index.getPrice()));
+                .data(thirdPartyProductRecordService.searchIndexRecord(filter), (data, index, indexBean) -> {
+                    data.add("id", index + 1);
+                    data.add("brandName", indexBean.getBrandName());
+                    data.add("typeName", indexBean.getTypeName());
+                    data.add("subTypeName", indexBean.getSubTypeName());
+                    data.add("price", PRICE_FORMATTER.format(indexBean.getPrice()));
                 })
                 .build();
     }
