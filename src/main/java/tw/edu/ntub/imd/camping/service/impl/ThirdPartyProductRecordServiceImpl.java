@@ -3,6 +3,7 @@ package tw.edu.ntub.imd.camping.service.impl;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tw.edu.ntub.birc.common.util.CollectionUtils;
@@ -15,6 +16,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductSubType;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductType;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ThirdPartyProductRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.view.ThirdPartyProductRecordIndex;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.view.ThirdPartyProductRecordIndex_;
 import tw.edu.ntub.imd.camping.dto.file.excel.row.Row;
 import tw.edu.ntub.imd.camping.dto.file.excel.sheet.Sheet;
 import tw.edu.ntub.imd.camping.dto.file.excel.workbook.PoiWorkbook;
@@ -41,9 +43,16 @@ public class ThirdPartyProductRecordServiceImpl implements ThirdPartyProductReco
     @Override
     public List<ThirdPartyProductRecordIndexBean> searchIndexRecord(ThirdPartyProductRecordIndexFilterBean filterBean) {
         return CollectionUtils.map(
-                indexDAO.findAll(Example.of(
-                        JavaBeanUtils.copy(filterBean, new ThirdPartyProductRecordIndex())
-                )),
+                indexDAO.findAll(
+                        Example.of(
+                                JavaBeanUtils.copy(filterBean, new ThirdPartyProductRecordIndex())
+                        ),
+                        Sort.by(
+                                Sort.Order.asc(ThirdPartyProductRecordIndex_.BRAND_ID),
+                                Sort.Order.asc(ThirdPartyProductRecordIndex_.TYPE),
+                                Sort.Order.asc(ThirdPartyProductRecordIndex_.SUB_TYPE)
+                        )
+                ),
                 indexTransformer::transferToBean
         );
     }
