@@ -60,9 +60,12 @@ public class ThirdPartyProductRecordController {
     }
 
     @PostMapping(path = "/import")
-    public ResponseEntity<String> importRecord(@RequestParam(name = "file") MultipartFile file) throws IOException {
+    public ResponseEntity<String> importRecord(
+            @RequestParam MultipartFile file,
+            @RequestParam boolean isReplaceOldRecord
+    ) throws IOException {
         Workbook workbook = new PoiWorkbook(file.getInputStream());
-        thirdPartyProductRecordService.importRecord(workbook);
+        thirdPartyProductRecordService.importRecord(workbook, isReplaceOldRecord);
         return ResponseEntityBuilder.buildSuccessMessage("匯入成功");
     }
 

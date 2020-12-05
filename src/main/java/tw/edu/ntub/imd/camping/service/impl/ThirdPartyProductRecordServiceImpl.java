@@ -1,6 +1,7 @@
 package tw.edu.ntub.imd.camping.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,7 +69,10 @@ public class ThirdPartyProductRecordServiceImpl implements ThirdPartyProductReco
 
     @Override
     @Transactional
-    public void importRecord(Workbook recordWorkbook) {
+    public void importRecord(Workbook recordWorkbook, boolean isReplaceOldRecord) {
+        if (isReplaceOldRecord) {
+            thirdPartyProductRecordDAO.deleteAll();
+        }
         thirdPartyProductRecordDAO.saveAll(
                 recordWorkbook.getSheet(0)
                         .getLoadedRowList()
@@ -100,7 +104,7 @@ public class ThirdPartyProductRecordServiceImpl implements ThirdPartyProductReco
                 .orElseThrow(() -> new NotFoundException("未知的商品類型：" + type));
     }
 
-    private ProductSubType getProductSubType(ProductType productType, String subTypeName) {
+    private ProductSubType getProductSubType(@NotNull ProductType productType, String subTypeName) {
         Optional<ProductSubType> optionalProductSubType =
                 productSubTypeDAO.findByTypeAndName(productType.getId(), subTypeName);
         if (optionalProductSubType.isPresent()) {
