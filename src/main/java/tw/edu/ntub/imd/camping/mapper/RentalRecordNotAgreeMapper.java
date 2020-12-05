@@ -11,6 +11,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.NotificationType;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.exception.RentalRecordStatusException;
+import tw.edu.ntub.imd.camping.util.NotificationUtils;
 import tw.edu.ntub.imd.camping.util.http.RequestUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,7 +24,8 @@ public class RentalRecordNotAgreeMapper implements RentalRecordStatusMapper {
             RentalRecordStatus.NOT_PAY,
             RentalRecordStatus.ALREADY_CANCEL
     );
-    public final NotificationDAO notificationDAO;
+    private final NotificationDAO notificationDAO;
+    private final NotificationUtils notificationUtils;
 
     @Override
     public RentalRecordStatus getMappedStatus() {
@@ -66,16 +68,17 @@ public class RentalRecordNotAgreeMapper implements RentalRecordStatusMapper {
         Notification notification = new Notification();
         ProductGroup productGroup = record.getProductGroupByProductGroupId();
         notification.setRentalRecordId(record.getId());
+        notification.setUserAccount(record.getRenterAccount());
         if (isAgree(record.getStatus())) {
             notification.setType(NotificationType.RENTAL_AGREE);
             notification.setContent(NotificationType.RENTAL_AGREE.getMessage(productGroup.getName()));
+            notificationUtils.sendMail(notification);
         } else if (isDenied(record.getStatus())) {
             notification.setType(NotificationType.RENTAL_DENIED);
             notification.setContent(NotificationType.RENTAL_DENIED.getMessage(productGroup.getName()));
         } else {
             return;
         }
-        notification.setUserAccount(record.getRenterAccount());
         notificationDAO.save(notification);
     }
 

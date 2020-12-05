@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="tw" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>借借露 - 通知信件</title>
+</head>
+<body th:object="${notification}">
+
+<div>
+  <th:block th:text="*{userAccount}">a0909002250@gmail.com</th:block>
+  您好：
+</div>
+<div th:text="*{content}">
+
+</div>
+
+</body>
+</html>

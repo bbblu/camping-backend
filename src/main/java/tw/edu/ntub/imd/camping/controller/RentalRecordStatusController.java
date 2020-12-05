@@ -286,6 +286,7 @@ public class RentalRecordStatusController {
                         .id(id)
                         .newStatus(RentalRecordStatus.TERMINATE)
                         .changeDescription(beReturnDescription.getDescription())
+                        .payload(beReturnDescription)
                         .build()
         );
         return createResponse("退貨完成", RentalRecordStatus.TERMINATE);

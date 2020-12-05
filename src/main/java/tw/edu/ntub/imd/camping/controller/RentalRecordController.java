@@ -120,6 +120,13 @@ public class RentalRecordController {
         rentalRecordData.add("areaName", city.getAreaName());
         rentalRecordData.add("price", rentalRecord.getPrice());
         rentalRecordData.add("rentalDate", rentalRecord.getRentalDate(), DateTimePattern.of("yyyy/MM/dd HH:mm"));
+        rentalRecordData.add(
+                "isComment",
+                rentalRecordService.isComment(
+                        rentalRecord.getId(),
+                        SecurityUtils.getLoginUserAccount()
+                )
+        );
 
         CollectionObjectData collectionObjectData = rentalRecordData.createCollectionData();
         collectionObjectData.add("detailArray", rentalRecord.getDetailBeanList(), (detailData, detail) -> {
@@ -222,6 +229,13 @@ public class RentalRecordController {
             rentalRecordService.saveComment(id, comment);
             return ResponseEntityBuilder.buildSuccessMessage("評價成功");
         }
+    }
+
+    @GetMapping(path = "/{id}/terminate-description")
+    public ResponseEntity<String> searchTerminateDescription(@PathVariable int id) {
+        return ResponseEntityBuilder.success("查詢成功")
+                .data(SingleValueObjectData.create("description", rentalRecordService.getTerminateDescription(id)))
+                .build();
     }
 
     // |---------------------------------------------------------------------------------------------------------------------------------------------|

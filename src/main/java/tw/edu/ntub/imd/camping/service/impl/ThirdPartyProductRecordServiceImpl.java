@@ -1,7 +1,9 @@
 package tw.edu.ntub.imd.camping.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tw.edu.ntub.birc.common.util.CollectionUtils;
@@ -14,6 +16,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductSubType;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductType;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ThirdPartyProductRecord;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.view.ThirdPartyProductRecordIndex;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.view.ThirdPartyProductRecordIndex_;
 import tw.edu.ntub.imd.camping.dto.file.excel.row.Row;
 import tw.edu.ntub.imd.camping.dto.file.excel.sheet.Sheet;
 import tw.edu.ntub.imd.camping.dto.file.excel.workbook.PoiWorkbook;
@@ -40,9 +43,16 @@ public class ThirdPartyProductRecordServiceImpl implements ThirdPartyProductReco
     @Override
     public List<ThirdPartyProductRecordIndexBean> searchIndexRecord(ThirdPartyProductRecordIndexFilterBean filterBean) {
         return CollectionUtils.map(
-                indexDAO.findAll(Example.of(
-                        JavaBeanUtils.copy(filterBean, new ThirdPartyProductRecordIndex())
-                )),
+                indexDAO.findAll(
+                        Example.of(
+                                JavaBeanUtils.copy(filterBean, new ThirdPartyProductRecordIndex())
+                        ),
+                        Sort.by(
+                                Sort.Order.asc(ThirdPartyProductRecordIndex_.BRAND_ID),
+                                Sort.Order.asc(ThirdPartyProductRecordIndex_.TYPE),
+                                Sort.Order.asc(ThirdPartyProductRecordIndex_.SUB_TYPE)
+                        )
+                ),
                 indexTransformer::transferToBean
         );
     }
@@ -68,7 +78,10 @@ public class ThirdPartyProductRecordServiceImpl implements ThirdPartyProductReco
 
     @Override
     @Transactional
-    public void importRecord(Workbook recordWorkbook) {
+    public void importRecord(Workbook recordWorkbook, boolean isReplaceOldRecord) {
+        if (isReplaceOldRecord) {
+            thirdPartyProductRecordDAO.deleteAll();
+        }
         thirdPartyProductRecordDAO.saveAll(
                 recordWorkbook.getSheet(0)
                         .getLoadedRowList()
@@ -100,7 +113,7 @@ public class ThirdPartyProductRecordServiceImpl implements ThirdPartyProductReco
                 .orElseThrow(() -> new NotFoundException("未知的商品類型：" + type));
     }
 
-    private ProductSubType getProductSubType(ProductType productType, String subTypeName) {
+    private ProductSubType getProductSubType(@NotNull ProductType productType, String subTypeName) {
         Optional<ProductSubType> optionalProductSubType =
                 productSubTypeDAO.findByTypeAndName(productType.getId(), subTypeName);
         if (optionalProductSubType.isPresent()) {
@@ -123,5 +136,22 @@ public class ThirdPartyProductRecordServiceImpl implements ThirdPartyProductReco
             productBrand.setName(brandName);
             return productBrandDAO.saveAndFlush(productBrand);
         }
+    }
+
+    @Override
+    public Workbook getRecordExcel() {
+        Workbook result = getTemplateExcel();
+        Sheet sheet = result.getSheet(0);
+
+        int rowNumber = 2;
+        for (ThirdPartyProductRecordIndex index : indexDAO.findAll()) {
+            Row row = sheet.getRowByRowNumber(rowNumber++);
+            row.getCell("A").setValue(index.getBrandName());
+            row.getCell("B").setValue(index.getTypeName());
+            row.getCell("C").setValue(index.getSubTypeName());
+            row.getCell("D").setValue(index.getPrice());
+        }
+
+        return result;
     }
 }

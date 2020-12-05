@@ -13,6 +13,7 @@ import tw.edu.ntub.imd.camping.databaseconfig.enumerate.NotificationType;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.RentalRecordStatus;
 import tw.edu.ntub.imd.camping.dto.CreditCard;
 import tw.edu.ntub.imd.camping.exception.RentalRecordStatusException;
+import tw.edu.ntub.imd.camping.util.NotificationUtils;
 import tw.edu.ntub.imd.camping.util.TransactionUtils;
 
 import java.util.EnumSet;
@@ -26,6 +27,7 @@ public class RentalRecordNotPayMapper implements RentalRecordStatusMapper {
     );
     private final TransactionUtils transactionUtils;
     private final NotificationDAO notificationDAO;
+    private final NotificationUtils notificationUtils;
 
     @Override
     public RentalRecordStatus getMappedStatus() {
@@ -68,13 +70,17 @@ public class RentalRecordNotPayMapper implements RentalRecordStatusMapper {
     @Override
     public void afterChange(RentalRecord record, RentalRecordStatus originStatus, Object payload) throws ClassCastException {
         if (record.getStatus() == RentalRecordStatus.NOT_PLACE) {
-            Notification notification = new Notification();
-            notification.setRentalRecordId(record.getId());
-            notification.setType(NotificationType.PAYMENT_SUCCESS);
-            notification.setUserAccount(SecurityUtils.getLoginUserAccount());
-            notification.setContent(NotificationType.PAYMENT_SUCCESS.getMessage(record.getId()));
-            notificationDAO.save(notification);
+            createPaymentSuccessNotification(record);
         }
+    }
+
+    private void createPaymentSuccessNotification(RentalRecord record) {
+        Notification notification = new Notification();
+        notification.setRentalRecordId(record.getId());
+        notification.setType(NotificationType.PAYMENT_SUCCESS);
+        notification.setUserAccount(SecurityUtils.getLoginUserAccount());
+        notification.setContent(NotificationType.PAYMENT_SUCCESS.getMessage(record.getId()));
+        notificationDAO.save(notification);
     }
 
     private static class NotRenterException extends RentalRecordStatusException {

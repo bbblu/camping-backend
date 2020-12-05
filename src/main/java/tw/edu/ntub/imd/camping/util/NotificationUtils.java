@@ -5,10 +5,13 @@ import org.springframework.stereotype.Component;
 import tw.edu.ntub.birc.common.util.StringUtils;
 import tw.edu.ntub.imd.camping.config.util.SecurityUtils;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.NotificationDAO;
+import tw.edu.ntub.imd.camping.databaseconfig.dao.UserDAO;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.Notification;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductGroup;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.RentalRecord;
+import tw.edu.ntub.imd.camping.databaseconfig.entity.User;
 import tw.edu.ntub.imd.camping.databaseconfig.enumerate.NotificationType;
+import tw.edu.ntub.imd.camping.dto.Mail;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -17,6 +20,8 @@ import java.util.Date;
 @Component
 public class NotificationUtils {
     private final NotificationDAO notificationDAO;
+    private final MailSender mailSender;
+    private final UserDAO userDAO;
 
     public void create(RentalRecord rentalRecord) {
         switch (rentalRecord.getStatus()) {
@@ -64,6 +69,7 @@ public class NotificationUtils {
         }
         productOwnerNotification.setUserAccount(userAccount);
         notificationDAO.save(productOwnerNotification);
+        sendMail(productOwnerNotification);
     }
 
     private void createBeReturnedNotification(RentalRecord rentalRecord) {
@@ -74,6 +80,7 @@ public class NotificationUtils {
         renterNotification.setContent(NotificationType.BE_RETURN.getMessage(rentalRecord.getId(), 3));
         renterNotification.setUserAccount(productGroup.getCreateAccount());
         notificationDAO.save(renterNotification);
+        sendMail(renterNotification);
     }
 
     private void createRentalNotification(RentalRecord rentalRecord) {
@@ -84,6 +91,15 @@ public class NotificationUtils {
         ProductGroup productGroup = rentalRecord.getProductGroupByProductGroupId();
         notification.setUserAccount(productGroup.getCreateAccount());
         notificationDAO.save(notification);
+        sendMail(notification);
+    }
+
+    public void sendMail(Notification notification) {
+        Mail mail = new Mail("/mail/notification/message");
+        mail.setSubject("借借露 - " + notification.getType());
+        mail.addSendTo(userDAO.findById(notification.getUserAccount()).map(User::getEmail).orElseThrow());
+        mail.addAttribute("notification", notification);
+        mailSender.sendMail(mail);
     }
 
     private void createAlreadyPayNotification(RentalRecord rentalRecord) {
@@ -112,6 +128,7 @@ public class NotificationUtils {
         ));
         notification.setUserAccount(rentalRecord.getRenterAccount());
         notificationDAO.save(notification);
+        sendMail(notification);
     }
 
     private void createAlreadyReturnNotification(RentalRecord rentalRecord) {
@@ -128,5 +145,6 @@ public class NotificationUtils {
         ProductGroup productGroup = rentalRecord.getProductGroupByProductGroupId();
         notification.setUserAccount(productGroup.getCreateAccount());
         notificationDAO.save(notification);
+        sendMail(notification);
     }
 }

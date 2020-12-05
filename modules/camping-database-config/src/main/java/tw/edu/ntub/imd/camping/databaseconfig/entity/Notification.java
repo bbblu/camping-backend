@@ -118,5 +118,5 @@ public class Notification {
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_account", referencedColumnName = "account", nullable = false, insertable = false, updatable = false)
-    private User createUser;
+    private User user;
 }

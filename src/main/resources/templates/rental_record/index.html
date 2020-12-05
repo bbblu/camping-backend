@@ -30,32 +30,32 @@
 
 <ul id="slide-out" class="sidenav sidenav-fixed collection with-header">
   <li class="collection-header">
-    <a class="home" href="#" th:href="@{/rental/manager}">
+    <a class="home" href="../rental_record/index.html" th:href="@{/rental/manager}">
       <img class="logo col" alt="logo" src="../../static/images/logo.png" th:src="@{/static/images/logo.png}"/>
       <span class="col">管理者頁面</span>
     </a>
   </li>
 
   <li class="collection-item">
-    <a href="#" th:href="@{/problem-report/manager}">
+    <a href="../problem_report/index.html" th:href="@{/problem-report/manager}">
       <i class="material-icons">help</i>
       <span>問題回報</span>
     </a>
   </li>
   <li class="collection-item">
-    <a href="#" th:href="@{/rental/manager}">
+    <a href="../rental_record/index.html" th:href="@{/rental/manager}">
       <i class="material-icons">view_list</i>
       <span>訂單管理</span>
     </a>
   </li>
   <li class="collection-item">
-    <a href="#" th:href="@{/user/manager}">
+    <a href="../user/index.html" th:href="@{/user/manager}">
       <i class="material-icons">account_box</i>
       <span>使用者管理</span>
     </a>
   </li>
   <li class="collection-item">
-    <a href="#" th:href="@{/third-party-product}">
+    <a href="../third_party_record/index.html" th:href="@{/third-party-product}">
       <i class="material-icons">assessment</i>
       <span>其他商家資料</span>
     </a>
@@ -172,6 +172,42 @@
   </div>
 </div>
 
+<div id="terminateModal" class="modal">
+  <div class="modal-content">
+    <h4>退貨</h4>
+    <div class="row">
+      <div class="col s12">
+        <div class="input-field">
+          <textarea class="materialize-textarea" name="terminateDescription" id="terminateDescription"
+                    rows="4"></textarea>
+          <label for="terminateDescription" id="terminateDescriptionLabel">退貨原因</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="modal-close waves-effect waves-green btn-flat" id="terminateSubmit"
+       onclick="createTerminateRecord(this)">確定</a>
+  </div>
+</div>
+
+<div id="terminateDescriptionModal" class="modal">
+  <div class="modal-content">
+    <h4>退貨</h4>
+    <div class="row">
+      <div class="col s12">
+        <div class="input-field">
+          <textarea class="materialize-textarea" id="terminateDescriptionDescription" rows="4" disabled></textarea>
+          <label for="terminateDescriptionDescription">退貨原因</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="modal-close waves-effect waves-green btn-flat">確定</a>
+  </div>
+</div>
+
 <div id="compensateModal" class="modal">
   <div class="modal-content">
     <h4>賠償</h4>
@@ -200,7 +236,7 @@
 <script src="../../static/js/modal.js" th:src="@{/static/js/modal.js}"></script>
 <script src="../../static/js/pagination.js" th:src="@{/static/js/pagination.js}"></script>
 <script th:inline="javascript">
-    const datePerPage = 10;
+    const datePerPage = 12;
     let table;
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -239,7 +275,7 @@
                         <button class="btn waves-effect waves-light action" type="button" onclick="placed(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             寄放完成
                         </button>
-                        <button class="btn waves-effect waves-light action" type="button" onclick="beReturned(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                        <button class="btn waves-effect waves-light action" type="button" onclick="terminated(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             退貨
                         </button>
                     `;
@@ -255,15 +291,16 @@
                             退貨
                         </button>
                     `;
-                case "已終止":
+                case "已取回":
                     return `
                         <button class="btn waves-effect waves-light action" type="button" onclick="displayProductDescriptionModal(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
                             檢視商品狀況
                         </button>
-                        <button class="btn waves-effect waves-light action" type="button" onclick="alreadyTerminate(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
-                            取回商品
+                        <button class="btn waves-effect waves-light action" type="button" onclick="displayTerminateDescriptionModal(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                            退貨原因
                         </button>
                     `;
+
                 case "未歸還":
                     return `
                         <button class="btn waves-effect waves-light action" type="button" onclick="displayProductDescriptionModal(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
@@ -377,8 +414,8 @@
             });
     }
 
-    function beReturned(index, id) {
-        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/be-returned}]]*/"", id), "PATCH", index);
+    function terminated(index, id) {
+        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/be-returned}]]*/"", id), index);
     }
 
     function getReplacedUrl(url, id) {
@@ -386,11 +423,54 @@
     }
 
     function placed(index, id) {
-        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/placed}]]*/"", id), "PATCH", index);
+        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/placed}]]*/"", id), index);
     }
 
     function terminate(index, id) {
-        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/terminate}]]*/"", id), index);
+        const modalSubmitButton = document.querySelector("#terminateSubmit");
+        modalSubmitButton.setAttribute("data-id", id);
+        modalSubmitButton.setAttribute("data-index", index);
+        const modal = M.Modal.getInstance(document.querySelector("#terminateModal"));
+        modal.open();
+    }
+
+    function createTerminateRecord(button) {
+        const id = button.dataset.id;
+        const index = button.dataset.index;
+        fetch(getReplacedUrl(/*[[@{/rental/#id#/status/terminate}]]*/"", id), {
+            method: "PATCH",
+            body: JSON.stringify({
+                description: document.querySelector("#terminateDescription").value
+            }),
+            headers: {
+                "Content-Type": "application/json;charset=UTF-8"
+            }
+        }).then(response => response.json())
+            .then(response => {
+                if (response.result) {
+                    if (response.data) {
+                        table.data[index].status = response.data.name;
+                        table.reload();
+                        document.querySelector("#terminateDescription").value = "";
+                    }
+                }
+                alert(response.message);
+            })
+    }
+
+    function displayTerminateDescriptionModal(index, id) {
+        fetch(getReplacedUrl(/*[[@{/rental/#id#/terminate-description}]]*/"", id))
+            .then(response => response.json())
+            .then(response => {
+                if (response.result) {
+                    document.querySelector("#terminateDescriptionDescription").value = response.data.description;
+                    M.updateTextFields();
+                    const modal = M.Modal.getInstance(document.querySelector("#terminateDescriptionModal"));
+                    modal.open();
+                } else {
+                    alert(response.message);
+                }
+            });
     }
 
     function changeStatus(url, index) {
@@ -407,7 +487,7 @@
     }
 
     function pickUp(index, id) {
-        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/pick-up}]]*/"", id), "PATCH", index);
+        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/pick-up}]]*/"", id), index);
     }
 
     function alreadyTerminate(index, id) {
@@ -449,7 +529,7 @@
     }
 
     function doReturn(index, id) {
-        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/return}]]*/"", id), "PATCH", index);
+        changeStatus(getReplacedUrl(/*[[@{/rental/#id#/status/return}]]*/"", id), index);
     }
 
     function retrieve(index, id) {

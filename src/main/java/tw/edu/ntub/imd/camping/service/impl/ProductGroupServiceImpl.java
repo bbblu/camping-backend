@@ -138,19 +138,32 @@ public class ProductGroupServiceImpl
     @Override
     public void updateProduct(List<ProductBean> productBeanList) {
         if (CollectionUtils.isNotEmpty(productBeanList)) {
-            List<Integer> idList = productBeanList.stream()
+            List<ProductBean> existsProductBeanList = productBeanList.stream()
+                    .filter(productBean -> productBean.getId() != null)
+                    .collect(Collectors.toList());
+            List<Integer> idList = existsProductBeanList.stream()
                     .map(ProductBean::getId)
                     .collect(Collectors.toList());
             OwnerChecker.checkIsAllProductOwner(productDAO, idList);
+
             List<Product> productList = productDAO.findAllById(idList);
-            List<Product> newProductList = JavaBeanUtils.copy(productBeanList, productList);
-            productDAO.saveAll(newProductList);
+            List<Product> existsProductList = JavaBeanUtils.copy(
+                    CollectionUtils.map(existsProductBeanList, productTransformer::transferToEntity),
+                    productList
+            );
+            productDAO.updateAll(existsProductList);
 
             Product firstProduct = productList.get(0);
             Integer groupId = firstProduct.getGroupId();
-            productDAO.updateAll(productDAO.findByGroupIdAndIdNotIn(groupId, idList)
-                    .stream()
-                    .peek(product -> product.setEnable(false))
+            productDAO.updateAll(
+                    productDAO.findByGroupIdAndIdNotIn(groupId, idList)
+                            .stream()
+                            .peek(product -> product.setEnable(false))
+                            .collect(Collectors.toList())
+            );
+
+            saveProduct(productBeanList.stream()
+                    .filter(productBean -> productBean.getId() == null)
                     .collect(Collectors.toList())
             );
         }

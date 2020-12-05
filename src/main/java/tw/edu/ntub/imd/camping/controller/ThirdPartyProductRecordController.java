@@ -43,12 +43,12 @@ public class ThirdPartyProductRecordController {
             ThirdPartyProductRecordIndexFilterBean filter
     ) {
         return ResponseEntityBuilder.success("查詢成功")
-                .data(thirdPartyProductRecordService.searchIndexRecord(filter), (data, index) -> {
-                    data.add("id", index.getId());
-                    data.add("brandName", index.getBrandName());
-                    data.add("typeName", index.getTypeName());
-                    data.add("subTypeName", index.getSubTypeName());
-                    data.add("price", PRICE_FORMATTER.format(index.getPrice()));
+                .data(thirdPartyProductRecordService.searchIndexRecord(filter), (data, index, indexBean) -> {
+                    data.add("id", index + 1);
+                    data.add("brandName", indexBean.getBrandName());
+                    data.add("typeName", indexBean.getTypeName());
+                    data.add("subTypeName", indexBean.getSubTypeName());
+                    data.add("price", PRICE_FORMATTER.format(indexBean.getPrice()));
                 })
                 .build();
     }
@@ -60,9 +60,18 @@ public class ThirdPartyProductRecordController {
     }
 
     @PostMapping(path = "/import")
-    public ResponseEntity<String> importRecord(@RequestParam(name = "file") MultipartFile file) throws IOException {
+    public ResponseEntity<String> importRecord(
+            @RequestParam MultipartFile file,
+            @RequestParam boolean isReplaceOldRecord
+    ) throws IOException {
         Workbook workbook = new PoiWorkbook(file.getInputStream());
-        thirdPartyProductRecordService.importRecord(workbook);
+        thirdPartyProductRecordService.importRecord(workbook, isReplaceOldRecord);
         return ResponseEntityBuilder.buildSuccessMessage("匯入成功");
+    }
+
+    @GetMapping(path = "/record/export")
+    public void downloadRecord(HttpServletResponse response) {
+        Workbook workbook = thirdPartyProductRecordService.getRecordExcel();
+        ExcelResponseUtils.response(response, workbook);
     }
 }
