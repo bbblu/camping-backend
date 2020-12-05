@@ -4,14 +4,17 @@ import tw.edu.ntub.imd.camping.dto.file.File;
 import tw.edu.ntub.imd.camping.dto.file.excel.sheet.Sheet;
 import tw.edu.ntub.imd.camping.enumerate.ExcelType;
 import tw.edu.ntub.imd.camping.exception.file.FileUnknownException;
+import tw.edu.ntub.imd.camping.util.file.FileUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 @SuppressWarnings("unused")
 public interface Workbook extends File, AutoCloseable {
@@ -42,8 +45,24 @@ public interface Workbook extends File, AutoCloseable {
     void moveSheetBefore(Sheet moveTarget, Sheet anotherSheet);
 
     default void saveAs(@Nonnull Path savePath) {
+        saveAs(savePath, Objects.requireNonNull(getFullFileName()));
+    }
+
+    default void saveAs(@Nonnull Path savePath, @Nonnull String fileName) {
         try {
-            FileOutputStream savePathOutputStream = new FileOutputStream(savePath.toFile());
+            FileOutputStream savePathOutputStream;
+            if (Files.notExists(savePath)) {
+                if (FileUtils.isDirectory(savePath)) {
+                    Files.createDirectories(savePath);
+                } else {
+                    Files.createDirectories(savePath.getParent());
+                }
+            }
+            if (FileUtils.isDirectory(savePath)) {
+                savePathOutputStream = new FileOutputStream(savePath.resolve(fileName).toFile());
+            } else {
+                savePathOutputStream = new FileOutputStream(savePath.toFile());
+            }
             export(savePathOutputStream);
             savePathOutputStream.close();
         } catch (IOException e) {

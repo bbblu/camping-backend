@@ -10,6 +10,7 @@ import tw.edu.ntub.birc.common.util.CollectionUtils;
 import tw.edu.ntub.birc.common.util.JavaBeanUtils;
 import tw.edu.ntub.imd.camping.bean.ThirdPartyProductRecordIndexBean;
 import tw.edu.ntub.imd.camping.bean.ThirdPartyProductRecordIndexFilterBean;
+import tw.edu.ntub.imd.camping.config.properties.FileProperties;
 import tw.edu.ntub.imd.camping.databaseconfig.dao.*;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductBrand;
 import tw.edu.ntub.imd.camping.databaseconfig.entity.ProductSubType;
@@ -26,6 +27,9 @@ import tw.edu.ntub.imd.camping.exception.NotFoundException;
 import tw.edu.ntub.imd.camping.service.ThirdPartyProductRecordService;
 import tw.edu.ntub.imd.camping.service.transformer.ThirdPartyProductRecordIndexTransformer;
 
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,6 +43,7 @@ public class ThirdPartyProductRecordServiceImpl implements ThirdPartyProductReco
     private final ThirdPartyProductRecordDAO thirdPartyProductRecordDAO;
     private final ThirdPartyProductRecordIndexDAO indexDAO;
     private final ThirdPartyProductRecordIndexTransformer indexTransformer;
+    private final FileProperties fileProperties;
 
     @Override
     public List<ThirdPartyProductRecordIndexBean> searchIndexRecord(ThirdPartyProductRecordIndexFilterBean filterBean) {
@@ -80,6 +85,13 @@ public class ThirdPartyProductRecordServiceImpl implements ThirdPartyProductReco
     @Transactional
     public void importRecord(Workbook recordWorkbook, boolean isReplaceOldRecord) {
         if (isReplaceOldRecord) {
+            Workbook exportWorkbook = getRecordExcel();
+            exportWorkbook.setName(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss")));
+            exportWorkbook.saveAs(Path.of(
+                    fileProperties.getPath(),
+                    "third-party-product-record",
+                    exportWorkbook.getFullFileName()
+            ));
             thirdPartyProductRecordDAO.deleteAll();
         }
         thirdPartyProductRecordDAO.saveAll(
