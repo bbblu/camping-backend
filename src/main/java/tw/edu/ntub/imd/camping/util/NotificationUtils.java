@@ -37,7 +37,7 @@ public class NotificationUtils {
             case NOT_PLACE:
                 createAlreadyPayNotification(rentalRecord);
                 break;
-            case NOT_RETURN:
+            case NOT_PICK_UP:
                 createPlacedNotification(rentalRecord);
                 break;
             case NOT_RETRIEVE:
