@@ -235,7 +235,7 @@ public class RentalRecordStatusController {
                         .changeDescription("已送達倉庫")
                         .build()
         );
-        return createResponse("紀錄完成", RentalRecordStatus.NOT_PICK_UP);
+        return createResponse("寄放完成", RentalRecordStatus.NOT_PICK_UP);
     }
 
     @Operation(
