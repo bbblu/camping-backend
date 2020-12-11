@@ -323,6 +323,12 @@
                             取回商品
                         </button>
                     `;
+                case "已終止":
+                    return `
+                        <button class="btn waves-effect waves-light action" type="button" onclick="displayTerminateDescriptionModal(${table.data.indexOf(rentalRecord)}, ${rentalRecord.id})">
+                            退貨原因
+                        </button>
+                    `;
                 default:
                     return "";
             }
